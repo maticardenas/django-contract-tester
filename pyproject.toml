@@ -2,12 +2,12 @@
 name = "drf-openapi-tester"
 version = "2.3.3"
 description = "Test utility for validating OpenAPI response documentation"
-authors = ["Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
+authors = ["Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>", "Matías Cárdenas <cardenasmatias.1990@gmail.com>"]
 license = "BSD-4-Clause"
 readme = "README.md"
-homepage = "https://github.com/snok/drf-openapi-tester"
-repository = "https://github.com/snok/drf-openapi-tester"
-documentation = "https://github.com/snok/drf-openapi-tester"
+homepage = "https://github.com/maticardenas/drf-openapi-tester"
+repository = "https://github.com/maticardenas/drf-openapi-tester"
+documentation = "https://github.com/maticardenas/drf-openapi-tester"
 keywords = ["openapi", "swagger", "api", "testing", "schema", "django", "drf"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
