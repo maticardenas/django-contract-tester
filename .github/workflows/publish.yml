@@ -8,7 +8,7 @@ jobs:
   build-and-publish-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: snok/.github/workflows/publish@main
+      - uses: maticardenas/.github/workflows/publish@main
         with:
           overwrite-repository: true
           repository-url: https://test.pypi.org/legacy/
@@ -17,6 +17,6 @@ jobs:
     needs: build-and-publish-test
     runs-on: ubuntu-latest
     steps:
-      - uses: snok/.github/workflows/publish@main
+      - uses: maticardenas/.github/workflows/publish@main
         with:
           token: ${{ secrets.PYPI_TOKEN }}
