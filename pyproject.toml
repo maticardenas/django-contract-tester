@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "drf-oas-tester"
-version = "2.3.3"
+version = "3.3.3"
 description = "Test utility for validating OpenAPI response documentation"
-authors = ["Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>", "Matías Cárdenas <cardenasmatias.1990@gmail.com>"]
+authors =["Matías Cárdenas <cardenasmatias.1990@gmail.com>", "Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 license = "BSD-4-Clause"
 readme = "README.md"
 homepage = "https://github.com/maticardenas/drf-openapi-tester"
