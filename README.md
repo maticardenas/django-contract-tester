@@ -255,8 +255,7 @@ the OpenAPI schema.
 ## Known Issues
 
 * We are using [prance](https://github.com/jfinkhaeuser/prance) as a schema resolver, and it has some issues with the
-  resolution of (very) complex OpenAPI 2.0 schemas. If you encounter
-  issues, [please document them here](https://github.com/snok/drf-openapi-tester/issues/205).
+  resolution of (very) complex OpenAPI 2.0 schemas.
 
 ## Contributing
 
