@@ -2,7 +2,7 @@
 
 ## 1.3.7+
 
-See Github [releases](https://github.com/snok/drf-openapi-tester/releases) for changelog in newer versions.
+See Github [releases](https://github.com/maticardenas/drf-contract-tester/releases) for changelog in newer versions.
 
 ## v1.3.7 2021-05-20
 
