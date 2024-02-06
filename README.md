@@ -1,16 +1,18 @@
-[![PyPI](https://img.shields.io/pypi/v/drf-openapi-tester.svg)](https://pypi.org/project/drf-openapi-tester/)
-[![Coverage](https://codecov.io/gh/snok/drf-openapi-tester/branch/master/graph/badge.svg)](https://codecov.io/gh/snok/drf-openapi-tester)
-[![Python versions](https://img.shields.io/badge/Python-3.7%2B-blue)](https://pypi.org/project/drf-openapi-tester/)
-[![Django versions](https://img.shields.io/badge/Django-3.0%2B-blue)](https://pypi.org/project/drf-openapi-tester/)
+[![PyPI](https://img.shields.io/pypi/v/drf-openapi-tester.svg)](https://pypi.org/project/drf-contract-tester/)
+[![Coverage](https://codecov.io/gh/snok/drf-openapi-tester/branch/master/graph/badge.svg)](https://codecov.io/gh/maticardenas/drf-contract-tester)
+[![Python versions](https://img.shields.io/badge/Python-3.7%2B-blue)](https://pypi.org/project/drf-contract-tester/)
+[![Django versions](https://img.shields.io/badge/Django-3.0%2B-blue)](https://pypi.org/project/drf-contract-tester/)
 
 
 # DRF Contract Tester
 
-This is a test utility to validate DRF Test Responses against OpenAPI 2 and 3 schema. It has built-in support for:
+This is a test utility to validate DRF Test requests & responses against OpenAPI 2 and 3 schema. It has built-in support for:
 
 - OpenAPI 2/3 yaml or json schema files.
-- OpenAPI 2 schemas created with [drf-yasg](https://github.com/axnsan12/drf-yasg).
-- OpenAPI 3 schemas created with [drf-spectacular](https://github.com/tfranzel/drf-spectacular).
+- OpenAPI 2 schemas created with [drf-yasg](https://github.com/axnsan12/drf-yasg).*
+- OpenAPI 3 schemas created with [drf-spectacular](https://github.com/tfranzel/drf-spectacular).*
+
+*For `drf-yasg` and `drf-spectacular` support is for now only for responses.
 
 ## Installation
 
@@ -259,4 +261,4 @@ the OpenAPI schema.
 
 ## Contributing
 
-Contributions are welcome. Please see the [contributing guide](https://github.com/snok/.github/blob/main/CONTRIBUTING.md)
+Contributions are welcome. Please see the [contributing guide](https://github.com/maticardenas/drf-contract-tester/blob/master/CONTRIBUTING.md)
