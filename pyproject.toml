@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "drf-contract-tester"
-version = "3.3.6"
+version = "3.3.7"
 description = "Test utility for validating OpenAPI response documentation"
 authors =["Matías Cárdenas <cardenasmatias.1990@gmail.com>", "Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 license = "BSD-4-Clause"
