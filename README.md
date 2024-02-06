@@ -4,7 +4,7 @@
 [![Django versions](https://img.shields.io/badge/Django-3.0%2B-blue)](https://pypi.org/project/drf-openapi-tester/)
 
 
-# DRF OpenAPI Tester
+# DRF Contract Tester
 
 This is a test utility to validate DRF Test Responses against OpenAPI 2 and 3 schema. It has built-in support for:
 
@@ -15,7 +15,7 @@ This is a test utility to validate DRF Test Responses against OpenAPI 2 and 3 sc
 ## Installation
 
 ```shell script
-pip install drf-openapi-tester
+pip install drf-contract-tester
 ```
 
 ## Usage
