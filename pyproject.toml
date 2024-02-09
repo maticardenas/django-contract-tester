@@ -46,14 +46,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 django = [
     { version = '^3', python = '<=3.7' },
     { version = '^3 || ^4', python = '>=3.8' },
 ]
 djangorestframework = "*"
 inflection = "*"
-openapi-spec-validator = ">=0.4"
+openapi-spec-validator = "^0.7.1"
 prance = "*"
 pyYAML = "*"
 drf-spectacular = { version = "*", optional = true }
