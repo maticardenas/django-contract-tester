@@ -1,12 +1,14 @@
-[![PyPI](https://img.shields.io/pypi/v/drf-contract-tester.svg)](https://pypi.org/project/drf-contract-tester/)
-[![Coverage](https://codecov.io/gh/maticardenas/drf-contract-tester/graph/badge.svg)](https://app.codecov.io/gh/maticardenas/drf-contract-tester)
-[![Python versions](https://img.shields.io/badge/Python-3.7%2B-blue)](https://pypi.org/project/drf-contract-tester/)
-[![Django versions](https://img.shields.io/badge/Django-3.0%2B-blue)](https://pypi.org/project/drf-contract-tester/)
+[![PyPI](https://img.shields.io/pypi/v/django-contract-tester.svg)](https://pypi.org/project/django-contract-tester/)
+[![Coverage](https://codecov.io/gh/maticardenas/django-contract-tester/graph/badge.svg)](https://app.codecov.io/gh/maticardenas/django-contract-tester)
+[![Python versions](https://img.shields.io/badge/Python-3.7%2B-blue)](https://pypi.org/project/django-contract-tester/)
+[![Django versions](https://img.shields.io/badge/Django-3.0%2B-blue)](https://pypi.org/project/django-contract-tester/)
 
 
-# DRF Contract Tester
+# Django Contract Tester
 
-This is a test utility to validate DRF Test requests & responses against OpenAPI 2 and 3 schema. It has built-in support for:
+This is a test utility to validate DRF (Django REST Framework) test requests & responses against OpenAPI 2 and 3 schema.
+
+It has built-in support for:
 
 - OpenAPI 2/3 yaml or json schema files.
 - OpenAPI 2 schemas created with [drf-yasg](https://github.com/axnsan12/drf-yasg).*
@@ -17,7 +19,7 @@ This is a test utility to validate DRF Test requests & responses against OpenAPI
 ## Installation
 
 ```shell script
-pip install drf-contract-tester
+pip install django-contract-tester
 ```
 
 ## Usage
@@ -261,4 +263,4 @@ the OpenAPI schema.
 
 ## Contributing
 
-Contributions are welcome. Please see the [contributing guide](https://github.com/maticardenas/drf-contract-tester/blob/master/CONTRIBUTING.md)
+Contributions are welcome. Please see the [contributing guide](https://github.com/maticardenas/django-contract-tester/blob/master/CONTRIBUTING.md)
