@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "drf-contract-tester"
+name = "django-contract-tester"
 version = "3.3.7"
 description = "Test utility for validating OpenAPI response documentation"
 authors =["Matías Cárdenas <cardenasmatias.1990@gmail.com>", "Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 license = "BSD-4-Clause"
 readme = "README.md"
-homepage = "https://github.com/maticardenas/drf-contract-tester"
-repository = "https://github.com/maticardenas/drf-contract-tester"
-documentation = "https://github.com/maticardenas/drf-contract-tester"
+homepage = "https://github.com/maticardenas/django-contract-tester"
+repository = "https://github.com/maticardenas/django-contract-tester"
+documentation = "https://github.com/maticardenas/django-contract-tester"
 keywords = ["openapi", "swagger", "api", "testing", "schema", "django", "drf"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
