@@ -108,9 +108,9 @@ class BaseSchemaLoader:
             if result:
                 major, minor = result[0]
                 if (major, minor) == ("3", "0"):
-                    validator = OpenAPIV30SpecValidator
+                    validator = OpenAPIV30SpecValidator(schema=schema)
                 elif (major, minor) == ("3", "1"):
-                    validator = OpenAPIV31SpecValidator
+                    validator = OpenAPIV31SpecValidator(schema=schema)
                 else:
                     raise UndocumentedSchemaSectionError(
                         UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
@@ -120,8 +120,8 @@ class BaseSchemaLoader:
             else:
                 raise UndocumentedSchemaSectionError(UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=schema["openapi"]))
         else:
-            validator = OpenAPIV2SpecValidator
-        validator.validate(schema)
+            validator = OpenAPIV2SpecValidator(schema=schema)
+        validator.validate()
 
     def set_schema(self, schema: dict) -> None:
         """
