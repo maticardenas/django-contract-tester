@@ -20,12 +20,11 @@ jobs:
           path: |
             .venv
              ~/.cache/pre-commit
-          key: venv-3  # increment to reset
+          key: ${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}-6
       - run: |
           python -m venv .venv --upgrade-deps
           source .venv/bin/activate
           pip install pre-commit
-        if: steps.cache.outputs.cache-hit != 'true'
       - run: |
           source .venv/bin/activate
           pre-commit run --all-files
@@ -61,7 +60,7 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           pip install wheel setuptools pip -U
-          poetry install --no-interaction --no-root --extras drf-spectacular --extras drf-yasg
+          poetry install --no-interaction --no-root --extras drf-spectacular --extras drf-yasg --extras django-ninja
         if: steps.cache-venv.outputs.cache-hit != 'true'
       - run: |
           source .venv/bin/activate

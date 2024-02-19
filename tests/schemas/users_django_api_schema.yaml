@@ -1,0 +1,165 @@
+openapi:  3.0.0
+info:
+  title: My API
+  version:  1.0.0
+paths:
+  /ninja_api/users/:
+    post:
+      summary: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserIn'
+            examples:
+              example1:
+                summary: Example payload for creating a user
+                value:
+                  name: John Doe
+                  email: john.doe@example.com
+                  age:  30
+                  is_active: true
+        required: true
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOut'
+              examples:
+                example1:
+                  summary: Example response for a newly created user
+                  value:
+                    id:  1
+                    name: John Doe
+                    email: john.doe@example.com
+                    age:  30
+                    is_active: true
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: All users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserOut'
+              examples:
+                example1:
+                  summary: Example response for all users
+                  value:
+                    - id: 1
+                      name: John Doe
+                      email: john.doe@example.com
+                      age: 30
+                      is_active: true
+                    - id: 2
+                      name: Jane Doe
+                      email: jane.doe@example.com
+                      age: 28
+                      is_active: false
+  /ninja_api/users/{user_id}:
+    get:
+      summary: Get a specific user by ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOut'
+              examples:
+                example1:
+                  summary: Example response for a specific user
+                  value:
+                    id:  1
+                    name: John Doe
+                    email: john.doe@example.com
+                    age:  30
+                    is_active: true
+    put:
+      summary: Update a specific user by ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserIn'
+            examples:
+              example1:
+                summary: Example payload for updating a user
+                value:
+                  name: John Doe
+                  email: john.doe@example.com
+                  age:  30
+                  is_active: true
+        required: true
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserOut'
+              examples:
+                example1:
+                  summary: Example response for an updated user
+                  value:
+                    id:  1
+                    name: John Doe
+                    email: john.doe@example.com
+                    age:  30
+                    is_active: true
+    delete:
+      summary: Delete a specific user by ID
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: User deleted successfully
+components:
+  schemas:
+    UserIn:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        age:
+          type: integer
+        is_active:
+          type: boolean
+      required:
+        - name
+        - email
+        - age
+        - is_active
+    UserOut:
+      allOf:
+        - $ref: '#/components/schemas/UserIn'
+        - type: object
+          properties:
+            id:
+              type: integer
+          required:
+            - id

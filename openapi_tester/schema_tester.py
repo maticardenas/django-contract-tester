@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
 from itertools import chain
 from typing import TYPE_CHECKING, Any, Callable, cast
 
@@ -10,6 +9,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import URLValidator
 
+from openapi_tester.config import OpenAPITestConfig
 from openapi_tester.constants import (
     INIT_ERROR,
     UNDOCUMENTED_SCHEMA_SECTION_ERROR,
@@ -27,6 +27,7 @@ from openapi_tester.loaders import (
     StaticSchemaLoader,
     UrlStaticSchemaLoader,
 )
+from openapi_tester.response_handler_factory import ResponseHandlerFactory
 from openapi_tester.utils import lazy_combinations, normalize_schema_section
 from openapi_tester.validators import (
     validate_enum,
@@ -48,18 +49,10 @@ from openapi_tester.validators import (
 if TYPE_CHECKING:
     from typing import Optional
 
+    from django.http.response import HttpResponse
     from rest_framework.response import Response
 
-
-@dataclass
-class OpenAPITestConfig:
-    """Configuration dataclass for schema section test."""
-
-    case_tester: Callable[[str], None] | None = None
-    ignore_case: list[str] | None = None
-    validators: list[Callable[[dict[str, Any], Any], str | None]] | None = None
-    reference: str = "init"
-    http_message: str = "response"
+    from openapi_tester.response_handler import ResponseHandler
 
 
 class SchemaTester:
@@ -139,13 +132,14 @@ class SchemaTester:
             return "object"
         return None
 
-    def get_response_schema_section(self, response: Response) -> dict[str, Any]:
+    def get_response_schema_section(self, response_handler: ResponseHandler) -> dict[str, Any]:
         """
         Fetches the response section of a schema, wrt. the route, method, status code, and schema version.
 
         :param response: DRF Response Instance
         :return dict
         """
+        response = response_handler.response
         schema = self.loader.get_schema()
 
         response_method = response.request["REQUEST_METHOD"].lower()  # type: ignore
@@ -200,7 +194,7 @@ class SchemaTester:
             )
             return self.get_key_value(json_object, "schema")
 
-        if response.data and response.json():  # type: ignore
+        if response_handler.data:
             raise UndocumentedSchemaSectionError(
                 UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
                     key="content",
@@ -361,7 +355,7 @@ class SchemaTester:
         """
         test_config = test_config or OpenAPITestConfig()
         if data is None:
-            if self.test_is_nullable(schema_section):
+            if self.test_is_nullable(schema_section) or not schema_section:
                 # If data is None and nullable, we return early
                 return
             raise DocumentationError(
@@ -488,7 +482,7 @@ class SchemaTester:
 
     def validate_request(
         self,
-        response: Response,
+        response: Response | HttpResponse,
         test_config: OpenAPITestConfig | None = None,
     ) -> None:
         """
@@ -502,6 +496,7 @@ class SchemaTester:
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
+        response_handler = ResponseHandlerFactory.create(response)
         if self.is_openapi_schema():
             # TODO: Implement for other schema types
             if test_config:
@@ -509,16 +504,17 @@ class SchemaTester:
             else:
                 test_config = OpenAPITestConfig(http_message="request")
             request_body_schema = self.get_request_body_schema_section(response.request)  # type: ignore
+
             if request_body_schema:
                 self.test_schema_section(
                     schema_section=request_body_schema,
-                    data=response.renderer_context["request"].data,  # type: ignore
+                    data=response_handler.request_data,
                     test_config=test_config,
                 )
 
     def validate_response(
         self,
-        response: Response,
+        response: Response | HttpResponse,
         test_config: OpenAPITestConfig | None = None,
     ) -> None:
         """
@@ -531,13 +527,15 @@ class SchemaTester:
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
+        response_handler = ResponseHandlerFactory.create(response)
+
         if test_config:
             test_config.http_message = "response"
         else:
             test_config = OpenAPITestConfig(http_message="response")
-        response_schema = self.get_response_schema_section(response)
+        response_schema = self.get_response_schema_section(response_handler)
         self.test_schema_section(
             schema_section=response_schema,
-            data=response.json() if response.data is not None else {},  # type: ignore
+            data=response_handler.data,
             test_config=test_config,
         )
