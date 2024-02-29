@@ -13,7 +13,7 @@ import requests
 import yaml
 from django.urls import Resolver404, resolve
 from django.utils.functional import cached_property
-from openapi_spec_validator import openapi_v2_spec_validator, openapi_v30_spec_validator, openapi_v31_spec_validator
+from openapi_spec_validator import OpenAPIV2SpecValidator, OpenAPIV30SpecValidator, OpenAPIV31SpecValidator
 from prance.util.resolver import RefResolver
 from rest_framework.schemas.generators import BaseSchemaGenerator, EndpointEnumerator
 from rest_framework.settings import api_settings
@@ -108,9 +108,9 @@ class BaseSchemaLoader:
             if result:
                 major, minor = result[0]
                 if (major, minor) == ("3", "0"):
-                    validator = openapi_v30_spec_validator
+                    validator = OpenAPIV30SpecValidator(schema=schema)
                 elif (major, minor) == ("3", "1"):
-                    validator = openapi_v31_spec_validator
+                    validator = OpenAPIV31SpecValidator(schema=schema)
                 else:
                     raise UndocumentedSchemaSectionError(
                         UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
@@ -120,8 +120,8 @@ class BaseSchemaLoader:
             else:
                 raise UndocumentedSchemaSectionError(UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=schema["openapi"]))
         else:
-            validator = openapi_v2_spec_validator
-        validator.validate(schema)
+            validator = OpenAPIV2SpecValidator(schema=schema)
+        validator.validate()
 
     def set_schema(self, schema: dict) -> None:
         """
