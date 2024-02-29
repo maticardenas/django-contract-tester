@@ -5,6 +5,7 @@ from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
 
 from test_project import views
+from test_project.api.ninja.api import ninja_api
 from test_project.api.views.animals import Animals
 from test_project.api.views.cars import BadCars, GoodCars
 from test_project.api.views.exempt_endpoint import Exempt
@@ -36,6 +37,7 @@ api_urlpatterns = [
     # ^trailing slash is here on purpose
     path("api/<str:version>/router_generated/", include(router.urls)),
     path("api/pets", Pet.as_view(), name="get-pets"),
+    path("ninja_api/", ninja_api.urls),
     re_path(r"api/pet/(?P<petId>\d+)", Pet.as_view(), name="get-pet"),
 ]
 

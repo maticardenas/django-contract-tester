@@ -1,12 +1,12 @@
 [![PyPI](https://img.shields.io/pypi/v/django-contract-tester.svg)](https://pypi.org/project/django-contract-tester/)
 [![Coverage](https://codecov.io/gh/maticardenas/django-contract-tester/graph/badge.svg)](https://app.codecov.io/gh/maticardenas/django-contract-tester)
-[![Python versions](https://img.shields.io/badge/Python-3.7%2B-blue)](https://pypi.org/project/django-contract-tester/)
-[![Django versions](https://img.shields.io/badge/Django-3.0%2B-blue)](https://pypi.org/project/django-contract-tester/)
+[![Python versions](https://img.shields.io/badge/Python-3.8%2B-blue)](https://pypi.org/project/django-contract-tester/)
+[![Django versions](https://img.shields.io/badge/Django-3.2%2B-blue)](https://pypi.org/project/django-contract-tester/)
 
 
 # Django Contract Tester
 
-This is a test utility to validate DRF (Django REST Framework) test requests & responses against OpenAPI 2 and 3 schema.
+This is a test utility to validate DRF (Django REST Framework) and Django Ninja test requests & responses against OpenAPI 2 and 3 schema.
 
 It has built-in support for:
 

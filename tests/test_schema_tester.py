@@ -28,6 +28,7 @@ from openapi_tester.constants import (
 )
 from openapi_tester.exceptions import CaseError, DocumentationError, UndocumentedSchemaSectionError
 from openapi_tester.loaders import UrlStaticSchemaLoader
+from openapi_tester.response_handler_factory import ResponseHandlerFactory
 from openapi_tester.schema_tester import OpenAPITestConfig
 from test_project.models import Names
 from tests import example_object, example_schema_types
@@ -144,7 +145,8 @@ def test_example_schemas(filename):
                 StaticSchemaLoader, "resolve_path", side_effect=lambda *args, **kwargs: (url_fragment, None)  # noqa
             ):
                 schema_tester.validate_response(response)
-                assert sorted(schema_tester.get_response_schema_section(response)) == sorted(schema_section)
+                response_handler = ResponseHandlerFactory.create(response)
+                assert sorted(schema_tester.get_response_schema_section(response_handler)) == sorted(schema_section)
 
 
 def test_validate_response_failure_scenario_with_predefined_data(client):
