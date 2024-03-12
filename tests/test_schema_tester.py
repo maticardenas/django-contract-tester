@@ -558,3 +558,17 @@ def test_custom_validators():
         tester_with_custom_validator.test_schema_section(
             uid1_schema, uid4, test_config=OpenAPITestConfig(validators=[uuid_1_validator])
         )
+
+
+def test_get_paths_object():
+    schema = tester.loader.get_schema()
+    paths = tester.get_paths_object()
+    assert paths == schema["paths"]
+
+
+def test_get_paths_object_path_prefix(pets_api_schema: Path):
+    path_prefix = "/path/prefix"
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema), path_prefix=path_prefix)
+    paths_object = schema_tester.get_paths_object()
+
+    assert list(paths_object.keys()) == [f"{path_prefix}/api/pets", f"{path_prefix}/api/pets/{{id}}"]

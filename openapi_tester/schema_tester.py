@@ -68,6 +68,7 @@ class SchemaTester:
         schema_file_path: str | None = None,
         validators: list[Callable[[dict, Any], str | None]] | None = None,
         field_key_map: dict[str, str] | None = None,
+        path_prefix: str | None = None,
     ) -> None:
         """
         Iterates through an OpenAPI schema object and API response to check that they match at every level.
@@ -75,9 +76,11 @@ class SchemaTester:
         :param case_tester: An optional callable that validates schema and response keys
         :param ignore_case: An optional list of keys for the case_tester to ignore
         :schema_file_path: The file path to an OpenAPI yaml or json file. Only passed when using a static schema loader
+        :param path_prefix: An optional string to prefix the path of the schema file
         :raises: openapi_tester.exceptions.DocumentationError or ImproperlyConfigured
         """
         self.case_tester = case_tester
+        self._path_prefix = path_prefix
         self.ignore_case = ignore_case or []
         self.validators = validators or []
 
@@ -132,6 +135,14 @@ class SchemaTester:
             return "object"
         return None
 
+    def get_paths_object(self) -> dict[str, Any]:
+        schema = self.loader.get_schema()
+        paths_object = self.get_key_value(schema, "paths")
+        if self._path_prefix:
+            paths_object = {f"{self._path_prefix}{key}": value for key, value in paths_object.items()}
+
+        return paths_object
+
     def get_response_schema_section(self, response_handler: ResponseHandler) -> dict[str, Any]:
         """
         Fetches the response section of a schema, wrt. the route, method, status code, and schema version.
@@ -146,7 +157,7 @@ class SchemaTester:
         parameterized_path, _ = self.loader.resolve_path(
             response.request["PATH_INFO"], method=response_method  # type: ignore
         )
-        paths_object = self.get_key_value(schema, "paths")
+        paths_object = self.get_paths_object()
 
         route_object = self.get_key_value(
             paths_object,
@@ -212,11 +223,10 @@ class SchemaTester:
         :param response: DRF Request Instance
         :return dict
         """
-        schema = self.loader.get_schema()
         request_method = request["REQUEST_METHOD"].lower()
 
         parameterized_path, _ = self.loader.resolve_path(request["PATH_INFO"], method=request_method)
-        paths_object = self.get_key_value(schema, "paths")
+        paths_object = self.get_paths_object()
 
         route_object = self.get_key_value(
             paths_object,
