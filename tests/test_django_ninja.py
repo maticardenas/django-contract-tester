@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from openapi_tester import OpenAPIClient, SchemaTester
+from openapi_tester.exceptions import UndocumentedSchemaSectionError
 from tests.utils import TEST_ROOT
 
 if TYPE_CHECKING:
@@ -65,3 +66,15 @@ def test_delete_user(client: OpenAPIClient):
         path="/ninja_api/users/1",
     )
     assert response.status_code == 204
+
+
+def test_patch_user_undocumented_path(client: OpenAPIClient):
+    payload = {
+        "name": "John Doe",
+    }
+    with pytest.raises(UndocumentedSchemaSectionError):
+        client.patch(
+            path="/ninja_api/users/1",
+            data=json.dumps(payload),
+            content_type="application/json",
+        )

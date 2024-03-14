@@ -43,4 +43,9 @@ def get_users(request):
     ]
 
 
+@router.patch("/{user_id}", response={200: UserOut})
+def patch_user(request, user_id: int, user: UserIn):
+    return {"id": 1, "name": "John Doe", "email": "john.doe@example.com"}
+
+
 ninja_api.add_router("/users", router)
