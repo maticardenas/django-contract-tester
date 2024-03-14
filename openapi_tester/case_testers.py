@@ -1,4 +1,5 @@
 """ Case testers - this module includes helper functions to test key casing """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

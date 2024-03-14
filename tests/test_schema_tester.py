@@ -271,6 +271,38 @@ def test_validate_request_no_application_json(
     schema_tester.validate_request(response)
 
 
+def test_validate_request_schema_with_prefix_in_server(
+    response_factory, pets_api_schema_prefix_in_server: Path, pets_post_request: dict[str, Any]
+):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema_prefix_in_server))
+    response = response_factory(
+        schema=None,
+        url_fragment="/api/pets",
+        method="POST",
+        status_code=201,
+        response_body={"name": "Doggie"},
+    )
+
+    with pytest.raises(UndocumentedSchemaSectionError) as error:
+        schema_tester.validate_request(response)
+
+    assert "Undocumented route /api/pets" in str(error.value)
+
+
+def test_validate_request_schema_with_prefix_in_server_path_prefix(
+    response_factory, pets_api_schema_prefix_in_server: Path, pets_post_request: dict[str, Any]
+):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema_prefix_in_server), path_prefix="/api")
+    response = response_factory(
+        schema=None,
+        url_fragment="/api/pets",
+        method="POST",
+        status_code=201,
+        response_body={"name": "Doggie"},
+    )
+    schema_tester.validate_request(response)
+
+
 def test_is_openapi_schema(pets_api_schema: Path):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     assert schema_tester.is_openapi_schema() is True
@@ -558,3 +590,24 @@ def test_custom_validators():
         tester_with_custom_validator.test_schema_section(
             uid1_schema, uid4, test_config=OpenAPITestConfig(validators=[uuid_1_validator])
         )
+
+
+def test_get_paths_object():
+    schema = tester.loader.get_schema()
+    paths = tester.get_paths_object()
+    assert paths == schema["paths"]
+
+
+def test_get_paths_object_no_path_prefix(pets_api_schema: Path):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    paths_object = schema_tester.get_paths_object()
+
+    assert list(paths_object.keys()) == ["/api/pets", "/api/pets/{id}"]
+
+
+def test_get_paths_object_path_prefix(pets_api_schema_prefix_in_server: Path):
+    path_prefix = "/api"
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema_prefix_in_server), path_prefix=path_prefix)
+    paths_object = schema_tester.get_paths_object()
+
+    assert list(paths_object.keys()) == ["/api/pets", "/api/pets/{id}"]

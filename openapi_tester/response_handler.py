@@ -1,6 +1,7 @@
 """
 This module contains the concrete response handlers for both DRF and Django Ninja responses.
 """
+
 import json
 from typing import TYPE_CHECKING, Optional, Union
 

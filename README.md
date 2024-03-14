@@ -6,7 +6,7 @@
 
 # Django Contract Tester
 
-This is a test utility to validate DRF (Django REST Framework) and Django Ninja test requests & responses against OpenAPI 2 and 3 schema.
+This is a test utility to validate `DRF (Django REST Framework)` and `Django Ninja` test requests & responses against `OpenAPI` versions 2.x and 3.x schemas.
 
 It has built-in support for:
 
