@@ -1,4 +1,5 @@
 """ Constants module """
+
 OPENAPI_PYTHON_MAPPING = {
     "boolean": bool.__name__,
     "string": str.__name__,

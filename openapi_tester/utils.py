@@ -1,6 +1,7 @@
 """
 Utils Module - this file contains utility functions used in multiple places.
 """
+
 from __future__ import annotations
 
 from copy import deepcopy

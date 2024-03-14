@@ -20,6 +20,11 @@ def pets_api_schema() -> Path:
 
 
 @pytest.fixture()
+def pets_api_schema_prefix_in_server() -> Path:
+    return TEST_ROOT / "schemas" / "openapi_v3_prefix_in_server.yaml"
+
+
+@pytest.fixture()
 def pets_post_request():
     request_body = MagicMock()
     request_body.read.return_value = b'{"name": "doggie", "tag": "dog"}'

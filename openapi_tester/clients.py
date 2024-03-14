@@ -1,4 +1,5 @@
 """Subclass of ``APIClient`` using ``SchemaTester`` to validate responses."""
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
