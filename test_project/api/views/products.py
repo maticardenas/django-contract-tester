@@ -11,11 +11,15 @@ if TYPE_CHECKING:
 
 
 class Products(APIView):
-    def get(self, request: Request, version: int, category_pk: int, subcategory_pk: int) -> Response:
+    def get(
+        self, request: Request, version: int, category_pk: int, subcategory_pk: int
+    ) -> Response:
         products: dict[int, dict] = {
             1: {1: {}, 2: {}, 3: {}},
             2: {1: {}, 2: {}, 3: {}},
             3: {1: {}, 2: {}, 3: {}},
             4: {1: {}, 2: {}, 3: {}},
         }
-        return Response(products.get(category_pk, {}).get(subcategory_pk, {}), HTTP_200_OK)
+        return Response(
+            products.get(category_pk, {}).get(subcategory_pk, {}), HTTP_200_OK
+        )

@@ -1,6 +1,11 @@
 import pytest
 
-from openapi_tester.case_testers import is_camel_case, is_kebab_case, is_pascal_case, is_snake_case
+from openapi_tester.case_testers import (
+    is_camel_case,
+    is_kebab_case,
+    is_pascal_case,
+    is_snake_case,
+)
 from openapi_tester.exceptions import CaseError
 
 camel_case_test_data = [

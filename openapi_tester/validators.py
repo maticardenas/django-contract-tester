@@ -1,4 +1,4 @@
-""" Schema Validators """
+"""Schema Validators"""
 
 from __future__ import annotations
 
@@ -9,7 +9,12 @@ from typing import TYPE_CHECKING
 from uuid import UUID
 
 from django.core.exceptions import ValidationError
-from django.core.validators import EmailValidator, URLValidator, validate_ipv4_address, validate_ipv6_address
+from django.core.validators import (
+    EmailValidator,
+    URLValidator,
+    validate_ipv4_address,
+    validate_ipv6_address,
+)
 from django.utils.dateparse import parse_date, parse_datetime, parse_time
 
 from openapi_tester.constants import (
@@ -35,7 +40,9 @@ if TYPE_CHECKING:
     from typing import Any, Callable
 
 
-def create_validator(validation_fn: Callable, wrap_as_validator: bool = False) -> Callable[[Any], bool]:
+def create_validator(
+    validation_fn: Callable, wrap_as_validator: bool = False
+) -> Callable[[Any], bool]:
     def wrapped(value: Any) -> bool:
         try:
             return bool(validation_fn(value)) or not wrap_as_validator
@@ -49,15 +56,21 @@ number_format_validator = create_validator(
     lambda x: isinstance(x, float) if x != 0 else isinstance(x, (int, float)), True
 )
 
-base64_format_validator = create_validator(lambda x: base64.b64encode(base64.b64decode(x, validate=True)) == x)
+base64_format_validator = create_validator(
+    lambda x: base64.b64encode(base64.b64decode(x, validate=True)) == x
+)
 
 VALIDATOR_MAP: dict[str, Callable] = {
     # by type
     "string": create_validator(lambda x: isinstance(x, str), True),
     "file": create_validator(lambda x: isinstance(x, str), True),
     "boolean": create_validator(lambda x: isinstance(x, bool), True),
-    "integer": create_validator(lambda x: isinstance(x, int) and not isinstance(x, bool), True),
-    "number": create_validator(lambda x: isinstance(x, (float, int)) and not isinstance(x, bool), True),
+    "integer": create_validator(
+        lambda x: isinstance(x, int) and not isinstance(x, bool), True
+    ),
+    "number": create_validator(
+        lambda x: isinstance(x, (float, int)) and not isinstance(x, bool), True
+    ),
     "object": create_validator(lambda x: isinstance(x, dict), True),
     "array": create_validator(lambda x: isinstance(x, list), True),
     # by format
@@ -103,7 +116,9 @@ def validate_format(schema_section: dict[str, Any], data: Any) -> str | None:
 def validate_enum(schema_section: dict[str, Any], data: Any) -> str | None:
     enum = schema_section.get("enum")
     if enum and data not in enum:
-        return VALIDATE_ENUM_ERROR.format(enum=schema_section["enum"], received=f'"{data}"')
+        return VALIDATE_ENUM_ERROR.format(
+            enum=schema_section["enum"], received=f'"{data}"'
+        )
     return None
 
 
@@ -120,7 +135,9 @@ def validate_pattern(schema_section: dict[str, Any], data: str) -> str | None:
     return None
 
 
-def validate_multiple_of(schema_section: dict[str, Any], data: int | float) -> str | None:
+def validate_multiple_of(
+    schema_section: dict[str, Any], data: int | float
+) -> str | None:
     multiple = schema_section.get("multipleOf")
     if multiple and data % multiple != 0:
         return VALIDATE_MULTIPLE_OF_ERROR.format(data=data, multiple=multiple)
@@ -147,10 +164,15 @@ def validate_minimum(schema_section: dict[str, Any], data: int | float) -> str |
     return None
 
 
-def validate_unique_items(schema_section: dict[str, Any], data: list[Any]) -> str | None:
+def validate_unique_items(
+    schema_section: dict[str, Any], data: list[Any]
+) -> str | None:
     unique_items = schema_section.get("uniqueItems")
     if unique_items:
-        comparison_data = (json.dumps(item, sort_keys=True) if isinstance(item, dict) else item for item in data)
+        comparison_data = (
+            json.dumps(item, sort_keys=True) if isinstance(item, dict) else item
+            for item in data
+        )
         if len(set(comparison_data)) != len(data):
             return VALIDATE_UNIQUE_ITEMS_ERROR.format(data=data)
     return None
@@ -187,12 +209,16 @@ def validate_max_items(schema_section: dict[str, Any], data: list) -> str | None
 def validate_min_properties(schema_section: dict[str, Any], data: dict) -> str | None:
     min_properties: int | None = schema_section.get("minProperties")
     if min_properties and len(data.keys()) < int(min_properties):
-        return VALIDATE_MINIMUM_NUMBER_OF_PROPERTIES_ERROR.format(data=data, min_length=min_properties)
+        return VALIDATE_MINIMUM_NUMBER_OF_PROPERTIES_ERROR.format(
+            data=data, min_length=min_properties
+        )
     return None
 
 
 def validate_max_properties(schema_section: dict[str, Any], data: dict) -> str | None:
     max_properties: int | None = schema_section.get("maxProperties")
     if max_properties and len(data.keys()) > int(max_properties):
-        return VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR.format(data=data, max_length=max_properties)
+        return VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR.format(
+            data=data, max_length=max_properties
+        )
     return None

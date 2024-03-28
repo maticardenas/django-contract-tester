@@ -13,7 +13,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name="Names",
             fields=[
-                ("custom_id_field", models.IntegerField(primary_key=True, serialize=False)),
+                (
+                    "custom_id_field",
+                    models.IntegerField(primary_key=True, serialize=False),
+                ),
             ],
         ),
     ]

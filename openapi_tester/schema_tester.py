@@ -1,4 +1,4 @@
-""" Schema Tester """
+"""Schema Tester"""
 
 from __future__ import annotations
 
@@ -21,7 +21,11 @@ from openapi_tester.constants import (
     VALIDATE_ONE_OF_ERROR,
     VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR,
 )
-from openapi_tester.exceptions import DocumentationError, OpenAPISchemaError, UndocumentedSchemaSectionError
+from openapi_tester.exceptions import (
+    DocumentationError,
+    OpenAPISchemaError,
+    UndocumentedSchemaSectionError,
+)
 from openapi_tester.loaders import (
     DrfSpectacularSchemaLoader,
     DrfYasgSchemaLoader,
@@ -59,7 +63,12 @@ if TYPE_CHECKING:
 class SchemaTester:
     """Schema Tester: this is the base class of the library."""
 
-    loader: StaticSchemaLoader | DrfSpectacularSchemaLoader | DrfYasgSchemaLoader | UrlStaticSchemaLoader
+    loader: (
+        StaticSchemaLoader
+        | DrfSpectacularSchemaLoader
+        | DrfYasgSchemaLoader
+        | UrlStaticSchemaLoader
+    )
     validators: list[Callable[[dict, Any], str | None]]
 
     def __init__(
@@ -88,9 +97,13 @@ class SchemaTester:
         if schema_file_path is not None:
             try:
                 URLValidator()(schema_file_path)
-                self.loader = UrlStaticSchemaLoader(schema_file_path, field_key_map=field_key_map)
+                self.loader = UrlStaticSchemaLoader(
+                    schema_file_path, field_key_map=field_key_map
+                )
             except ValidationError:
-                self.loader = StaticSchemaLoader(schema_file_path, field_key_map=field_key_map)
+                self.loader = StaticSchemaLoader(
+                    schema_file_path, field_key_map=field_key_map
+                )
         elif "drf_spectacular" in settings.INSTALLED_APPS:
             self.loader = DrfSpectacularSchemaLoader(field_key_map=field_key_map)
         elif "drf_yasg" in settings.INSTALLED_APPS:
@@ -99,7 +112,9 @@ class SchemaTester:
             raise ImproperlyConfigured(INIT_ERROR)
 
     @staticmethod
-    def get_key_value(schema: dict[str, dict], key: str, error_addon: str = "", use_regex=False) -> dict:
+    def get_key_value(
+        schema: dict[str, dict], key: str, error_addon: str = "", use_regex=False
+    ) -> dict:
         """
         Returns the value of a given key
         """
@@ -112,11 +127,15 @@ class SchemaTester:
             return schema[key]
         except KeyError as e:
             raise UndocumentedSchemaSectionError(
-                UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=key, error_addon=error_addon)
+                UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
+                    key=key, error_addon=error_addon
+                )
             ) from e
 
     @staticmethod
-    def get_status_code(schema: dict[str | int, dict], status_code: str | int, error_addon: str = "") -> dict:
+    def get_status_code(
+        schema: dict[str | int, dict], status_code: str | int, error_addon: str = ""
+    ) -> dict:
         """
         Returns the status code section of a schema, handles both str and int status codes
         """
@@ -125,7 +144,9 @@ class SchemaTester:
         if int(status_code) in schema:
             return schema[int(status_code)]
         raise UndocumentedSchemaSectionError(
-            UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=status_code, error_addon=error_addon)
+            UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
+                key=status_code, error_addon=error_addon
+            )
         )
 
     @staticmethod
@@ -140,11 +161,16 @@ class SchemaTester:
         schema = self.loader.get_schema()
         paths_object = self.get_key_value(schema, "paths")
         if self._path_prefix:
-            paths_object = {f"{self._path_prefix}{key}": value for key, value in paths_object.items()}
+            paths_object = {
+                f"{self._path_prefix}{key}": value
+                for key, value in paths_object.items()
+            }
 
         return paths_object
 
-    def get_response_schema_section(self, response_handler: ResponseHandler) -> dict[str, Any]:
+    def get_response_schema_section(
+        self, response_handler: ResponseHandler
+    ) -> dict[str, Any]:
         """
         Fetches the response section of a schema, wrt. the route, method, status code, and schema version.
 
@@ -156,14 +182,16 @@ class SchemaTester:
 
         response_method = response.request["REQUEST_METHOD"].lower()  # type: ignore
         parameterized_path, _ = self.loader.resolve_path(
-            response.request["PATH_INFO"], method=response_method  # type: ignore
+            response.request["PATH_INFO"],  # type: ignore
+            method=response_method,
         )
         paths_object = self.get_paths_object()
 
         route_object = self.get_key_value(
             paths_object,
             parameterized_path,
-            f"\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: " + "\n\t• ".join(paths_object.keys()),
+            f"\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: "
+            + "\n\t• ".join(paths_object.keys()),
         )
 
         method_object = self.get_key_value(
@@ -217,7 +245,9 @@ class SchemaTester:
             )
         return {}
 
-    def get_request_body_schema_section(self, request: dict[str, Any]) -> dict[str, Any]:
+    def get_request_body_schema_section(
+        self, request: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Fetches the request section of a schema.
 
@@ -226,13 +256,16 @@ class SchemaTester:
         """
         request_method = request["REQUEST_METHOD"].lower()
 
-        parameterized_path, _ = self.loader.resolve_path(request["PATH_INFO"], method=request_method)
+        parameterized_path, _ = self.loader.resolve_path(
+            request["PATH_INFO"], method=request_method
+        )
         paths_object = self.get_paths_object()
 
         route_object = self.get_key_value(
             paths_object,
             parameterized_path,
-            f"\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: " + "\n\t• ".join(paths_object.keys()),
+            f"\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: "
+            + "\n\t• ".join(paths_object.keys()),
         )
 
         method_object = self.get_key_value(
@@ -244,7 +277,9 @@ class SchemaTester:
             ),
         )
 
-        if all(key in request for key in ["CONTENT_LENGTH", "CONTENT_TYPE", "wsgi.input"]):
+        if all(
+            key in request for key in ["CONTENT_LENGTH", "CONTENT_TYPE", "wsgi.input"]
+        ):
             if request["CONTENT_TYPE"] != "application/json":
                 return {}
 
@@ -271,7 +306,13 @@ class SchemaTester:
 
         return {}
 
-    def handle_one_of(self, schema_section: dict, data: Any, reference: str, test_config: OpenAPITestConfig) -> None:
+    def handle_one_of(
+        self,
+        schema_section: dict,
+        data: Any,
+        reference: str,
+        test_config: OpenAPITestConfig,
+    ) -> None:
         matches = 0
         passed_schema_section_formats = set()
         for option in schema_section["oneOf"]:
@@ -292,9 +333,17 @@ class SchemaTester:
             # will succeed twice where it used to succeed once.
             return
         if matches != 1:
-            raise DocumentationError(f"{VALIDATE_ONE_OF_ERROR.format(matches=matches)}\n\nReference: {reference}.oneOf")
+            raise DocumentationError(
+                f"{VALIDATE_ONE_OF_ERROR.format(matches=matches)}\n\nReference: {reference}.oneOf"
+            )
 
-    def handle_any_of(self, schema_section: dict, data: Any, reference: str, test_config: OpenAPITestConfig) -> None:
+    def handle_any_of(
+        self,
+        schema_section: dict,
+        data: Any,
+        reference: str,
+        test_config: OpenAPITestConfig,
+    ) -> None:
         any_of: list[dict[str, Any]] = schema_section.get("anyOf", [])
         for schema in chain(any_of, lazy_combinations(any_of)):
             test_config.reference = f"{test_config.reference}.anyOf"
@@ -307,7 +356,9 @@ class SchemaTester:
                 return
             except DocumentationError:
                 continue
-        raise DocumentationError(f"{VALIDATE_ANY_OF_ERROR}\n\nReference: {reference}.anyOf")
+        raise DocumentationError(
+            f"{VALIDATE_ANY_OF_ERROR}\n\nReference: {reference}.anyOf"
+        )
 
     def is_openapi_schema(self) -> bool:
         return self.loader.get_schema().get("openapi") is not None
@@ -377,12 +428,18 @@ class SchemaTester:
         schema_section = normalize_schema_section(schema_section)
         if "oneOf" in schema_section:
             self.handle_one_of(
-                schema_section=schema_section, data=data, reference=test_config.reference, test_config=test_config
+                schema_section=schema_section,
+                data=data,
+                reference=test_config.reference,
+                test_config=test_config,
             )
             return
         if "anyOf" in schema_section:
             self.handle_any_of(
-                schema_section=schema_section, data=data, reference=test_config.reference, test_config=test_config
+                schema_section=schema_section,
+                data=data,
+                reference=test_config.reference,
+                test_config=test_config,
             )
             return
 
@@ -413,12 +470,18 @@ class SchemaTester:
         for validator in combined_validators:
             error = validator(schema_section, data)
             if error:
-                raise DocumentationError(f"\n\n{error}\n\nReference: {test_config.reference}")
+                raise DocumentationError(
+                    f"\n\n{error}\n\nReference: {test_config.reference}"
+                )
 
         if schema_section_type == "object":
-            self.test_openapi_object(schema_section=schema_section, data=data, test_config=test_config)
+            self.test_openapi_object(
+                schema_section=schema_section, data=data, test_config=test_config
+            )
         elif schema_section_type == "array":
-            self.test_openapi_array(schema_section=schema_section, data=data, test_config=test_config)
+            self.test_openapi_array(
+                schema_section=schema_section, data=data, test_config=test_config
+            )
 
     def test_openapi_object(
         self,
@@ -433,12 +496,22 @@ class SchemaTester:
         4. Validate sub-schema/nested data
         """
         properties = schema_section.get("properties", {})
-        write_only_properties = [key for key in properties.keys() if properties[key].get("writeOnly")]
-        required_keys = [key for key in schema_section.get("required", []) if key not in write_only_properties]
+        write_only_properties = [
+            key for key in properties.keys() if properties[key].get("writeOnly")
+        ]
+        required_keys = [
+            key
+            for key in schema_section.get("required", [])
+            if key not in write_only_properties
+        ]
         request_response_keys = data.keys()
-        additional_properties: bool | dict | None = schema_section.get("additionalProperties")
+        additional_properties: bool | dict | None = schema_section.get(
+            "additionalProperties"
+        )
         additional_properties_allowed = additional_properties is not None
-        if additional_properties_allowed and not isinstance(additional_properties, (bool, dict)):
+        if additional_properties_allowed and not isinstance(
+            additional_properties, (bool, dict)
+        ):
             raise OpenAPISchemaError("Invalid additionalProperties type")
         for key in properties.keys():
             self.test_key_casing(key, test_config.case_tester, test_config.ignore_case)
@@ -481,7 +554,9 @@ class SchemaTester:
                     test_config=test_config,
                 )
 
-    def test_openapi_array(self, schema_section: dict[str, Any], data: dict, test_config: OpenAPITestConfig) -> None:
+    def test_openapi_array(
+        self, schema_section: dict[str, Any], data: dict, test_config: OpenAPITestConfig
+    ) -> None:
         for datum in data:
             test_config.reference = f"{test_config.reference}.array.item"
             self.test_schema_section(

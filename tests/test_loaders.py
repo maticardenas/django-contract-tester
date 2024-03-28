@@ -35,13 +35,15 @@ def test_loader_get_schema(loader):
 def test_url_schema_loader():
     test_schema_url = "http://schemas:8080/test/schema.yaml"
     schema_loader = UrlStaticSchemaLoader(test_schema_url)
-    schema_content = get_schema_content(TEST_ROOT / "schemas" / "any_of_one_of_test_schema.yaml")
+    schema_content = get_schema_content(
+        TEST_ROOT / "schemas" / "any_of_one_of_test_schema.yaml"
+    )
 
     with patch("openapi_tester.loaders.requests.get") as mocked_get_request:
         mocked_get_request.return_value = Mock(content=schema_content)
         loaded_schema = schema_loader.load_schema()
 
-    assert type(loaded_schema) == dict
+    assert isinstance(loaded_schema, dict)
     assert loaded_schema["openapi"] == "3.0.0"
     assert loaded_schema["info"]["title"] == "Swagger Petstore"
 
@@ -51,8 +53,14 @@ def test_loader_get_route(loader):
     assert loader.resolve_path("/api/v1/items/", "get")[0] == "/api/{version}/items"
     assert loader.resolve_path("api/v1/items/", "get")[0] == "/api/{version}/items"
     assert loader.resolve_path("api/v1/items", "get")[0] == "/api/{version}/items"
-    assert loader.resolve_path("/api/v1/snake-case/", "get")[0] == "/api/{version}/snake-case/"
-    assert loader.resolve_path("api/v1/snake-case/", "get")[0] == "/api/{version}/snake-case/"
+    assert (
+        loader.resolve_path("/api/v1/snake-case/", "get")[0]
+        == "/api/{version}/snake-case/"
+    )
+    assert (
+        loader.resolve_path("api/v1/snake-case/", "get")[0]
+        == "/api/{version}/snake-case/"
+    )
     with pytest.raises(ValueError, match="Could not resolve path `test`"):
         assert loader.resolve_path("test", "get")
 
@@ -62,7 +70,8 @@ def test_loader_resolve_path(loader):
     assert loader.resolve_path("/api/v1/cars/correct", "get") is not None
 
     with pytest.raises(
-        ValueError, match="Could not resolve path `/api/v1/blars/correct`.\n\nDid you mean one of these?"
+        ValueError,
+        match="Could not resolve path `/api/v1/blars/correct`.\n\nDid you mean one of these?",
     ):
         loader.resolve_path("/api/v1/blars/correct", "get")
 

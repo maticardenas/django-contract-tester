@@ -48,7 +48,10 @@ def normalize_schema_section(schema_section: dict[str, Any]) -> dict[str, Any]:
         if isinstance(value, dict):
             output[key] = normalize_schema_section(value)
         elif isinstance(value, list):
-            output[key] = [normalize_schema_section(entry) if isinstance(entry, dict) else entry for entry in value]
+            output[key] = [
+                normalize_schema_section(entry) if isinstance(entry, dict) else entry
+                for entry in value
+            ]
     return output
 
 

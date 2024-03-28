@@ -2,7 +2,11 @@ from drf_yasg.openapi import TYPE_ARRAY, TYPE_OBJECT, Schema
 from drf_yasg.utils import swagger_auto_schema
 
 from test_project.api.serializers import VehicleSerializer
-from test_project.api.swagger.responses import generic_error_response, get_cars_200_response, get_trucks_200_response
+from test_project.api.swagger.responses import (
+    generic_error_response,
+    get_cars_200_response,
+    get_trucks_200_response,
+)
 from test_project.api.swagger.schemas import generic_string_schema
 
 
@@ -76,7 +80,12 @@ def post_vehicle_auto_schema():
         request_body=VehicleSerializer,
         responses={
             "201": Schema(
-                type=TYPE_OBJECT, properties={"success": generic_string_schema("this is a response", "description")}
+                type=TYPE_OBJECT,
+                properties={
+                    "success": generic_string_schema(
+                        "this is a response", "description"
+                    )
+                },
             ),
         },
     )
@@ -87,7 +96,10 @@ def post_item_auto_schema():
         operation_id="create_item",
         operation_summary="Creates a new item type",
         operation_description="Creates a new item type in the database",
-        request_body=Schema(type=TYPE_OBJECT, properties={"itemType": generic_string_schema("truck", "type of item")}),
+        request_body=Schema(
+            type=TYPE_OBJECT,
+            properties={"itemType": generic_string_schema("truck", "type of item")},
+        ),
         responses={
             "201": Schema(
                 type=TYPE_OBJECT,
@@ -95,7 +107,9 @@ def post_item_auto_schema():
                     "success": Schema(
                         type=TYPE_OBJECT,
                         properties={
-                            "id": generic_string_schema("14082c78-7a4d-451e-b41f-3ff8ab176939", "unique id"),
+                            "id": generic_string_schema(
+                                "14082c78-7a4d-451e-b41f-3ff8ab176939", "unique id"
+                            ),
                             "itemType": generic_string_schema("truck", "description"),
                         },
                     )
@@ -115,7 +129,9 @@ def get_snake_cased_response():
                 title="Success",
                 type=TYPE_OBJECT,
                 properties={
-                    "this_is_snake_case": generic_string_schema(example="test", description="test"),
+                    "this_is_snake_case": generic_string_schema(
+                        example="test", description="test"
+                    ),
                 },
             ),
         },
@@ -135,8 +151,12 @@ def animals_auto_schema():
                     title="Success",
                     type=TYPE_OBJECT,
                     properties={
-                        "test": generic_string_schema(example="test", description="test"),
-                        "test2": generic_string_schema(example="test2", description="test2"),
+                        "test": generic_string_schema(
+                            example="test", description="test"
+                        ),
+                        "test2": generic_string_schema(
+                            example="test2", description="test2"
+                        ),
                     },
                 ),
             ),
@@ -160,7 +180,9 @@ def languages_auto_schema():
                     "languages": Schema(
                         title="Success",
                         type=TYPE_ARRAY,
-                        items=generic_string_schema(example="French", description="French language"),
+                        items=generic_string_schema(
+                            example="French", description="French language"
+                        ),
                     )
                 },
             ),

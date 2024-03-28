@@ -26,7 +26,11 @@ from openapi_tester.constants import (
     VALIDATE_ONE_OF_ERROR,
     VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR,
 )
-from openapi_tester.exceptions import CaseError, DocumentationError, UndocumentedSchemaSectionError
+from openapi_tester.exceptions import (
+    CaseError,
+    DocumentationError,
+    UndocumentedSchemaSectionError,
+)
 from openapi_tester.loaders import UrlStaticSchemaLoader
 from openapi_tester.response_handler_factory import ResponseHandlerFactory
 from openapi_tester.schema_tester import OpenAPITestConfig
@@ -49,24 +53,54 @@ bad_test_data = [
         "url": "/api/v1/cars/incorrect",
         "expected_response": [
             {"name": "Saab", "color": "Yellow", "height": "Medium height"},
-            {"name": "Volvo", "color": "Red", "width": "Not very wide", "length": "2 meters"},
-            {"name": "Tesla", "height": "Medium height", "width": "Medium width", "length": "2 meters"},
+            {
+                "name": "Volvo",
+                "color": "Red",
+                "width": "Not very wide",
+                "length": "2 meters",
+            },
+            {
+                "name": "Tesla",
+                "height": "Medium height",
+                "width": "Medium width",
+                "length": "2 meters",
+            },
         ],
     },
     {
         "url": "/api/v1/trucks/incorrect",
         "expected_response": [
             {"name": "Saab", "color": "Yellow", "height": "Medium height"},
-            {"name": "Volvo", "color": "Red", "width": "Not very wide", "length": "2 meters"},
-            {"name": "Tesla", "height": "Medium height", "width": "Medium width", "length": "2 meters"},
+            {
+                "name": "Volvo",
+                "color": "Red",
+                "width": "Not very wide",
+                "length": "2 meters",
+            },
+            {
+                "name": "Tesla",
+                "height": "Medium height",
+                "width": "Medium width",
+                "length": "2 meters",
+            },
         ],
     },
     {
         "url": "/api/v1/trucks/incorrect",
         "expected_response": [
             {"name": "Saab", "color": "Yellow", "height": "Medium height"},
-            {"name": "Volvo", "color": "Red", "width": "Not very wide", "length": "2 meters"},
-            {"name": "Tesla", "height": "Medium height", "width": "Medium width", "length": "2 meters"},
+            {
+                "name": "Volvo",
+                "color": "Red",
+                "width": "Not very wide",
+                "length": "2 meters",
+            },
+            {
+                "name": "Tesla",
+                "height": "Medium height",
+                "width": "Medium width",
+                "length": "2 meters",
+            },
         ],
     },
 ]
@@ -105,7 +139,10 @@ def test_loader_inference(settings):
     assert isinstance(SchemaTester(schema_file_path="test").loader, StaticSchemaLoader)
 
     # Test url static loader
-    assert isinstance(SchemaTester(schema_file_path="http://test.url:8080/schema.yaml").loader, UrlStaticSchemaLoader)
+    assert isinstance(
+        SchemaTester(schema_file_path="http://test.url:8080/schema.yaml").loader,
+        UrlStaticSchemaLoader,
+    )
 
     # Test no loader
     settings.INSTALLED_APPS = []
@@ -115,7 +152,12 @@ def test_loader_inference(settings):
 
 @pytest.mark.usefixtures("db")
 @pytest.mark.parametrize(
-    "url", [f"/api/v1/{name_id}/names", "/api/v1/router_generated/names/", f"/api/v1/router_generated/names/{name_id}/"]
+    "url",
+    [
+        f"/api/v1/{name_id}/names",
+        "/api/v1/router_generated/names/",
+        f"/api/v1/router_generated/names/{name_id}/",
+    ],
 )
 def test_drf_coerced_model_primary_key(client, url):
     Names.objects.create(custom_id_field=name_id)
@@ -139,14 +181,20 @@ def test_example_schemas(filename):
     schema_tester = SchemaTester(schema_file_path=filename)
     schema = schema_tester.loader.load_schema()
     schema_tester.loader.schema = schema_tester.loader.de_reference_schema(schema)
-    for schema_section, response, url_fragment in iterate_schema(schema_tester.loader.schema):
+    for schema_section, response, url_fragment in iterate_schema(
+        schema_tester.loader.schema
+    ):
         if schema_section and response:
             with patch.object(
-                StaticSchemaLoader, "resolve_path", side_effect=lambda *args, **kwargs: (url_fragment, None)  # noqa
+                StaticSchemaLoader,
+                "resolve_path",
+                side_effect=lambda *args, **kwargs: (url_fragment, None),  # noqa
             ):
                 schema_tester.validate_response(response)
                 response_handler = ResponseHandlerFactory.create(response)
-                assert sorted(schema_tester.get_response_schema_section(response_handler)) == sorted(schema_section)
+                assert sorted(
+                    schema_tester.get_response_schema_section(response_handler)
+                ) == sorted(schema_section)
 
 
 def test_validate_response_failure_scenario_with_predefined_data(client):
@@ -154,15 +202,20 @@ def test_validate_response_failure_scenario_with_predefined_data(client):
         response = client.get(item["url"])
         assert response.status_code == 200
         assert response.json() == item["expected_response"]
-        with pytest.raises(DocumentationError, match='The following property is missing in the response data: "width"'):
+        with pytest.raises(
+            DocumentationError,
+            match='The following property is missing in the response data: "width"',
+        ):
             tester.validate_response(response)
 
 
-def test_validate_response_failure_scenario_undocumented_path(monkeypatch, response_factory):
+def test_validate_response_failure_scenario_undocumented_path(
+    monkeypatch, response_factory
+):
     schema = deepcopy(tester.loader.get_schema())
-    schema_section = schema["paths"][parameterized_path][method]["responses"][status]["content"]["application/json"][
-        "schema"
-    ]
+    schema_section = schema["paths"][parameterized_path][method]["responses"][status][
+        "content"
+    ]["application/json"]["schema"]
     del schema["paths"][parameterized_path]
     monkeypatch.setattr(tester.loader, "get_schema", mock_schema(schema))
     response = response_factory(schema_section, de_parameterized_path, method, status)
@@ -173,11 +226,13 @@ def test_validate_response_failure_scenario_undocumented_path(monkeypatch, respo
         tester.validate_response(response)
 
 
-def test_validate_response_failure_scenario_undocumented_method(monkeypatch, response_factory):
+def test_validate_response_failure_scenario_undocumented_method(
+    monkeypatch, response_factory
+):
     schema = deepcopy(tester.loader.get_schema())
-    schema_section = schema["paths"][parameterized_path][method]["responses"][status]["content"]["application/json"][
-        "schema"
-    ]
+    schema_section = schema["paths"][parameterized_path][method]["responses"][status][
+        "content"
+    ]["application/json"]["schema"]
     del schema["paths"][parameterized_path][method]
     monkeypatch.setattr(tester.loader, "get_schema", mock_schema(schema))
     response = response_factory(schema_section, de_parameterized_path, method, status)
@@ -188,11 +243,13 @@ def test_validate_response_failure_scenario_undocumented_method(monkeypatch, res
         tester.validate_response(response)
 
 
-def test_validate_response_failure_scenario_undocumented_status_code(monkeypatch, response_factory):
+def test_validate_response_failure_scenario_undocumented_status_code(
+    monkeypatch, response_factory
+):
     schema = deepcopy(tester.loader.get_schema())
-    schema_section = schema["paths"][parameterized_path][method]["responses"][status]["content"]["application/json"][
-        "schema"
-    ]
+    schema_section = schema["paths"][parameterized_path][method]["responses"][status][
+        "content"
+    ]["application/json"]["schema"]
     del schema["paths"][parameterized_path][method]["responses"][status]
     monkeypatch.setattr(tester.loader, "get_schema", mock_schema(schema))
     response = response_factory(schema_section, de_parameterized_path, method, status)
@@ -218,7 +275,9 @@ def test_validate_response_failure_scenario_undocumented_content(client, monkeyp
         tester.validate_response(response)
 
 
-def test_validate_request(response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]):
+def test_validate_request(
+    response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]
+):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     response = response_factory(
         schema=None,
@@ -230,7 +289,9 @@ def test_validate_request(response_factory, pets_api_schema: Path, pets_post_req
     schema_tester.validate_request(response)
 
 
-def test_validate_request_with_config(response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]):
+def test_validate_request_with_config(
+    response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]
+):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     response = response_factory(
         schema=None,
@@ -239,10 +300,15 @@ def test_validate_request_with_config(response_factory, pets_api_schema: Path, p
         status_code=201,
         response_body={"name": "doggie", "tag": "dog"},
     )
-    schema_tester.validate_request(response, OpenAPITestConfig(case_tester=is_pascal_case, ignore_case=["name", "tag"]))
+    schema_tester.validate_request(
+        response,
+        OpenAPITestConfig(case_tester=is_pascal_case, ignore_case=["name", "tag"]),
+    )
 
 
-def test_validate_request_invalid(response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]):
+def test_validate_request_invalid(
+    response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]
+):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     response = response_factory(
         schema=None,
@@ -272,7 +338,9 @@ def test_validate_request_no_application_json(
 
 
 def test_validate_request_schema_with_prefix_in_server(
-    response_factory, pets_api_schema_prefix_in_server: Path, pets_post_request: dict[str, Any]
+    response_factory,
+    pets_api_schema_prefix_in_server: Path,
+    pets_post_request: dict[str, Any],
 ):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema_prefix_in_server))
     response = response_factory(
@@ -290,9 +358,13 @@ def test_validate_request_schema_with_prefix_in_server(
 
 
 def test_validate_request_schema_with_prefix_in_server_path_prefix(
-    response_factory, pets_api_schema_prefix_in_server: Path, pets_post_request: dict[str, Any]
+    response_factory,
+    pets_api_schema_prefix_in_server: Path,
+    pets_post_request: dict[str, Any],
 ):
-    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema_prefix_in_server), path_prefix="/api")
+    schema_tester = SchemaTester(
+        schema_file_path=str(pets_api_schema_prefix_in_server), path_prefix="/api"
+    )
     response = response_factory(
         schema=None,
         url_fragment="/api/pets",
@@ -313,7 +385,9 @@ def test_is_openapi_schema_false():
     assert schema_tester.is_openapi_schema() is False
 
 
-def test_get_request_body_schema_section(pets_post_request: dict[str, Any], pets_api_schema: Path):
+def test_get_request_body_schema_section(
+    pets_post_request: dict[str, Any], pets_api_schema: Path
+):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     schema_section = schema_tester.get_request_body_schema_section(pets_post_request)
     assert schema_section == {
@@ -332,7 +406,9 @@ def test_get_request_body_schema_section_content_type_no_application_json(
     assert schema_section == {}
 
 
-def test_get_request_body_schema_section_no_content_request(pets_post_request: dict[str, Any], pets_api_schema: Path):
+def test_get_request_body_schema_section_no_content_request(
+    pets_post_request: dict[str, Any], pets_api_schema: Path
+):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     del pets_post_request["wsgi.input"]
     schema_section = schema_tester.get_request_body_schema_section(pets_post_request)
@@ -346,7 +422,9 @@ def test_validate_response_global_case_tester(client):
 
 
 @pytest.mark.parametrize("empty_schema", [None, {}])
-def test_validate_response_empty_content(empty_schema, client, monkeypatch, response_factory):
+def test_validate_response_empty_content(
+    empty_schema, client, monkeypatch, response_factory
+):
     schema = deepcopy(tester.loader.get_schema())
     del schema["paths"][parameterized_path][method]["responses"][status]["content"]
     monkeypatch.setattr(tester.loader, "get_schema", mock_schema(schema))
@@ -357,14 +435,20 @@ def test_validate_response_empty_content(empty_schema, client, monkeypatch, resp
 def test_validate_response_global_ignored_case(client):
     response = client.get(de_parameterized_path)
     SchemaTester(
-        case_tester=is_pascal_case, ignore_case=["name", "color", "height", "width", "length"]
+        case_tester=is_pascal_case,
+        ignore_case=["name", "color", "height", "width", "length"],
     ).validate_response(response=response)
 
 
 def test_validate_response_passed_in_case_tester(client):
     response = client.get(de_parameterized_path)
-    with pytest.raises(CaseError, match="The response key `name` is not properly PascalCased. Expected value: Name"):
-        tester.validate_response(response=response, test_config=OpenAPITestConfig(case_tester=is_pascal_case))
+    with pytest.raises(
+        CaseError,
+        match="The response key `name` is not properly PascalCased. Expected value: Name",
+    ):
+        tester.validate_response(
+            response=response, test_config=OpenAPITestConfig(case_tester=is_pascal_case)
+        )
 
 
 def test_validate_response_passed_in_ignored_case(client):
@@ -372,7 +456,8 @@ def test_validate_response_passed_in_ignored_case(client):
     tester.validate_response(
         response=response,
         test_config=OpenAPITestConfig(
-            case_tester=is_pascal_case, ignore_case=["name", "color", "height", "width", "length"]
+            case_tester=is_pascal_case,
+            ignore_case=["name", "color", "height", "width", "length"],
         ),
     )
 
@@ -381,7 +466,10 @@ def test_nullable_validation():
     for schema in example_schema_types:
         # A null value should always raise an error
         with pytest.raises(
-            DocumentationError, match=VALIDATE_NONE_ERROR.format(expected=OPENAPI_PYTHON_MAPPING[schema["type"]])
+            DocumentationError,
+            match=VALIDATE_NONE_ERROR.format(
+                expected=OPENAPI_PYTHON_MAPPING[schema["type"]]
+            ),
         ):
             tester.test_schema_section(schema, None)
 
@@ -410,7 +498,10 @@ def test_write_only_validation():
     test_response = {"test": "testString"}
     tester.test_schema_section(test_schema_section, test_response)
     test_schema_section["properties"]["test"]["writeOnly"] = True
-    with pytest.raises(DocumentationError, match=VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key="test")):
+    with pytest.raises(
+        DocumentationError,
+        match=VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key="test"),
+    ):
         tester.test_schema_section(test_schema_section, test_response)
 
 
@@ -421,10 +512,14 @@ def test_any_of_validation():
     """
     tester.test_schema_section(docs_any_of_example, {"age": 50})
     tester.test_schema_section(docs_any_of_example, {"pet_type": "Cat", "hunts": True})
-    tester.test_schema_section(docs_any_of_example, {"nickname": "Fido", "pet_type": "Dog", "age": 44})
+    tester.test_schema_section(
+        docs_any_of_example, {"nickname": "Fido", "pet_type": "Dog", "age": 44}
+    )
 
     with pytest.raises(DocumentationError):
-        tester.test_schema_section(docs_any_of_example, {"nickname": "Mr. Paws", "hunts": False})
+        tester.test_schema_section(
+            docs_any_of_example, {"nickname": "Mr. Paws", "hunts": False}
+        )
 
 
 def test_one_of_validation():
@@ -442,7 +537,9 @@ def test_one_of_validation():
     int_types = all_types[1:3]
     int_value = 1
     for t in non_int_types:
-        with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)
+        ):
             tester.test_schema_section({"oneOf": [t]}, int_value)
     for t in int_types:
         tester.test_schema_section({"oneOf": [t]}, int_value)
@@ -452,7 +549,9 @@ def test_one_of_validation():
     string_types = all_types[:1]
     string_value = "test"
     for t in non_string_types:
-        with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)
+        ):
             tester.test_schema_section({"oneOf": [t]}, string_value)
     for t in string_types:
         tester.test_schema_section({"oneOf": [t]}, string_value)
@@ -462,7 +561,9 @@ def test_one_of_validation():
     boolean_types = [all_types[3]]
     boolean_value = False
     for t in non_boolean_types:
-        with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)
+        ):
             tester.test_schema_section({"oneOf": [t]}, boolean_value)
     for t in boolean_types:
         tester.test_schema_section({"oneOf": [t]}, boolean_value)
@@ -472,7 +573,9 @@ def test_one_of_validation():
     array_types = [all_types[4]]
     array_value = []
     for t in non_array_types:
-        with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)
+        ):
             tester.test_schema_section({"oneOf": [t]}, array_value)
     for t in array_types:
         tester.test_schema_section({"oneOf": [t]}, array_value)
@@ -482,13 +585,17 @@ def test_one_of_validation():
     object_types = [all_types[5]]
     object_value = {}
     for t in non_object_types:
-        with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)
+        ):
             tester.test_schema_section({"oneOf": [t]}, object_value)
     for t in object_types:
         tester.test_schema_section({"oneOf": [t]}, object_value)
 
     # Make sure we raise the appropriate error when we find several matches
-    with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=2)):
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=2)
+    ):
         tester.test_schema_section(
             {
                 "oneOf": [
@@ -504,7 +611,9 @@ def test_one_of_validation():
         )
 
     # Make sure we raise the appropriate error when we find no matches
-    with pytest.raises(DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)):
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_ONE_OF_ERROR.format(matches=0)
+    ):
         tester.test_schema_section(
             {
                 "oneOf": [
@@ -521,9 +630,16 @@ def test_one_of_validation():
 
 def test_missing_keys_validation():
     # If a required key is missing, we should raise an error
-    required_key = {"type": "object", "properties": {"value": {"type": "integer"}}, "required": ["value"]}
+    required_key = {
+        "type": "object",
+        "properties": {"value": {"type": "integer"}},
+        "required": ["value"],
+    }
     with pytest.raises(
-        DocumentationError, match=VALIDATE_MISSING_KEY_ERROR.format(http_message="response", missing_key="value")
+        DocumentationError,
+        match=VALIDATE_MISSING_KEY_ERROR.format(
+            http_message="response", missing_key="value"
+        ),
     ):
         tester.test_schema_section(required_key, {})
 
@@ -536,7 +652,9 @@ def test_excess_keys_validation():
     schema = {"type": "object", "properties": {}}
     with pytest.raises(
         DocumentationError,
-        match=VALIDATE_EXCESS_KEY_ERROR.format(http_message="response", excess_key="value"),
+        match=VALIDATE_EXCESS_KEY_ERROR.format(
+            http_message="response", excess_key="value"
+        ),
     ):
         tester.test_schema_section(schema, example_object)
 
@@ -550,7 +668,9 @@ def test_custom_validators():
                 return f"Expected uuid4, but received {data}"
         return None
 
-    def uuid_1_validator(schema_section: dict, data: Any) -> str | None:  # pragma: no cover
+    def uuid_1_validator(
+        schema_section: dict, data: Any
+    ) -> str | None:  # pragma: no cover
         schema_format = schema_section.get("format")
         if schema_format == "uuid1":  #
             try:
@@ -578,7 +698,9 @@ def test_custom_validators():
 
     assert (
         tester_with_custom_validator.test_schema_section(
-            uid1_schema, uid1, test_config=OpenAPITestConfig(validators=[uuid_1_validator])
+            uid1_schema,
+            uid1,
+            test_config=OpenAPITestConfig(validators=[uuid_1_validator]),
         )
         is None
     )
@@ -588,7 +710,9 @@ def test_custom_validators():
         match=f"Expected uuid1, but received {uid4}",
     ):
         tester_with_custom_validator.test_schema_section(
-            uid1_schema, uid4, test_config=OpenAPITestConfig(validators=[uuid_1_validator])
+            uid1_schema,
+            uid4,
+            test_config=OpenAPITestConfig(validators=[uuid_1_validator]),
         )
 
 
@@ -607,7 +731,9 @@ def test_get_paths_object_no_path_prefix(pets_api_schema: Path):
 
 def test_get_paths_object_path_prefix(pets_api_schema_prefix_in_server: Path):
     path_prefix = "/api"
-    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema_prefix_in_server), path_prefix=path_prefix)
+    schema_tester = SchemaTester(
+        schema_file_path=str(pets_api_schema_prefix_in_server), path_prefix=path_prefix
+    )
     paths_object = schema_tester.get_paths_object()
 
     assert list(paths_object.keys()) == ["/api/pets", "/api/pets/{id}"]

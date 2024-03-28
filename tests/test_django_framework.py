@@ -11,7 +11,9 @@ from tests.utils import TEST_ROOT
 if TYPE_CHECKING:
     from rest_framework.response import Response
 
-schema_tester = SchemaTester(schema_file_path=str(TEST_ROOT) + "/schemas/sample-schemas/content_types.yaml")
+schema_tester = SchemaTester(
+    schema_file_path=str(TEST_ROOT) + "/schemas/sample-schemas/content_types.yaml"
+)
 
 
 class BaseAPITestCase(APITestCase):

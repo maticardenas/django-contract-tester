@@ -1,4 +1,4 @@
-""" Exceptions Module """
+"""Exceptions Module"""
 
 
 class DocumentationError(AssertionError):
@@ -15,7 +15,9 @@ class CaseError(DocumentationError):
     """
 
     def __init__(self, key: str, case: str, expected: str) -> None:
-        super().__init__(f"The response key `{key}` is not properly {case}. Expected value: {expected}")
+        super().__init__(
+            f"The response key `{key}` is not properly {case}. Expected value: {expected}"
+        )
 
 
 class OpenAPISchemaError(Exception):

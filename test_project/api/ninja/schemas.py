@@ -8,11 +8,22 @@ class UserIn(Schema):
     is_active: bool
 
     class Config:
-        example = {"name": "John Doe", "email": "john.doe@example.com", "age": 30, "is_active": True}
+        example = {
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "age": 30,
+            "is_active": True,
+        }
 
 
 class UserOut(UserIn):
     id: int
 
     class Config:
-        example = {"id": 1, "name": "John Doe", "email": "john.doe@example.com", "age": 30, "is_active": True}
+        example = {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "age": 30,
+            "is_active": True,
+        }

@@ -6,7 +6,9 @@ from django.shortcuts import redirect
 from rest_framework.request import Request
 
 
-def index(request: Request) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]:
+def index(
+    request: Request,
+) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]:
     """
     Redirects traffic from / to /swagger.
     """

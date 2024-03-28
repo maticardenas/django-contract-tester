@@ -48,8 +48,14 @@ TEST_DATA_MAP: dict[str, tuple[Any, Any]] = {
     "object": (faker.pydict(), faker.pystr()),
     "array": (faker.pylist(), faker.pystr()),
     # by format
-    "byte": (base64.b64encode(faker.pystr().encode("utf-8")).decode("utf-8"), faker.pystr(min_chars=5, max_chars=5)),
-    "base64": (base64.b64encode(faker.pystr().encode("utf-8")).decode("utf-8"), faker.pystr(min_chars=5, max_chars=5)),
+    "byte": (
+        base64.b64encode(faker.pystr().encode("utf-8")).decode("utf-8"),
+        faker.pystr(min_chars=5, max_chars=5),
+    ),
+    "base64": (
+        base64.b64encode(faker.pystr().encode("utf-8")).decode("utf-8"),
+        faker.pystr(min_chars=5, max_chars=5),
+    ),
     "date": (faker.date(), faker.pystr()),
     "date-time": (faker.date_time().isoformat(), faker.pystr()),
     "double": (faker.pyfloat(), faker.pyint()),
@@ -100,11 +106,17 @@ def test_type_validation():
 
 def test_min_and_max_length_validation():
     # Not adhering to minlength limitations should raise an error
-    with pytest.raises(DocumentationError, match=VALIDATE_MIN_LENGTH_ERROR.format(data="a" * 2, min_length=3)):
+    with pytest.raises(
+        DocumentationError,
+        match=VALIDATE_MIN_LENGTH_ERROR.format(data="a" * 2, min_length=3),
+    ):
         tester.test_schema_section(example_schema_string, "a" * 2)
 
     # Not adhering to maxlength limitations should raise an error
-    with pytest.raises(DocumentationError, match=VALIDATE_MAX_LENGTH_ERROR.format(data="a" * 6, max_length=5)):
+    with pytest.raises(
+        DocumentationError,
+        match=VALIDATE_MAX_LENGTH_ERROR.format(data="a" * 6, max_length=5),
+    ):
         tester.test_schema_section(example_schema_string, "a" * 6)
 
 
@@ -112,7 +124,10 @@ def test_min_and_max_items_validation():
     # Not adhering to minlength limitations should raise an error
     schema = {"type": "array", "items": {"type": "string"}, "minItems": 2}
     with pytest.raises(
-        DocumentationError, match=VALIDATE_MIN_ARRAY_LENGTH_ERROR.format(data=r"\['string'\]", min_length=2)
+        DocumentationError,
+        match=VALIDATE_MIN_ARRAY_LENGTH_ERROR.format(
+            data=r"\['string'\]", min_length=2
+        ),
     ):
         tester.test_schema_section(schema, ["string"])
 
@@ -121,7 +136,8 @@ def test_min_and_max_items_validation():
     with pytest.raises(
         DocumentationError,
         match=VALIDATE_MAX_ARRAY_LENGTH_ERROR.format(
-            data=r"\['string', 'string', 'string', 'string', 'string', 'string'\]", max_length=5
+            data=r"\['string', 'string', 'string', 'string', 'string', 'string'\]",
+            max_length=5,
         ),
     ):
         tester.test_schema_section(schema, ["string"] * 6)
@@ -129,8 +145,14 @@ def test_min_and_max_items_validation():
 
 def test_min_and_max_number_of_properties_validation():
     # Not adhering to minlength limitations should raise an error
-    schema = {"type": "object", "properties": {"oneKey": {"type": "string"}}, "minProperties": 2}
-    with pytest.raises(DocumentationError, match=VALIDATE_MINIMUM_NUMBER_OF_PROPERTIES_ERROR[:10]):
+    schema = {
+        "type": "object",
+        "properties": {"oneKey": {"type": "string"}},
+        "minProperties": 2,
+    }
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_MINIMUM_NUMBER_OF_PROPERTIES_ERROR[:10]
+    ):
         tester.test_schema_section(schema, {"oneKey": "test"})
 
     # Not adhering to minlength limitations should raise an error
@@ -139,38 +161,65 @@ def test_min_and_max_number_of_properties_validation():
         "properties": {"oneKey": {"type": "string"}, "twoKey": {"type": "string"}},
         "maxProperties": 1,
     }
-    with pytest.raises(DocumentationError, match=VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR[:10]):
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR[:10]
+    ):
         tester.test_schema_section(schema, {"oneKey": "test", "twoKey": "test"})
 
 
 def test_additional_properties_allowed():
-    schema = {"type": "object", "additionalProperties": True, "properties": {"oneKey": {"type": "string"}}}
+    schema = {
+        "type": "object",
+        "additionalProperties": True,
+        "properties": {"oneKey": {"type": "string"}},
+    }
     tester.test_schema_section(schema, {"oneKey": "test", "twoKey": "test2"})
 
 
 def test_additional_properties_specified_as_empty_object_allowed():
-    schema = {"type": "object", "additionalProperties": {}, "properties": {"oneKey": {"type": "string"}}}
+    schema = {
+        "type": "object",
+        "additionalProperties": {},
+        "properties": {"oneKey": {"type": "string"}},
+    }
     tester.test_schema_section(schema, {"oneKey": "test", "twoKey": "test2"})
 
 
 def test_additional_properties_not_allowed_by_default():
     schema = {"type": "object", "properties": {"oneKey": {"type": "string"}}}
     with pytest.raises(
-        DocumentationError, match=VALIDATE_EXCESS_KEY_ERROR.format(http_message="response", excess_key="twoKey")
+        DocumentationError,
+        match=VALIDATE_EXCESS_KEY_ERROR.format(
+            http_message="response", excess_key="twoKey"
+        ),
     ):
         tester.test_schema_section(schema, {"oneKey": "test", "twoKey": "test2"})
 
 
 def test_string_dictionary_specified_as_additional_properties_allowed():
-    schema = {"type": "object", "additionalProperties": {"type": "string"}, "properties": {"key_1": {"type": "string"}}}
-    tester.test_schema_section(schema, {"key_1": "value_1", "key_2": "value_2", "key_3": "value_3"})
+    schema = {
+        "type": "object",
+        "additionalProperties": {"type": "string"},
+        "properties": {"key_1": {"type": "string"}},
+    }
+    tester.test_schema_section(
+        schema, {"key_1": "value_1", "key_2": "value_2", "key_3": "value_3"}
+    )
 
 
 def test_string_dictionary_with_non_string_value_fails_validation():
-    schema = {"type": "object", "additionalProperties": {"type": "string"}, "properties": {"key_1": {"type": "string"}}}
-    expected_error_message = VALIDATE_TYPE_ERROR.format(article="a", type="string", received=123)
+    schema = {
+        "type": "object",
+        "additionalProperties": {"type": "string"},
+        "properties": {"key_1": {"type": "string"}},
+    }
+    expected_error_message = VALIDATE_TYPE_ERROR.format(
+        article="a", type="string", received=123
+    )
     with pytest.raises(DocumentationError, match=expected_error_message):
-        tester.test_schema_section(schema, {"key_1": "value_1", "key_2": 123, "key_3": "value_3"})
+        tester.test_schema_section(
+            schema, {"key_1": "value_1", "key_2": 123, "key_3": "value_3"}
+        )
 
 
 def test_object_dictionary_specified_as_additional_properties_allowed():
@@ -201,13 +250,21 @@ def test_additional_properties_schema_not_validated_in_main_properties():
             "properties": {"key_2": {"type": "string"}, "key_3": {"type": "number"}},
         },
     }
-    expected_error_message = VALIDATE_TYPE_ERROR.format(article="an", type="object", received='"value_2"')
+    expected_error_message = VALIDATE_TYPE_ERROR.format(
+        article="an", type="object", received='"value_2"'
+    )
     with pytest.raises(DocumentationError, match=expected_error_message):
-        tester.test_schema_section(schema, {"key_1": "value_1", "key_2": "value_2", "key_3": 123})
+        tester.test_schema_section(
+            schema, {"key_1": "value_1", "key_2": "value_2", "key_3": 123}
+        )
 
 
 def test_invalid_additional_properties_raises_schema_error():
-    schema = {"type": "object", "properties": {"key_1": {"type": "string"}}, "additionalProperties": 123}
+    schema = {
+        "type": "object",
+        "properties": {"key_1": {"type": "string"}},
+        "additionalProperties": 123,
+    }
     with pytest.raises(OpenAPISchemaError, match="Invalid additionalProperties type"):
         tester.test_schema_section(schema, {"key_1": "value_1", "key_2": "value_2"})
 
@@ -238,12 +295,16 @@ def test_exclusives_validation():
 
     # Fail when we exclude the minimum
     schema["exclusiveMinimum"] = True
-    with pytest.raises(DocumentationError, match=VALIDATE_MINIMUM_ERROR.format(data=3, minimum=4)):
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_MINIMUM_ERROR.format(data=3, minimum=4)
+    ):
         tester.test_schema_section(schema, 3)
 
     # Fail when we exclude the maximum
     schema["exclusiveMaximum"] = True
-    with pytest.raises(DocumentationError, match=VALIDATE_MAXIMUM_ERROR.format(data=5, maximum=4)):
+    with pytest.raises(
+        DocumentationError, match=VALIDATE_MAXIMUM_ERROR.format(data=5, maximum=4)
+    ):
         tester.test_schema_section(schema, 5)
 
     # Pass when we include the maximum
@@ -254,12 +315,16 @@ def test_exclusives_validation():
 def test_maximum_and_minimum_validation():
     # Not adhering to maximum limitations should raise an error
     for num, schema in [(6, example_schema_integer), (6.12, example_schema_number)]:
-        with pytest.raises(DocumentationError, match=VALIDATE_MAXIMUM_ERROR.format(data=num, maximum=5)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_MAXIMUM_ERROR.format(data=num, maximum=5)
+        ):
             tester.test_schema_section(schema, num)
 
     # Not adhering to minimum limitations should raise an error
     for num, schema in [(2, example_schema_integer), (2.22, example_schema_number)]:
-        with pytest.raises(DocumentationError, match=VALIDATE_MINIMUM_ERROR.format(data=num, minimum=3)):
+        with pytest.raises(
+            DocumentationError, match=VALIDATE_MINIMUM_ERROR.format(data=num, minimum=3)
+        ):
             tester.test_schema_section(schema, num)
 
 
@@ -279,14 +344,19 @@ def test_multiple_of_validation():
             tester.test_schema_section(schema, integer)
 
         # Fail
-        with pytest.raises(DocumentationError, match=VALIDATE_MULTIPLE_OF_ERROR.format(data=num + 2, multiple=num)):
+        with pytest.raises(
+            DocumentationError,
+            match=VALIDATE_MULTIPLE_OF_ERROR.format(data=num + 2, multiple=num),
+        ):
             tester.test_schema_section(schema, num + 2)
 
 
 def test_unique_items_validation():
     schema = {"type": "array", "items": {"type": "string"}, "uniqueItems": True}
     with pytest.raises(DocumentationError):
-        tester.test_schema_section(schema, ["identical value", "identical value", "non-identical value"])
+        tester.test_schema_section(
+            schema, ["identical value", "identical value", "non-identical value"]
+        )
 
 
 def test_date_validation():
@@ -300,46 +370,69 @@ def test_date_validation():
 
 def test_datetime_validation():
     # ISO8601 is valid
-    tester.test_schema_section({"type": "string", "format": "date-time"}, "2040-01-01 08:00")
+    tester.test_schema_section(
+        {"type": "string", "format": "date-time"}, "2040-01-01 08:00"
+    )
 
     # This is invalid
     with pytest.raises(DocumentationError):
-        tester.test_schema_section({"type": "string", "format": "date-time"}, "2040-01-01 9800")
+        tester.test_schema_section(
+            {"type": "string", "format": "date-time"}, "2040-01-01 9800"
+        )
 
 
 def test_byte_validation():
-    tester.test_schema_section({"type": "string", "format": "byte"}, base64.b64encode(b"test123").decode("utf-8"))
+    tester.test_schema_section(
+        {"type": "string", "format": "byte"},
+        base64.b64encode(b"test123").decode("utf-8"),
+    )
 
     with pytest.raises(DocumentationError):
         tester.test_schema_section({"type": "string", "format": "byte"}, "test123")
 
 
 def test_is_nullable_anyof():
-    tester.test_schema_section({"anyOf": [{"type": "object", "nullable": True}, {"type": "string"}]}, None)
+    tester.test_schema_section(
+        {"anyOf": [{"type": "object", "nullable": True}, {"type": "string"}]}, None
+    )
 
     with pytest.raises(DocumentationError):
-        tester.test_schema_section({"anyOf": [{"type": "object"}, {"type": "string"}]}, None)
+        tester.test_schema_section(
+            {"anyOf": [{"type": "object"}, {"type": "string"}]}, None
+        )
 
 
 def test_is_nullable_oneof():
-    tester.test_schema_section({"oneOf": [{"type": "object", "nullable": True}, {"type": "string"}]}, None)
+    tester.test_schema_section(
+        {"oneOf": [{"type": "object", "nullable": True}, {"type": "string"}]}, None
+    )
 
     with pytest.raises(DocumentationError):
-        tester.test_schema_section({"oneOf": [{"type": "object"}, {"type": "string"}]}, None)
+        tester.test_schema_section(
+            {"oneOf": [{"type": "object"}, {"type": "string"}]}, None
+        )
 
 
 def test_validate_unique_items_dict():
     # Only unique objects.
     result = validate_unique_items(
         {"uniqueItems": True},
-        [{"id": 123, "type": "Potato"}, {"id": 234, "type": "Potato"}, {"type": "Tomato", "id": 123}],
+        [
+            {"id": 123, "type": "Potato"},
+            {"id": 234, "type": "Potato"},
+            {"type": "Tomato", "id": 123},
+        ],
     )
     assert result is None
 
     # Repeated object (in reverse key order).
     result = validate_unique_items(
         {"uniqueItems": True},
-        [{"id": 123, "type": "Potato"}, {"id": 234, "type": "Potato"}, {"type": "Potato", "id": 123}],
+        [
+            {"id": 123, "type": "Potato"},
+            {"id": 234, "type": "Potato"},
+            {"type": "Potato", "id": 123},
+        ],
     )
     assert (
         result
