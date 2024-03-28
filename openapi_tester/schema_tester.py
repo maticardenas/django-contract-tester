@@ -446,10 +446,10 @@ class SchemaTester:
                 # If data is None and nullable, we return early
                 return
             raise DocumentationError(
-                f"{VALIDATE_NONE_ERROR.format(http_message=test_config.http_message)}\n\n"
-                f"Reference: "
+                f"{VALIDATE_NONE_ERROR.format(http_message=test_config.http_message)}"
+                f"\n\nReference:"
                 f"\n\n{test_config.reference}"
-                f"\n\n Schema description:\n  {json.dumps(schema_section, indent=4)}"
+                f"\n\nSchema description:\n  {json.dumps(schema_section, indent=4)}"
                 "\n\nHint: Return a valid type, or document the value as nullable"
             )
         schema_section = normalize_schema_section(schema_section)
@@ -551,8 +551,8 @@ class SchemaTester:
                     f"{VALIDATE_MISSING_KEY_ERROR.format(missing_key=key, http_message=test_config.http_message)}"
                     "\n\nReference:"
                     f"\n\n{test_config.reference} > {key}"
-                    f"\n\n {test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
-                    f"\n Schema section:\n  {json.dumps(properties, indent=4)}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
+                    f"\nSchema section:\n  {json.dumps(properties, indent=4)}"
                     f"\n\nHint: Remove the key from your OpenAPI docs, or"
                     f" include it in your API {test_config.http_message}"
                 )
@@ -562,17 +562,18 @@ class SchemaTester:
                 raise DocumentationError(
                     f"{VALIDATE_EXCESS_KEY_ERROR.format(excess_key=key, http_message=test_config.http_message)}"
                     "\n\nReference:"
-                    f"\n\n {test_config.http_message.capitalize()} body:\n  ${json.dumps(data, indent=4)}"
-                    f"\n\n Schema section:\n  ${json.dumps(properties, indent=4)}"
+                    f"\n\n{test_config.reference} > {key}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
+                    f"\n\nSchema section:\n  {json.dumps(properties, indent=4)}"
                     f"\n\nHint: Remove the key from your API"
                     f" {test_config.http_message}, or include it in your OpenAPI docs"
                 )
             if key in write_only_properties:
                 raise DocumentationError(
                     f"{VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key=key)}\n\nReference:"
-                    f" {test_config.reference} > {key}"
-                    f"\n\n {test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
-                    f"\n Schema section:\n  {json.dumps(properties, indent=4)}"
+                    f"\n\n{test_config.reference} > {key}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
+                    f"\nSchema section:\n  {json.dumps(properties, indent=4)}"
                     f"\n\nHint: Remove the key from your API {test_config.http_message}, or"
                     ' remove the "WriteOnly" restriction'
                 )

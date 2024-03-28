@@ -175,57 +175,69 @@ class TestValidatorErrors:
 class TestTestOpenAPIObjectErrors:
     def test_missing_response_key_error(self):
         expected_error_message = (
-            'The following property is missing in the response data: "one"\n\n'
-            "Reference: init.object:key:one\n\n"
-            "Hint: Remove the key from your OpenAPI docs, or include it in your API response"
+            'The following property was found in the schema definition, but is missing from the response data: "one"'
+            "\n\nReference:\n\nPOST /endpoint > response > one"
+            '\n\nResponse body:\n  {\n    "two": 2\n}'
+            '\nSchema section:\n  {\n    "one": {\n        "type": "int"\n    }\n}'
+            "\n\nHint: Remove the key from your OpenAPI docs, or include it in your API response"
         )
         tester = SchemaTester()
         with pytest.raises(DocumentationError, match=expected_error_message):
             tester.test_openapi_object(
                 {"required": ["one"], "properties": {"one": {"type": "int"}}},
                 {"two": 2},
-                OpenAPITestConfig(reference="init"),
+                OpenAPITestConfig(reference="POST /endpoint > response"),
             )
 
     def test_missing_schema_key_error(self):
         expected_error_message = (
-            'The following property was found in the response, but is missing from the schema definition: "two"\n\n'
-            "Reference: init.object:key:two\n\n"
-            "Hint: Remove the key from your API response, or include it in your OpenAPI docs"
+            'The following property was found in the response data, but is missing from the schema definition: "two"'
+            '\n\nReference:'
+            '\n\nPOST /endpoint > response > two'
+            '\n\nResponse body:\n  {\n    "one": 1,\n    "two": 2\n}'
+            '\n\nSchema section:\n  {\n    "one": {\n        "type": "int"\n    }\n}'
+            "\n\nHint: Remove the key from your API response, or include it in your OpenAPI docs"
         )
         tester = SchemaTester()
         with pytest.raises(DocumentationError, match=expected_error_message):
             tester.test_openapi_object(
                 {"required": ["one"], "properties": {"one": {"type": "int"}}},
                 {"one": 1, "two": 2},
-                OpenAPITestConfig(reference="init"),
+                OpenAPITestConfig(reference="POST /endpoint > response"),
             )
 
     def test_key_in_write_only_properties_error(self):
         expected_error_message = (
-            'The following property was found in the response, but is documented as being "writeOnly": "one"\n\n'
-            "Reference: init.object:key:one\n\n"
-            'Hint: Remove the key from your API response, or remove the "WriteOnly" restriction'
+            'The following property was found in the response, but is documented as being "writeOnly": "one"'
+            '\n\nReference:'
+            '\n\nPOST /endpoint > response > one'
+            '\n\nResponse body:\n  {\n    "one": 1\n}'
+            '\nSchema section:\n  {\n    "one": {\n        "type": "int",\n        "writeOnly": true\n    }\n}'
+            '\n\nHint: Remove the key from your API response, or remove the "WriteOnly" restriction'
         )
         tester = SchemaTester()
         with pytest.raises(DocumentationError, match=expected_error_message):
             tester.test_openapi_object(
                 {"properties": {"one": {"type": "int", "writeOnly": True}}},
                 {"one": 1},
-                OpenAPITestConfig(reference="init"),
+                OpenAPITestConfig(reference="POST /endpoint > response"),
             )
 
 
 def test_null_error():
     expected_error_message = (
-        "Received a null value for a non-nullable schema object\n\n"
-        "Reference: init\n\n"
-        "Hint: Return a valid type, or document the value as nullable"
+        "A property received a null value in the response data, but is a non-nullable object in the schema definition"
+        "\n\nReference:"
+        "\n\nPOST /endpoint > response > nonNullableObject"
+        '\n\nSchema description:\n  {\n    "type": "object"\n}'
+        "\n\nHint: Return a valid type, or document the value as nullable"
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
         tester.test_schema_section(
-            {"type": "object"}, None, OpenAPITestConfig(reference="init")
+            {"type": "object"},
+            None,
+            OpenAPITestConfig(reference="POST /endpoint > response > nonNullableObject")
         )
 
 
