@@ -42,7 +42,7 @@ def test_create_user(client: OpenAPIClient):
     }
     response = client.post(
         path="/ninja_api/users/",
-        data=json.dumps(payload),
+        data=payload,
         content_type="application/json",
     )
     assert response.status_code == 201
@@ -57,7 +57,7 @@ def test_update_user(client: OpenAPIClient):
     }
     response = client.put(
         path="/ninja_api/users/1",
-        data=json.dumps(payload),
+        data=payload,
         content_type="application/json",
     )
     assert response.status_code == 200

@@ -36,9 +36,17 @@ VALIDATE_MAX_ARRAY_LENGTH_ERROR = "The length of the array {data} exceeds the sp
 VALIDATE_MINIMUM_NUMBER_OF_PROPERTIES_ERROR = "The number of properties in {data} is fewer than the specified minimum number of properties of {min_length}"
 VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR = "The number of properties in {data} exceeds the specified maximum number of properties of {max_length}"
 VALIDATE_UNIQUE_ITEMS_ERROR = "The array {data} must contain unique items only"
-VALIDATE_NONE_ERROR = "Received a null value for a non-nullable schema object"
+VALIDATE_NONE_ERROR = (
+    'A property received a null value in the {http_message} data, '
+    'but is a non-nullable object in the schema definition'
+)
 VALIDATE_MISSING_KEY_ERROR = (
-    'The following property is missing in the {http_message} data: "{missing_key}"'
+    'The following property was found in the schema definition, '
+    'but is missing from the {http_message} data: "{missing_key}"'
+)
+VALIDATE_EXCESS_KEY_ERROR = (
+    'The following property was found in the {http_message} data, '
+    'but is missing from the schema definition: "{excess_key}"'
 )
 VALIDATE_EXCESS_KEY_ERROR = 'The following property was found in the {http_message}, but is missing from the schema definition: "{excess_key}"'
 VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR = 'The following property was found in the response, but is documented as being "writeOnly": "{write_only_key}"'

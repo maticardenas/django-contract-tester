@@ -25,6 +25,11 @@ def pets_api_schema_prefix_in_server() -> Path:
 
 
 @pytest.fixture
+def cars_api_schema() -> Path:
+    return TEST_ROOT / "schemas" / "spectactular_reference_schema.yaml"
+
+
+@pytest.fixture
 def pets_post_request():
     request_body = MagicMock()
     request_body.read.return_value = b'{"name": "doggie", "tag": "dog"}'

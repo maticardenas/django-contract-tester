@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from typing import TYPE_CHECKING
 
 from rest_framework.test import APIClient
@@ -32,6 +34,31 @@ class OpenAPIClient(APIClient):
             self.schema_tester.validate_request(response)
         self.schema_tester.validate_response(response)
         return response
+
+    def post(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+        if data and content_type == "application/json":
+            data = json.dumps(data)
+        return super().post(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
+
+    def put(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+        if data and content_type == "application/json":
+            data = json.dumps(data)
+        return super().put(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
+
+    def patch(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+        if data and content_type == "application/json":
+            data = json.dumps(data)
+        return super().patch(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
+
+    def delete(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+        if data and content_type == "application/json":
+            data = json.dumps(data)
+        return super().delete(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
+
+    def options(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+        if data and content_type == "application/json":
+            data = json.dumps(data)
+        return super().options(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
 
     @staticmethod
     def _is_successful_response(response: Response) -> bool:
