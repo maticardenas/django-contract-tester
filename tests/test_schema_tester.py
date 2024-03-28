@@ -193,7 +193,10 @@ def test_example_schemas(filename):
                 schema_tester.validate_response(response)
                 response_handler = ResponseHandlerFactory.create(response)
                 assert sorted(
-                    schema_tester.get_response_schema_section(response_handler)
+                    schema_tester.get_response_schema_section(
+                        response_handler,
+                        test_config=OpenAPITestConfig(case_tester=is_pascal_case)
+                    )
                 ) == sorted(schema_section)
 
 
@@ -203,9 +206,9 @@ def test_validate_response_failure_scenario_with_predefined_data(client):
         assert response.status_code == 200
         assert response.json() == item["expected_response"]
         with pytest.raises(
-            DocumentationError,
-            match='The following property is missing in the response data: "width"',
-        ):
+                DocumentationError,
+                match='The following property was found in the schema definition, '
+                      'but is missing from the response data: "width"'):
             tester.validate_response(response)
 
 
@@ -268,8 +271,9 @@ def test_validate_response_failure_scenario_undocumented_content(client, monkeyp
     with pytest.raises(
         UndocumentedSchemaSectionError,
         match=(
-            "Error: Unsuccessfully tried to index the OpenAPI schema by `content`. \n\n"
-            f"No `content` defined for this response: {method}, path: {parameterized_path}"
+            "Error: Unsuccessfully tried to index the OpenAPI schema by `content`. "
+            "\n\nGET /api/v1/cars/correct > response > 200"
+            f"\n\nNo `content` defined for this response: {method}, path: {parameterized_path}"
         ),
     ):
         tester.validate_response(response)
@@ -385,11 +389,10 @@ def test_is_openapi_schema_false():
     assert schema_tester.is_openapi_schema() is False
 
 
-def test_get_request_body_schema_section(
-    pets_post_request: dict[str, Any], pets_api_schema: Path
-):
+def test_get_request_body_schema_section(pets_post_request: dict[str, Any], pets_api_schema: Path):
+    test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
-    schema_section = schema_tester.get_request_body_schema_section(pets_post_request)
+    schema_section = schema_tester.get_request_body_schema_section(pets_post_request, test_config=test_config)
     assert schema_section == {
         "type": "object",
         "required": ["name"],
@@ -401,17 +404,17 @@ def test_get_request_body_schema_section_content_type_no_application_json(
     pets_post_request: dict[str, Any], pets_api_schema: Path
 ):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     pets_post_request["CONTENT_TYPE"] = "application/xml"
-    schema_section = schema_tester.get_request_body_schema_section(pets_post_request)
+    schema_section = schema_tester.get_request_body_schema_section(pets_post_request, test_config=test_config)
     assert schema_section == {}
 
 
-def test_get_request_body_schema_section_no_content_request(
-    pets_post_request: dict[str, Any], pets_api_schema: Path
-):
+def test_get_request_body_schema_section_no_content_request(pets_post_request: dict[str, Any], pets_api_schema: Path):
+    test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     del pets_post_request["wsgi.input"]
-    schema_section = schema_tester.get_request_body_schema_section(pets_post_request)
+    schema_section = schema_tester.get_request_body_schema_section(pets_post_request, test_config=test_config)
     assert schema_section == {}
 
 
@@ -466,10 +469,10 @@ def test_nullable_validation():
     for schema in example_schema_types:
         # A null value should always raise an error
         with pytest.raises(
-            DocumentationError,
-            match=VALIDATE_NONE_ERROR.format(
-                expected=OPENAPI_PYTHON_MAPPING[schema["type"]]
-            ),
+            DocumentationError, match=VALIDATE_NONE_ERROR.format(
+                    expected=OPENAPI_PYTHON_MAPPING[schema["type"]],
+                    http_message="response"
+                )
         ):
             tester.test_schema_section(schema, None)
 

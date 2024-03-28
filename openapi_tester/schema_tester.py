@@ -624,10 +624,10 @@ class SchemaTester:
         response_handler = ResponseHandlerFactory.create(response)
         if self.is_openapi_schema():
             # TODO: Implement for other schema types
+            request = response.request
             if test_config:
                 test_config.http_message = "request"
             else:
-                request = response.request
                 test_config = OpenAPITestConfig(
                     http_message="request",
                     reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request"
