@@ -192,8 +192,8 @@ class TestTestOpenAPIObjectErrors:
     def test_missing_schema_key_error(self):
         expected_error_message = (
             'The following property was found in the response data, but is missing from the schema definition: "two"'
-            '\n\nReference:'
-            '\n\nPOST /endpoint > response > two'
+            "\n\nReference:"
+            "\n\nPOST /endpoint > response > two"
             '\n\nResponse body:\n  {\n    "one": 1,\n    "two": 2\n}'
             '\n\nSchema section:\n  {\n    "one": {\n        "type": "int"\n    }\n}'
             "\n\nHint: Remove the key from your API response, or include it in your OpenAPI docs"
@@ -209,8 +209,8 @@ class TestTestOpenAPIObjectErrors:
     def test_key_in_write_only_properties_error(self):
         expected_error_message = (
             'The following property was found in the response, but is documented as being "writeOnly": "one"'
-            '\n\nReference:'
-            '\n\nPOST /endpoint > response > one'
+            "\n\nReference:"
+            "\n\nPOST /endpoint > response > one"
             '\n\nResponse body:\n  {\n    "one": 1\n}'
             '\nSchema section:\n  {\n    "one": {\n        "type": "int",\n        "writeOnly": true\n    }\n}'
             '\n\nHint: Remove the key from your API response, or remove the "WriteOnly" restriction'
@@ -235,9 +235,7 @@ def test_null_error():
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
         tester.test_schema_section(
-            {"type": "object"},
-            None,
-            OpenAPITestConfig(reference="POST /endpoint > response > nonNullableObject")
+            {"type": "object"}, None, OpenAPITestConfig(reference="POST /endpoint > response > nonNullableObject")
         )
 
 

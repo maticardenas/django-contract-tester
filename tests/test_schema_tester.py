@@ -194,8 +194,7 @@ def test_example_schemas(filename):
                 response_handler = ResponseHandlerFactory.create(response)
                 assert sorted(
                     schema_tester.get_response_schema_section(
-                        response_handler,
-                        test_config=OpenAPITestConfig(case_tester=is_pascal_case)
+                        response_handler, test_config=OpenAPITestConfig(case_tester=is_pascal_case)
                     )
                 ) == sorted(schema_section)
 
@@ -206,9 +205,12 @@ def test_validate_response_failure_scenario_with_predefined_data(client):
         assert response.status_code == 200
         assert response.json() == item["expected_response"]
         with pytest.raises(
-                DocumentationError,
-                match='The following property was found in the schema definition, '
-                      'but is missing from the response data: "width"'):
+            DocumentationError,
+            match=(
+                "The following property was found in the schema definition, "
+                'but is missing from the response data: "width"'
+            ),
+        ):
             tester.validate_response(response)
 
 
@@ -469,10 +471,8 @@ def test_nullable_validation():
     for schema in example_schema_types:
         # A null value should always raise an error
         with pytest.raises(
-            DocumentationError, match=VALIDATE_NONE_ERROR.format(
-                    expected=OPENAPI_PYTHON_MAPPING[schema["type"]],
-                    http_message="response"
-                )
+            DocumentationError,
+            match=VALIDATE_NONE_ERROR.format(expected=OPENAPI_PYTHON_MAPPING[schema["type"]], http_message="response"),
         ):
             tester.test_schema_section(schema, None)
 

@@ -36,20 +36,13 @@ def test_init_schema_tester_passed():
 def test_get_request(cars_api_schema: "Path"):
     schema_tester = SchemaTester(schema_file_path=str(cars_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
-    response = openapi_client.get(
-        path="/api/v1/cars/correct"
-    )
+    response = openapi_client.get(path="/api/v1/cars/correct")
 
     assert response.status_code == status.HTTP_200_OK
 
 
 def test_post_request(openapi_client):
-    response = openapi_client.post(
-        path="/api/v1/vehicles",
-        data={
-            "vehicle_type": "suv"
-        }
-    )
+    response = openapi_client.post(path="/api/v1/vehicles", data={"vehicle_type": "suv"})
 
     assert response.status_code == status.HTTP_201_CREATED
 
@@ -57,12 +50,7 @@ def test_post_request(openapi_client):
 def test_request_validation_is_not_triggered_for_bad_requests(pets_api_schema: "Path"):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
-    response = openapi_client.post(
-        path="/api/pets",
-        data={
-            "tag": "doggie"
-        }
-    )
+    response = openapi_client.post(path="/api/pets", data={"tag": "doggie"})
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -74,10 +62,7 @@ def test_request_body_extra_non_documented_field(pets_api_schema: "Path"):
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
 
     with pytest.raises(DocumentationError):
-        openapi_client.post(
-            path="/api/pets",
-            data={"name": "doggie", "age": 1}
-        )
+        openapi_client.post(path="/api/pets", data={"name": "doggie", "age": 1})
 
 
 def test_request_body_non_null_fields(pets_api_schema: "Path"):
@@ -85,10 +70,7 @@ def test_request_body_non_null_fields(pets_api_schema: "Path"):
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
 
     with pytest.raises(DocumentationError):
-        openapi_client.post(
-            path="/api/pets",
-            data={"name":  "doggie", "tag": None}
-        )
+        openapi_client.post(path="/api/pets", data={"name": "doggie", "tag": None})
 
 
 def test_request_on_empty_list(openapi_client):

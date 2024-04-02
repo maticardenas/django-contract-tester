@@ -171,9 +171,7 @@ class SchemaTester:
         return paths_object
 
     def get_response_schema_section(
-        self,
-        response_handler: ResponseHandler,
-        test_config: OpenAPITestConfig
+        self, response_handler: ResponseHandler, test_config: OpenAPITestConfig
     ) -> dict[str, Any]:
         """
         Fetches the response section of a schema, wrt. the route, method, status code, and schema version.
@@ -195,9 +193,8 @@ class SchemaTester:
             paths_object,
             parameterized_path,
             (
-                f"\n\n{test_config.reference}"
-                f"\n\nUndocumented route {parameterized_path}."
-                f"\n\nDocumented routes: " + "\n\t• ".join(paths_object.keys())
+                f"\n\n{test_config.reference}\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: "
+                + "\n\t• ".join(paths_object.keys())
             ),
         )
 
@@ -207,7 +204,7 @@ class SchemaTester:
             (
                 f"\n\n{test_config.reference}"
                 f"\n\nUndocumented method: {response_method}."
-                f"\n\nDocumented methods: "
+                "\n\nDocumented methods: "
                 f"{[method.lower() for method in route_object.keys() if method.lower() != 'parameters']}."
             ),
         )
@@ -260,7 +257,9 @@ class SchemaTester:
             )
         return {}
 
-    def get_request_body_schema_section(self, request: dict[str, Any], test_config: OpenAPITestConfig) -> dict[str, Any]:
+    def get_request_body_schema_section(
+        self, request: dict[str, Any], test_config: OpenAPITestConfig
+    ) -> dict[str, Any]:
         """
         Fetches the request section of a schema.
 
@@ -278,9 +277,8 @@ class SchemaTester:
             paths_object,
             parameterized_path,
             (
-                f"\n\n{test_config.reference}"
-                f"\n\nUndocumented route {parameterized_path}."
-                f"\n\nDocumented routes: " + "\n\t• ".join(paths_object.keys())
+                f"\n\n{test_config.reference}\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: "
+                + "\n\t• ".join(paths_object.keys())
             ),
         )
 
@@ -290,7 +288,7 @@ class SchemaTester:
             (
                 f"\n\n{test_config.reference}"
                 f"\n\nUndocumented method: {request_method}."
-                f"\n\nDocumented methods: "
+                "\n\nDocumented methods: "
                 f"{[method.lower() for method in route_object.keys() if method.lower() != 'parameters']}."
             ),
         )
@@ -447,7 +445,7 @@ class SchemaTester:
                 return
             raise DocumentationError(
                 f"{VALIDATE_NONE_ERROR.format(http_message=test_config.http_message)}"
-                f"\n\nReference:"
+                "\n\nReference:"
                 f"\n\n{test_config.reference}"
                 f"\n\nSchema description:\n  {json.dumps(schema_section, indent=4)}"
                 "\n\nHint: Return a valid type, or document the value as nullable"
@@ -499,7 +497,7 @@ class SchemaTester:
             if error:
                 raise DocumentationError(
                     f"\n\n{error}"
-                    f"\n\nReference: "
+                    "\n\nReference: "
                     f"\n\n{test_config.reference}"
                     f"\n\n {test_config.http_message.capitalize()} value:\n  {data}"
                     f"\n Schema description:\n  {schema_section}"
@@ -553,7 +551,7 @@ class SchemaTester:
                     f"\n\n{test_config.reference} > {key}"
                     f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
                     f"\nSchema section:\n  {json.dumps(properties, indent=4)}"
-                    f"\n\nHint: Remove the key from your OpenAPI docs, or"
+                    "\n\nHint: Remove the key from your OpenAPI docs, or"
                     f" include it in your API {test_config.http_message}"
                 )
         for key in request_response_keys:
@@ -565,7 +563,7 @@ class SchemaTester:
                     f"\n\n{test_config.reference} > {key}"
                     f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
                     f"\n\nSchema section:\n  {json.dumps(properties, indent=4)}"
-                    f"\n\nHint: Remove the key from your API"
+                    "\n\nHint: Remove the key from your API"
                     f" {test_config.http_message}, or include it in your OpenAPI docs"
                 )
             if key in write_only_properties:
@@ -630,8 +628,7 @@ class SchemaTester:
                 test_config.http_message = "request"
             else:
                 test_config = OpenAPITestConfig(
-                    http_message="request",
-                    reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request"
+                    http_message="request", reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request"
                 )
             request_body_schema = self.get_request_body_schema_section(request, test_config=test_config)  # type: ignore
 
@@ -665,7 +662,7 @@ class SchemaTester:
             request = response.request
             test_config = OpenAPITestConfig(
                 http_message="response",
-                reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > response > {response.status_code}"
+                reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > response > {response.status_code}",
             )
         response_schema = self.get_response_schema_section(response_handler, test_config=test_config)
         self.test_schema_section(
