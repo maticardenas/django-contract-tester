@@ -623,14 +623,14 @@ class SchemaTester:
         response_handler = ResponseHandlerFactory.create(response)
         if self.is_openapi_schema():
             # TODO: Implement for other schema types
-            request = response.request
+            request = response.request  # type: ignore
             if test_config:
                 test_config.http_message = "request"
             else:
                 test_config = OpenAPITestConfig(
                     http_message="request", reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request"
                 )
-            request_body_schema = self.get_request_body_schema_section(request, test_config=test_config)  # type: ignore
+            request_body_schema = self.get_request_body_schema_section(request, test_config=test_config)
 
             if request_body_schema:
                 self.test_schema_section(
@@ -659,7 +659,7 @@ class SchemaTester:
         if test_config:
             test_config.http_message = "response"
         else:
-            request = response.request
+            request = response.request  # type: ignore
             test_config = OpenAPITestConfig(
                 http_message="response",
                 reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > response > {response.status_code}",

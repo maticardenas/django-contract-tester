@@ -34,27 +34,32 @@ class OpenAPIClient(APIClient):
         self.schema_tester.validate_response(response)
         return response
 
-    def post(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+    # pylint: disable=W0622
+    def post(self, path, data=None, format=None, content_type="application/json", follow=False, **extra):
         if data and content_type == "application/json":
             data = json.dumps(data)
         return super().post(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
 
-    def put(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+    # pylint: disable=W0622
+    def put(self, path, data=None, format=None, content_type="application/json", follow=False, **extra):
         if data and content_type == "application/json":
             data = json.dumps(data)
         return super().put(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
 
-    def patch(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+    # pylint: disable=W0622
+    def patch(self, path, data=None, format=None, content_type="application/json", follow=False, **extra):
         if data and content_type == "application/json":
             data = json.dumps(data)
         return super().patch(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
 
-    def delete(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+    # pylint: disable=W0622
+    def delete(self, path, data=None, format=None, content_type="application/json", follow=False, **extra):
         if data and content_type == "application/json":
             data = json.dumps(data)
         return super().delete(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
 
-    def options(self, path, data=None, format=None, content_type="application/json", follow=False, **extra) -> Response:
+    # pylint: disable=W0622
+    def options(self, path, data=None, format=None, content_type="application/json", follow=False, **extra):
         if data and content_type == "application/json":
             data = json.dumps(data)
         return super().options(path, data=data, format=format, content_type=content_type, follow=follow, **extra)
