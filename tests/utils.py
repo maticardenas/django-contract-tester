@@ -80,5 +80,5 @@ def sort_object(data_object: Any) -> Any:
 
 
 def get_schema_content(schema: Path) -> bytes:
-    with open(schema, "rb") as schema_file:
+    with schema.open("rb") as schema_file:
         return schema_file.read()
