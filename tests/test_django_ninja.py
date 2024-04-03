@@ -11,14 +11,16 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.fixture()
+@pytest.fixture
 def users_ninja_api_schema() -> "Path":
     return TEST_ROOT / "schemas" / "users_django_api_schema.yaml"
 
 
-@pytest.fixture()
+@pytest.fixture
 def client(users_ninja_api_schema: "Path") -> OpenAPIClient:
-    return OpenAPIClient(schema_tester=SchemaTester(schema_file_path=str(users_ninja_api_schema)))
+    return OpenAPIClient(
+        schema_tester=SchemaTester(schema_file_path=str(users_ninja_api_schema))
+    )
 
 
 def test_get_users(client: OpenAPIClient):

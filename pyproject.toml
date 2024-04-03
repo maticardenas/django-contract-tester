@@ -28,6 +28,8 @@ classifiers = [
     'Framework :: Django :: 3.2',
     'Framework :: Django :: 4.0',
     'Framework :: Django :: 4.1',
+    'Framework :: Django :: 4.2',
+    'Framework :: Django :: 5.0',
     "Framework :: Pytest",
     "Topic :: Software Development",
     "Topic :: Software Development :: Libraries",
@@ -47,8 +49,10 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 django = [
-    { version = '^3', python = '<=3.8' },
-    { version = '^3 || ^4', python = '>=3.8' },
+    { version = '^4.2 || ^5', python = '>=3.11' },
+    { version = '^4.1 || ^5', python = '>=3.10, <3.11' },
+    { version = '^3 || ^4', python = '>=3.8, <3.10' },
+    { version = '^3', python = '<3.8' },
 ]
 djangorestframework = "*"
 inflection = "*"
@@ -58,6 +62,7 @@ pyYAML = "*"
 drf-spectacular = { version = "*", optional = true }
 drf-yasg = { version = "*", optional = true }
 django-ninja = {version = "^1.1.0", optional = true}
+ruff = "^0.3.5"
 
 [tool.poetry.extras]
 drf-yasg = ["drf-yasg"]

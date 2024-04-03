@@ -1,5 +1,5 @@
 """
-  Configuration module for schema section test.
+Configuration module for schema section test.
 """
 
 from dataclasses import dataclass

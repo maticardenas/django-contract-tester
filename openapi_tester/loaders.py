@@ -1,4 +1,4 @@
-""" Loaders Module """
+"""Loaders Module"""
 
 from __future__ import annotations
 
@@ -14,7 +14,11 @@ import requests
 import yaml
 from django.urls import Resolver404, resolve
 from django.utils.functional import cached_property
-from openapi_spec_validator import OpenAPIV2SpecValidator, OpenAPIV30SpecValidator, OpenAPIV31SpecValidator
+from openapi_spec_validator import (
+    OpenAPIV2SpecValidator,
+    OpenAPIV30SpecValidator,
+    OpenAPIV31SpecValidator,
+)
 from prance.util.resolver import RefResolver
 from rest_framework.schemas.generators import BaseSchemaGenerator, EndpointEnumerator
 from rest_framework.settings import api_settings
@@ -95,7 +99,9 @@ class BaseSchemaLoader:
         normalized_paths: dict[str, dict] = {}
         for key, value in schema["paths"].items():
             try:
-                parameterized_path, _ = self.resolve_path(endpoint_path=key, method=list(value.keys())[0])
+                parameterized_path, _ = self.resolve_path(
+                    endpoint_path=key, method=list(value.keys())[0]
+                )
                 normalized_paths[parameterized_path] = value
             except ValueError:
                 normalized_paths[key] = value
@@ -115,11 +121,14 @@ class BaseSchemaLoader:
                 else:
                     raise UndocumentedSchemaSectionError(
                         UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
-                            key=schema["openapi"], error_addon="Support might need to be added."
+                            key=schema["openapi"],
+                            error_addon="Support might need to be added.",
                         )
                     )
             else:
-                raise UndocumentedSchemaSectionError(UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=schema["openapi"]))
+                raise UndocumentedSchemaSectionError(
+                    UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(key=schema["openapi"])
+                )
         else:
             validator = OpenAPIV2SpecValidator(schema=schema)
         validator.validate()
@@ -138,9 +147,13 @@ class BaseSchemaLoader:
         """
         Returns a list of endpoint paths.
         """
-        return list({endpoint[0] for endpoint in EndpointEnumerator().get_api_endpoints()})
+        return list(
+            {endpoint[0] for endpoint in EndpointEnumerator().get_api_endpoints()}
+        )
 
-    def resolve_path(self, endpoint_path: str, method: str) -> tuple[str, ResolverMatch]:
+    def resolve_path(
+        self, endpoint_path: str, method: str
+    ) -> tuple[str, ResolverMatch]:
         """
         Resolves a Django path.
         """
@@ -168,11 +181,15 @@ class BaseSchemaLoader:
         message = f"Could not resolve path `{endpoint_path}`."
         close_matches = difflib.get_close_matches(endpoint_path, self.endpoints)
         if close_matches:
-            message += "\n\nDid you mean one of these?\n\n- " + "\n- ".join(close_matches)
+            message += "\n\nDid you mean one of these?\n\n- " + "\n- ".join(
+                close_matches
+            )
         raise ValueError(message)
 
     @staticmethod
-    def handle_pk_parameter(resolved_route: ResolverMatch, path: str, method: str) -> tuple[str, ResolverMatch]:
+    def handle_pk_parameter(
+        resolved_route: ResolverMatch, path: str, method: str
+    ) -> tuple[str, ResolverMatch]:
         """
         Handle the DRF conversion of params called {pk} into a named parameter based on Model field
         """
@@ -180,7 +197,9 @@ class BaseSchemaLoader:
             path=path, method=method, view=cast("APIView", resolved_route.func)
         )
         pk_field_name = "".join(
-            entry.replace("+ ", "") for entry in difflib.Differ().compare(path, coerced_path) if "+ " in entry
+            entry.replace("+ ", "")
+            for entry in difflib.Differ().compare(path, coerced_path)
+            if "+ " in entry
         )
         resolved_route.kwargs[pk_field_name] = resolved_route.kwargs["pk"]
         del resolved_route.kwargs["pk"]
@@ -197,7 +216,9 @@ class DrfYasgSchemaLoader(BaseSchemaLoader):
         from drf_yasg.generators import OpenAPISchemaGenerator
         from drf_yasg.openapi import Info
 
-        self.schema_generator = OpenAPISchemaGenerator(info=Info(title="", default_version=""))
+        self.schema_generator = OpenAPISchemaGenerator(
+            info=Info(title="", default_version="")
+        )
 
     def load_schema(self) -> dict:
         """
@@ -206,8 +227,12 @@ class DrfYasgSchemaLoader(BaseSchemaLoader):
         odict_schema = self.schema_generator.get_schema(None, True)
         return cast("dict", loads(dumps(odict_schema.as_odict())))
 
-    def resolve_path(self, endpoint_path: str, method: str) -> tuple[str, ResolverMatch]:
-        de_parameterized_path, resolved_path = super().resolve_path(endpoint_path=endpoint_path, method=method)
+    def resolve_path(
+        self, endpoint_path: str, method: str
+    ) -> tuple[str, ResolverMatch]:
+        de_parameterized_path, resolved_path = super().resolve_path(
+            endpoint_path=endpoint_path, method=method
+        )
         path_prefix = self.schema_generator.determine_path_prefix(self.endpoints)
         trim_length = len(path_prefix) if path_prefix != "/" else 0
         return de_parameterized_path[trim_length:], resolved_path
@@ -230,10 +255,14 @@ class DrfSpectacularSchemaLoader(BaseSchemaLoader):
         """
         return cast("dict", loads(dumps(self.schema_generator.get_schema(public=True))))
 
-    def resolve_path(self, endpoint_path: str, method: str) -> tuple[str, ResolverMatch]:
+    def resolve_path(
+        self, endpoint_path: str, method: str
+    ) -> tuple[str, ResolverMatch]:
         from drf_spectacular.settings import spectacular_settings
 
-        de_parameterized_path, resolved_path = super().resolve_path(endpoint_path=endpoint_path, method=method)
+        de_parameterized_path, resolved_path = super().resolve_path(
+            endpoint_path=endpoint_path, method=method
+        )
         return (
             de_parameterized_path[len(spectacular_settings.SCHEMA_PATH_PREFIX or "") :],
             resolved_path,
@@ -260,7 +289,10 @@ class StaticSchemaLoader(BaseSchemaLoader):
         with open(self.path, encoding="utf-8") as file:
             content = file.read()
             return cast(
-                "dict", json.loads(content) if ".json" in self.path else yaml.load(content, Loader=yaml.FullLoader)
+                "dict",
+                json.loads(content)
+                if ".json" in self.path
+                else yaml.load(content, Loader=yaml.FullLoader),
             )
 
 

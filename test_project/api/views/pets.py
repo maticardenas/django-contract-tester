@@ -14,7 +14,12 @@ if TYPE_CHECKING:
 
 class Pet(APIView):
     def get(self, request: Request, petId: int) -> Response:
-        pet = {"name": "doggie", "category": {"id": 1, "name": "Dogs"}, "photoUrls": [], "status": "available"}
+        pet = {
+            "name": "doggie",
+            "category": {"id": 1, "name": "Dogs"},
+            "photoUrls": [],
+            "status": "available",
+        }
         return Response(pet, HTTP_200_OK)
 
     def post(self, request) -> Response:

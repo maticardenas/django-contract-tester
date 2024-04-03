@@ -1,4 +1,4 @@
-""" Schema to Python converter """
+"""Schema to Python converter"""
 
 from __future__ import annotations
 
@@ -38,7 +38,12 @@ class SchemaToPythonConverter:
         if "anyOf" in schema:
             any_of = schema.pop("anyOf")
             return self.convert_schema(
-                {**schema, **merge_objects(random.sample(any_of, random.randint(1, len(any_of))))}
+                {
+                    **schema,
+                    **merge_objects(
+                        random.sample(any_of, random.randint(1, len(any_of)))
+                    ),
+                }
             )
         if schema_type == "array":
             return self.convert_schema_array_to_list(schema)
@@ -57,7 +62,9 @@ class SchemaToPythonConverter:
             "object": self.faker.pydict,
             "string": self.faker.pystr,
             # by format
-            "byte": lambda: base64.b64encode(self.faker.pystr().encode("utf-8")).decode("utf-8"),
+            "byte": lambda: base64.b64encode(self.faker.pystr().encode("utf-8")).decode(
+                "utf-8"
+            ),
             "date": lambda: datetime.now().date().isoformat(),
             "date-time": lambda: datetime.now().isoformat(),
             "double": self.faker.pyfloat,
@@ -77,7 +84,9 @@ class SchemaToPythonConverter:
         enum: list | None = schema_object.get("enum")
         if enum:
             return random.sample(enum, 1)[0]
-        if schema_type in ["integer", "number"] and (minimum is not None or maximum is not None):
+        if schema_type in ["integer", "number"] and (
+            minimum is not None or maximum is not None
+        ):
             if minimum is not None:
                 minimum += 1 if schema_object.get("exclusiveMinimum") else 0
             if maximum is not None:

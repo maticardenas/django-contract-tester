@@ -20,7 +20,9 @@ class SnakeCasedResponse(APIView):
     @extend_schema(
         responses={
             200: inline_serializer(
-                name="SnakeCaseSerializer", many=True, fields={"this_is_snake_case": serializers.CharField()}
+                name="SnakeCaseSerializer",
+                many=True,
+                fields={"this_is_snake_case": serializers.CharField()},
             )
         }
     )

@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 TEST_ROOT = Path(__file__).resolve(strict=True).parent
 
 
-def response_factory(schema: dict | None, url_fragment: str, method: str, status_code: int | str = 200) -> Response:
+def response_factory(
+    schema: dict | None, url_fragment: str, method: str, status_code: int | str = 200
+) -> Response:
     converted_schema = None
     if schema:
         converted_schema = SchemaToPythonConverter(deepcopy(schema)).result
@@ -26,7 +28,9 @@ def response_factory(schema: dict | None, url_fragment: str, method: str, status
     return response
 
 
-def iterate_schema(schema: dict) -> Generator[tuple[dict | None, Response | None, str], None, None]:
+def iterate_schema(
+    schema: dict,
+) -> Generator[tuple[dict | None, Response | None, str], None, None]:
     for url_fragment, path_object in schema["paths"].items():
         for method, method_object in path_object.items():
             if method.lower() != "parameters":
@@ -37,12 +41,17 @@ def iterate_schema(schema: dict) -> Generator[tuple[dict | None, Response | None
                     response = None
                     with suppress(KeyError):
                         if "content" in responses_object:
-                            schema_section = responses_object["content"]["application/json"]["schema"]
+                            schema_section = responses_object["content"][
+                                "application/json"
+                            ]["schema"]
                         elif "schema" in responses_object:  # noqa: SIM908
                             schema_section = responses_object["schema"]
                     if schema_section:
                         response = response_factory(
-                            schema=schema_section, url_fragment=url_fragment, method=method, status_code=status_code
+                            schema=schema_section,
+                            url_fragment=url_fragment,
+                            method=method,
+                            status_code=status_code,
                         )
                     yield schema_section, response, url_fragment
 

@@ -14,17 +14,17 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.fixture()
+@pytest.fixture
 def pets_api_schema() -> Path:
     return TEST_ROOT / "schemas" / "openapi_v3_reference_schema.yaml"
 
 
-@pytest.fixture()
+@pytest.fixture
 def pets_api_schema_prefix_in_server() -> Path:
     return TEST_ROOT / "schemas" / "openapi_v3_prefix_in_server.yaml"
 
 
-@pytest.fixture()
+@pytest.fixture
 def pets_post_request():
     request_body = MagicMock()
     request_body.read.return_value = b'{"name": "doggie", "tag": "dog"}'
@@ -40,7 +40,7 @@ def pets_post_request():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def invalid_pets_post_request():
     request_body = MagicMock()
     request_body.read.return_value = b'{"surname": "doggie", "species": "dog"}'
@@ -56,7 +56,7 @@ def invalid_pets_post_request():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def response_factory() -> Callable:
     def response(
         schema: dict | None,

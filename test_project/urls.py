@@ -11,7 +11,11 @@ from test_project.api.views.cars import BadCars, GoodCars
 from test_project.api.views.exempt_endpoint import Exempt
 from test_project.api.views.i18n import Languages
 from test_project.api.views.items import Items
-from test_project.api.views.names import EmptyNameViewSet, NamesRetrieveView, NameViewSet
+from test_project.api.views.names import (
+    EmptyNameViewSet,
+    NamesRetrieveView,
+    NameViewSet,
+)
 from test_project.api.views.pets import Pet
 from test_project.api.views.products import Products
 from test_project.api.views.snake_cased_response import SnakeCasedResponse
@@ -32,7 +36,10 @@ api_urlpatterns = [
     path("api/<str:version>/exempt-endpoint", Exempt.as_view()),
     path("api/<str:version>/<str:pk>/names", NamesRetrieveView.as_view()),
     path("api/<str:version>/empty-names", EmptyNameViewSet.as_view({"get": "list"})),
-    path("api/<str:version>/categories/<int:category_pk>/subcategories/<int:subcategory_pk>/", Products.as_view()),
+    path(
+        "api/<str:version>/categories/<int:category_pk>/subcategories/<int:subcategory_pk>/",
+        Products.as_view(),
+    ),
     path("api/<str:version>/snake-case/", SnakeCasedResponse.as_view()),
     # ^trailing slash is here on purpose
     path("api/<str:version>/router_generated/", include(router.urls)),
@@ -60,7 +67,11 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("", views.index),
-    path("swagger/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path(
+        "swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
 urlpatterns += api_urlpatterns + internationalised_urlpatterns

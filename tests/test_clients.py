@@ -14,11 +14,13 @@ if TYPE_CHECKING:
     from pathlib import Path
 
 
-@pytest.fixture()
+@pytest.fixture
 def openapi_client(settings) -> OpenAPIClient:
     """Sample ``OpenAPIClient`` instance to use in tests."""
     # use `drf-yasg` schema loader in tests
-    settings.INSTALLED_APPS = [app for app in settings.INSTALLED_APPS if app != "drf_spectacular"]
+    settings.INSTALLED_APPS = [
+        app for app in settings.INSTALLED_APPS if app != "drf_spectacular"
+    ]
     return OpenAPIClient()
 
 
