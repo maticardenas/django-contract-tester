@@ -398,7 +398,7 @@ def test_get_request_body_schema_section(pets_post_request: dict[str, Any], pets
     assert schema_section == {
         "type": "object",
         "required": ["name"],
-        "properties": {"name": {"type": "string"}, "tag": {"type": "string"}},
+        "properties": {"name": {"type": ["string", "null"]}, "tag": {"type": "string"}},
     }
 
 
