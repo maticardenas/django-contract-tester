@@ -598,7 +598,9 @@ class SchemaTester:
                     test_config=drill_down_test_config,
                 )
 
-    def test_openapi_array(self, schema_section: dict[str, Any], data: dict, test_config: OpenAPITestConfig) -> None:
+    def test_openapi_array(
+        self, schema_section: dict[str, Any], data: dict, test_config: OpenAPITestConfig
+    ) -> None:
         for array_item in data:
             array_item_test_config = copy(test_config)
             array_item_test_config.reference = f"{test_config.reference}"
@@ -633,9 +635,12 @@ class SchemaTester:
                 test_config.http_message = "request"
             else:
                 test_config = OpenAPITestConfig(
-                    http_message="request", reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request"
+                    http_message="request",
+                    reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request",
                 )
-            request_body_schema = self.get_request_body_schema_section(request, test_config=test_config)
+            request_body_schema = self.get_request_body_schema_section(
+                request, test_config=test_config
+            )
 
             if request_body_schema:
                 self.test_schema_section(
@@ -669,7 +674,9 @@ class SchemaTester:
                 http_message="response",
                 reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > response > {response.status_code}",
             )
-        response_schema = self.get_response_schema_section(response_handler, test_config=test_config)
+        response_schema = self.get_response_schema_section(
+            response_handler, test_config=test_config
+        )
         self.test_schema_section(
             schema_section=response_schema,
             data=response_handler.data,

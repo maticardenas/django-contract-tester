@@ -36,9 +36,7 @@ VALIDATE_MAX_ARRAY_LENGTH_ERROR = "The length of the array {data} exceeds the sp
 VALIDATE_MINIMUM_NUMBER_OF_PROPERTIES_ERROR = "The number of properties in {data} is fewer than the specified minimum number of properties of {min_length}"
 VALIDATE_MAXIMUM_NUMBER_OF_PROPERTIES_ERROR = "The number of properties in {data} exceeds the specified maximum number of properties of {max_length}"
 VALIDATE_UNIQUE_ITEMS_ERROR = "The array {data} must contain unique items only"
-VALIDATE_NONE_ERROR = (
-    "A property received a null value in the {http_message} data, but is a non-nullable object in the schema definition"
-)
+VALIDATE_NONE_ERROR = "A property received a null value in the {http_message} data, but is a non-nullable object in the schema definition"
 VALIDATE_MISSING_KEY_ERROR = (
     "The following property was found in the schema definition, "
     'but is missing from the {http_message} data: "{missing_key}"'

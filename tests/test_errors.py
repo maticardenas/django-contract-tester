@@ -235,7 +235,11 @@ def test_null_error():
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
         tester.test_schema_section(
-            {"type": "object"}, None, OpenAPITestConfig(reference="POST /endpoint > response > nonNullableObject")
+            {"type": "object"},
+            None,
+            OpenAPITestConfig(
+                reference="POST /endpoint > response > nonNullableObject"
+            ),
         )
 
 

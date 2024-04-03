@@ -194,7 +194,8 @@ def test_example_schemas(filename):
                 response_handler = ResponseHandlerFactory.create(response)
                 assert sorted(
                     schema_tester.get_response_schema_section(
-                        response_handler, test_config=OpenAPITestConfig(case_tester=is_pascal_case)
+                        response_handler,
+                        test_config=OpenAPITestConfig(case_tester=is_pascal_case),
                     )
                 ) == sorted(schema_section)
 
@@ -391,10 +392,14 @@ def test_is_openapi_schema_false():
     assert schema_tester.is_openapi_schema() is False
 
 
-def test_get_request_body_schema_section(pets_post_request: dict[str, Any], pets_api_schema: Path):
+def test_get_request_body_schema_section(
+    pets_post_request: dict[str, Any], pets_api_schema: Path
+):
     test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
-    schema_section = schema_tester.get_request_body_schema_section(pets_post_request, test_config=test_config)
+    schema_section = schema_tester.get_request_body_schema_section(
+        pets_post_request, test_config=test_config
+    )
     assert schema_section == {
         "type": "object",
         "required": ["name"],
@@ -408,15 +413,21 @@ def test_get_request_body_schema_section_content_type_no_application_json(
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     pets_post_request["CONTENT_TYPE"] = "application/xml"
-    schema_section = schema_tester.get_request_body_schema_section(pets_post_request, test_config=test_config)
+    schema_section = schema_tester.get_request_body_schema_section(
+        pets_post_request, test_config=test_config
+    )
     assert schema_section == {}
 
 
-def test_get_request_body_schema_section_no_content_request(pets_post_request: dict[str, Any], pets_api_schema: Path):
+def test_get_request_body_schema_section_no_content_request(
+    pets_post_request: dict[str, Any], pets_api_schema: Path
+):
     test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     del pets_post_request["wsgi.input"]
-    schema_section = schema_tester.get_request_body_schema_section(pets_post_request, test_config=test_config)
+    schema_section = schema_tester.get_request_body_schema_section(
+        pets_post_request, test_config=test_config
+    )
     assert schema_section == {}
 
 
@@ -472,7 +483,9 @@ def test_nullable_validation():
         # A null value should always raise an error
         with pytest.raises(
             DocumentationError,
-            match=VALIDATE_NONE_ERROR.format(expected=OPENAPI_PYTHON_MAPPING[schema["type"]], http_message="response"),
+            match=VALIDATE_NONE_ERROR.format(
+                expected=OPENAPI_PYTHON_MAPPING[schema["type"]], http_message="response"
+            ),
         ):
             tester.test_schema_section(schema, None)
 

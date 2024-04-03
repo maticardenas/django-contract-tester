@@ -42,7 +42,9 @@ def test_get_request(cars_api_schema: "Path"):
 
 
 def test_post_request(openapi_client):
-    response = openapi_client.post(path="/api/v1/vehicles", data={"vehicle_type": "suv"})
+    response = openapi_client.post(
+        path="/api/v1/vehicles", data={"vehicle_type": "suv"}
+    )
 
     assert response.status_code == status.HTTP_201_CREATED
 
