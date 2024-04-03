@@ -78,5 +78,5 @@ class OpenAPIClient(APIClient):
         try:
             return json.dumps(data)
         except (TypeError, OverflowError):
-            """Data is already serialized"""
+            # Data is already serialized
             return data
