@@ -9,7 +9,7 @@ class VehicleSerializer(serializers.Serializer):
 
 
 class PetsSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=254)
+    name = serializers.CharField(max_length=254, required=False, allow_null=True)
     tag = serializers.CharField(max_length=254, required=False, allow_null=True)
 
 

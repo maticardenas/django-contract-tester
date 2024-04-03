@@ -73,6 +73,20 @@ def test_request_body_non_null_fields(pets_api_schema: "Path"):
         openapi_client.post(path="/api/pets", data={"name": "doggie", "tag": None})
 
 
+def test_request_multiple_types_supported(pets_api_schema: "Path"):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    openapi_client.post(path="/api/pets", data={"name": "doggie", "tag": "pet"})
+
+
+def test_request_multiple_types_null_type_allowed(pets_api_schema: "Path"):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    openapi_client.post(path="/api/pets", data={"name": None, "tag": "pet"})
+
+
 def test_request_on_empty_list(openapi_client):
     """Ensure ``SchemaTester`` doesn't raise exception when response is empty list."""
     response = openapi_client.generic(
