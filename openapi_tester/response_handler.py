@@ -24,12 +24,10 @@ class ResponseHandler:
         return self._response
 
     @property
-    def data(self) -> Optional[dict]:
-        ...
+    def data(self) -> Optional[dict]: ...
 
     @property
-    def request_data(self) -> Optional[dict]:
-        ...
+    def request_data(self) -> Optional[dict]: ...
 
 
 class DRFResponseHandler(ResponseHandler):

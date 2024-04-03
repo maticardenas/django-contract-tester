@@ -23,7 +23,10 @@ from openapi_tester.validators import (
 
 def test_case_error_message():
     error = CaseError(key="test-key", case="camelCase", expected="testKey")
-    assert error.args[0].strip() == "The response key `test-key` is not properly camelCase. Expected value: testKey"
+    assert (
+        error.args[0].strip()
+        == "The response key `test-key` is not properly camelCase. Expected value: testKey"
+    )
 
 
 class TestValidatorErrors:
@@ -31,31 +34,45 @@ class TestValidatorErrors:
 
     def test_validate_min_properties_error(self):
         message = validate_min_properties({"minProperties": 2}, {})
-        assert message == "The number of properties in {} is fewer than the specified minimum number of properties of 2"
+        assert (
+            message
+            == "The number of properties in {} is fewer than the specified minimum number of properties of 2"
+        )
 
     def test_validate_max_properties_error(self):
         message = validate_max_properties({"maxProperties": 1}, {"one": 1, "two": 2})
         assert (
             message
-            == "The number of properties in {'one': 1, 'two': 2} exceeds the"
-            " specified maximum number of properties of 1"
+            == "The number of properties in {'one': 1, 'two': 2} exceeds the specified maximum number of properties"
+            " of 1"
         )
 
     def test_validate_max_items_error(self):
         message = validate_max_items({"maxItems": 1}, [1, 2])
-        assert message == "The length of the array [1, 2] exceeds the specified maximum length of 1"
+        assert (
+            message
+            == "The length of the array [1, 2] exceeds the specified maximum length of 1"
+        )
 
     def test_validate_min_items_error(self):
         message = validate_min_items({"minItems": 1}, [])
-        assert message == "The length of the array [] is shorter than the specified minimum length of 1"
+        assert (
+            message
+            == "The length of the array [] is shorter than the specified minimum length of 1"
+        )
 
     def test_validate_max_length_error(self):
         message = validate_max_length({"maxLength": 1}, "test")
-        assert message == 'The length of "test" exceeds the specified maximum length of 1'
+        assert (
+            message == 'The length of "test" exceeds the specified maximum length of 1'
+        )
 
     def test_validate_min_length_error(self):
         message = validate_min_length({"minLength": 5}, "test")
-        assert message == 'The length of "test" is shorter than the specified minimum length of 5'
+        assert (
+            message
+            == 'The length of "test" is shorter than the specified minimum length of 5'
+        )
 
     def test_validate_unique_items_error(self):
         message = validate_unique_items({"uniqueItems": True}, [1, 2, 1])
@@ -95,7 +112,9 @@ class TestValidatorErrors:
 
     def test_validate_enum_error(self):
         message = validate_enum({"enum": ["Cat"]}, "Turtle")
-        assert message == "Expected: a member of the enum ['Cat']\n\nReceived: \"Turtle\""
+        assert (
+            message == "Expected: a member of the enum ['Cat']\n\nReceived: \"Turtle\""
+        )
 
     def test_validate_format_error(self):
         d = [
@@ -114,7 +133,10 @@ class TestValidatorErrors:
         ]
         for schema, data in d:
             message = validate_format(schema, data)
-            assert message == f'''Expected: a "{schema['format']}" formatted value\n\nReceived: "{data}"'''
+            assert (
+                message
+                == f'''Expected: a "{schema['format']}" formatted value\n\nReceived: "{data}"'''
+            )
 
     def test_validate_type_error(self):
         # string
@@ -202,7 +224,9 @@ def test_null_error():
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
-        tester.test_schema_section({"type": "object"}, None, OpenAPITestConfig(reference="init"))
+        tester.test_schema_section(
+            {"type": "object"}, None, OpenAPITestConfig(reference="init")
+        )
 
 
 def test_any_of_error():
@@ -212,13 +236,15 @@ def test_any_of_error():
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
-        tester.test_schema_section({"anyOf": []}, {}, OpenAPITestConfig(reference="init"))
+        tester.test_schema_section(
+            {"anyOf": []}, {}, OpenAPITestConfig(reference="init")
+        )
 
 
 def test_one_of_error():
-    expected_error_message = (
-        "Expected data to match one and only one of the oneOf schema types; found 0 matches\n\nReference: init.oneOf"
-    )
+    expected_error_message = "Expected data to match one and only one of the oneOf schema types; found 0 matches\n\nReference: init.oneOf"
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
-        tester.test_schema_section({"oneOf": []}, {}, OpenAPITestConfig(reference="init"))
+        tester.test_schema_section(
+            {"oneOf": []}, {}, OpenAPITestConfig(reference="init")
+        )

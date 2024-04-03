@@ -1,13 +1,16 @@
 # pylint: disable=R0903
 """
-  Module that contains the factory to create response handlers.
+Module that contains the factory to create response handlers.
 """
 
 from typing import TYPE_CHECKING, Union
 
 from rest_framework.response import Response
 
-from openapi_tester.response_handler import DjangoNinjaResponseHandler, DRFResponseHandler
+from openapi_tester.response_handler import (
+    DjangoNinjaResponseHandler,
+    DRFResponseHandler,
+)
 
 if TYPE_CHECKING:
     from django.http.response import HttpResponse

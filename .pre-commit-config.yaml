@@ -1,9 +1,4 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.3.0
-    hooks:
-      - id: black
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
@@ -15,31 +10,21 @@ repos:
       - id: check-yaml
       - id: check-merge-conflict
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.0.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    # Ruff version.
+    rev: v0.3.3
     hooks:
-      - id: flake8
-        additional_dependencies: [
-            'flake8-bugbear',
-            'flake8-comprehensions',
-            'flake8-print',
-            'flake8-mutable',
-            'flake8-use-fstring',
-            'flake8-simplify',
-            'flake8-pytest-style',
-            'flake8-type-checking==2.3.0',
-        ]
+      # Run the linter.
+      - id: ruff
+        args: [ --fix ]
+      # Run the formatter.
+      - id: ruff-format
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.8.0
     hooks:
       - id: pyupgrade
         args: [ "--py3-plus", "--py36-plus", "--py37-plus" ]
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.4.1
@@ -52,6 +37,7 @@ repos:
           - types-PyYAML
           - drf-yasg
           - drf-spectacular
+          - setuptools
 
   - repo: local
     hooks:
