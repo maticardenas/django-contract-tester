@@ -84,9 +84,7 @@ class SchemaToPythonConverter:
         enum: list | None = schema_object.get("enum")
         if isinstance(schema_type, list):
             for s_type in schema_type:
-                return (
-                    faker_handler_map[s_type]()
-                )
+                return faker_handler_map[s_type]()
         if enum:
             return random.sample(enum, 1)[0]
         if schema_type in ["integer", "number"] and (
