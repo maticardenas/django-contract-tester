@@ -25,7 +25,9 @@ class ResponseHandlerFactory:
     """
 
     @staticmethod
-    def create(response: Union[Response, "HttpResponse"]) -> "ResponseHandler":
+    def create(
+        *request_args, response: Union[Response, "HttpResponse"], **kwargs
+    ) -> "ResponseHandler":
         if isinstance(response, Response):
-            return DRFResponseHandler(response)
-        return DjangoNinjaResponseHandler(response)
+            return DRFResponseHandler(response=response)
+        return DjangoNinjaResponseHandler(*request_args, response=response, **kwargs)

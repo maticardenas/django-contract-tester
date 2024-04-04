@@ -32,6 +32,7 @@ from openapi_tester.exceptions import (
     UndocumentedSchemaSectionError,
 )
 from openapi_tester.loaders import UrlStaticSchemaLoader
+from openapi_tester.response_handler import GenericRequest
 from openapi_tester.response_handler_factory import ResponseHandlerFactory
 from openapi_tester.schema_tester import OpenAPITestConfig
 from test_project.models import Names
@@ -163,7 +164,7 @@ def test_drf_coerced_model_primary_key(client, url):
     Names.objects.create(custom_id_field=name_id)
     schema_tester = SchemaTester()
     response = client.get(url)
-    schema_tester.validate_response(response)
+    schema_tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 @pytest.mark.parametrize(
@@ -190,11 +191,11 @@ def test_example_schemas(filename):
                 "resolve_path",
                 side_effect=lambda *args, **kwargs: (url_fragment, None),  # noqa
             ):
-                schema_tester.validate_response(response)
-                response_handler = ResponseHandlerFactory.create(response)
+                response_handler = ResponseHandlerFactory.create(response=response)
+                schema_tester.validate_response(response_handler=response_handler)
                 assert sorted(
                     schema_tester.get_response_schema_section(
-                        response_handler,
+                        response_handler=response_handler,
                         test_config=OpenAPITestConfig(case_tester=is_pascal_case),
                     )
                 ) == sorted(schema_section)
@@ -212,7 +213,7 @@ def test_validate_response_failure_scenario_with_predefined_data(client):
                 'but is missing from the response data: "width"'
             ),
         ):
-            tester.validate_response(response)
+            tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_response_failure_scenario_undocumented_path(
@@ -229,7 +230,7 @@ def test_validate_response_failure_scenario_undocumented_path(
         UndocumentedSchemaSectionError,
         match=f"Unsuccessfully tried to index the OpenAPI schema by `{parameterized_path}`.",
     ):
-        tester.validate_response(response)
+        tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_response_failure_scenario_undocumented_method(
@@ -246,7 +247,7 @@ def test_validate_response_failure_scenario_undocumented_method(
         UndocumentedSchemaSectionError,
         match=f"Unsuccessfully tried to index the OpenAPI schema by `{method}`.",
     ):
-        tester.validate_response(response)
+        tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_response_failure_scenario_undocumented_status_code(
@@ -263,7 +264,7 @@ def test_validate_response_failure_scenario_undocumented_status_code(
         UndocumentedSchemaSectionError,
         match=f"Unsuccessfully tried to index the OpenAPI schema by `{status}`.",
     ):
-        tester.validate_response(response)
+        tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_response_failure_scenario_undocumented_content(client, monkeypatch):
@@ -274,12 +275,10 @@ def test_validate_response_failure_scenario_undocumented_content(client, monkeyp
     with pytest.raises(
         UndocumentedSchemaSectionError,
         match=(
-            "Error: Unsuccessfully tried to index the OpenAPI schema by `content`. "
-            "\n\nGET /api/v1/cars/correct > response > 200"
-            f"\n\nNo `content` defined for this response: {method}, path: {parameterized_path}"
+            "Error: Unsuccessfully tried to index the OpenAPI schema by `content`. \n\nNo `content` defined for this response: get, path: /api/{version}/cars/correct"
         ),
     ):
-        tester.validate_response(response)
+        tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_request(
@@ -293,7 +292,7 @@ def test_validate_request(
         status_code=201,
         response_body={"name": "doggie", "tag": "dog"},
     )
-    schema_tester.validate_request(response)
+    schema_tester.validate_request(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_request_with_config(
@@ -308,29 +307,30 @@ def test_validate_request_with_config(
         response_body={"name": "doggie", "tag": "dog"},
     )
     schema_tester.validate_request(
-        response,
+        ResponseHandlerFactory.create(response=response),
         OpenAPITestConfig(case_tester=is_pascal_case, ignore_case=["name", "tag"]),
     )
 
 
 def test_validate_request_invalid(
-    response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]
+    response_factory, pets_api_schema: Path, pets_post_request: GenericRequest
 ):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    pets_post_request.data.pop("name")
     response = response_factory(
         schema=None,
         url_fragment="/api/pets",
         method="POST",
         status_code=201,
-        response_body={"tag": "dog"},
+        request=pets_post_request,
     )
-
+    response_handler = ResponseHandlerFactory.create(response=response)
     with pytest.raises(DocumentationError):
-        schema_tester.validate_request(response)
+        schema_tester.validate_request(response_handler=response_handler)
 
 
 def test_validate_request_no_application_json(
-    response_factory, pets_api_schema: Path, pets_post_request: dict[str, Any]
+    response_factory, pets_api_schema: Path, pets_post_request: GenericRequest
 ):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     response = response_factory(
@@ -340,8 +340,8 @@ def test_validate_request_no_application_json(
         status_code=201,
         response_body={"tag": "dog"},
     )
-    response.request["CONTENT_TYPE"] = "application/xml"
-    schema_tester.validate_request(response)
+    response.renderer_context["request"].headers["CONTENT_TYPE"] = "application/xml"
+    schema_tester.validate_request(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_request_schema_with_prefix_in_server(
@@ -359,7 +359,7 @@ def test_validate_request_schema_with_prefix_in_server(
     )
 
     with pytest.raises(UndocumentedSchemaSectionError) as error:
-        schema_tester.validate_request(response)
+        schema_tester.validate_request(ResponseHandlerFactory.create(response=response))
 
     assert "Undocumented route /api/pets" in str(error.value)
 
@@ -379,7 +379,7 @@ def test_validate_request_schema_with_prefix_in_server_path_prefix(
         status_code=201,
         response_body={"name": "Doggie"},
     )
-    schema_tester.validate_request(response)
+    schema_tester.validate_request(ResponseHandlerFactory.create(response=response))
 
 
 def test_is_openapi_schema(pets_api_schema: Path):
@@ -393,12 +393,12 @@ def test_is_openapi_schema_false():
 
 
 def test_get_request_body_schema_section(
-    pets_post_request: dict[str, Any], pets_api_schema: Path
+    pets_post_request: GenericRequest, pets_api_schema: Path
 ):
     test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     schema_section = schema_tester.get_request_body_schema_section(
-        pets_post_request, test_config=test_config
+        request=pets_post_request, test_config=test_config
     )
     assert schema_section == {
         "type": "object",
@@ -408,25 +408,25 @@ def test_get_request_body_schema_section(
 
 
 def test_get_request_body_schema_section_content_type_no_application_json(
-    pets_post_request: dict[str, Any], pets_api_schema: Path
+    pets_post_request: GenericRequest, pets_api_schema: Path
 ):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     test_config = OpenAPITestConfig(case_tester=is_pascal_case)
-    pets_post_request["CONTENT_TYPE"] = "application/xml"
+    pets_post_request.headers["Content-Type"] = "application/xml"
     schema_section = schema_tester.get_request_body_schema_section(
-        pets_post_request, test_config=test_config
+        request=pets_post_request, test_config=test_config
     )
     assert schema_section == {}
 
 
 def test_get_request_body_schema_section_no_content_request(
-    pets_post_request: dict[str, Any], pets_api_schema: Path
+    pets_post_request: GenericRequest, pets_api_schema: Path
 ):
     test_config = OpenAPITestConfig(case_tester=is_pascal_case)
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
-    del pets_post_request["wsgi.input"]
+    pets_post_request.data = {}
     schema_section = schema_tester.get_request_body_schema_section(
-        pets_post_request, test_config=test_config
+        request=pets_post_request, test_config=test_config
     )
     assert schema_section == {}
 
@@ -434,7 +434,9 @@ def test_get_request_body_schema_section_no_content_request(
 def test_validate_response_global_case_tester(client):
     response = client.get(de_parameterized_path)
     with pytest.raises(CaseError, match="is not properly PascalCased"):
-        SchemaTester(case_tester=is_pascal_case).validate_response(response=response)
+        SchemaTester(case_tester=is_pascal_case).validate_response(
+            ResponseHandlerFactory.create(response=response)
+        )
 
 
 @pytest.mark.parametrize("empty_schema", [None, {}])
@@ -445,7 +447,7 @@ def test_validate_response_empty_content(
     del schema["paths"][parameterized_path][method]["responses"][status]["content"]
     monkeypatch.setattr(tester.loader, "get_schema", mock_schema(schema))
     response = response_factory(empty_schema, de_parameterized_path, method, status)
-    tester.validate_response(response)
+    tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_response_global_ignored_case(client):
@@ -453,7 +455,7 @@ def test_validate_response_global_ignored_case(client):
     SchemaTester(
         case_tester=is_pascal_case,
         ignore_case=["name", "color", "height", "width", "length"],
-    ).validate_response(response=response)
+    ).validate_response(ResponseHandlerFactory.create(response=response))
 
 
 def test_validate_response_passed_in_case_tester(client):
@@ -463,14 +465,15 @@ def test_validate_response_passed_in_case_tester(client):
         match="The response key `name` is not properly PascalCased. Expected value: Name",
     ):
         tester.validate_response(
-            response=response, test_config=OpenAPITestConfig(case_tester=is_pascal_case)
+            response_handler=ResponseHandlerFactory.create(response=response),
+            test_config=OpenAPITestConfig(case_tester=is_pascal_case),
         )
 
 
 def test_validate_response_passed_in_ignored_case(client):
     response = client.get(de_parameterized_path)
     tester.validate_response(
-        response=response,
+        response_handler=ResponseHandlerFactory.create(response=response),
         test_config=OpenAPITestConfig(
             case_tester=is_pascal_case,
             ignore_case=["name", "color", "height", "width", "length"],
@@ -502,7 +505,7 @@ def test_nullable_validation():
 
 
 def test_write_only_validation():
-    test_schema_section: dict[str, Any] = {
+    test_schema_section = {
         "type": "object",
         "properties": {
             "test": {

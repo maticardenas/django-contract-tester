@@ -4,6 +4,7 @@ from contextlib import suppress
 from copy import deepcopy
 from pathlib import Path
 from typing import TYPE_CHECKING
+from unittest.mock import MagicMock
 
 from rest_framework.response import Response
 
@@ -23,6 +24,14 @@ def response_factory(
         converted_schema = SchemaToPythonConverter(deepcopy(schema)).result
     response = Response(status=int(status_code), data=converted_schema)
     response.request = {"REQUEST_METHOD": method, "PATH_INFO": url_fragment}  # type: ignore
+    response.renderer_context = {  # type: ignore[attr-defined]
+        "request": MagicMock(
+            path=url_fragment,
+            method=method,
+            data={},
+            headers={},
+        )
+    }
     if schema:
         response.json = lambda: converted_schema  # type: ignore
     return response

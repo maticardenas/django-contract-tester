@@ -43,7 +43,9 @@ def test_get_request(cars_api_schema: "Path"):
 
 def test_post_request(openapi_client):
     response = openapi_client.post(
-        path="/api/v1/vehicles", data={"vehicle_type": "suv"}
+        path="/api/v1/vehicles",
+        data={"vehicle_type": "suv"},
+        content_type="application/json",
     )
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -52,7 +54,7 @@ def test_post_request(openapi_client):
 def test_request_validation_is_not_triggered_for_bad_requests(pets_api_schema: "Path"):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
-    response = openapi_client.post(path="/api/pets", data={"name": False})
+    response = openapi_client.post(path="/api/pets", data={})
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -64,7 +66,11 @@ def test_request_body_extra_non_documented_field(pets_api_schema: "Path"):
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
 
     with pytest.raises(DocumentationError):
-        openapi_client.post(path="/api/pets", data={"name": "doggie", "age": 1})
+        openapi_client.post(
+            path="/api/pets",
+            data={"name": "doggie", "age": 1},
+            content_type="application/json",
+        )
 
 
 def test_request_body_non_null_fields(pets_api_schema: "Path"):
@@ -72,7 +78,11 @@ def test_request_body_non_null_fields(pets_api_schema: "Path"):
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
 
     with pytest.raises(DocumentationError):
-        openapi_client.post(path="/api/pets", data={"name": "doggie", "tag": None})
+        openapi_client.post(
+            path="/api/pets",
+            data={"name": "doggie", "tag": None},
+            content_type="application/json",
+        )
 
 
 def test_request_multiple_types_supported(pets_api_schema: "Path"):

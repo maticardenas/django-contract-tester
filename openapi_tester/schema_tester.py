@@ -34,7 +34,6 @@ from openapi_tester.loaders import (
     StaticSchemaLoader,
     UrlStaticSchemaLoader,
 )
-from openapi_tester.response_handler_factory import ResponseHandlerFactory
 from openapi_tester.utils import (
     lazy_combinations,
     normalize_schema_section,
@@ -60,10 +59,7 @@ from openapi_tester.validators import (
 if TYPE_CHECKING:
     from typing import Optional
 
-    from django.http.response import HttpResponse
-    from rest_framework.response import Response
-
-    from openapi_tester.response_handler import ResponseHandler
+    from openapi_tester.response_handler import GenericRequest, ResponseHandler
 
 
 class SchemaTester:
@@ -186,9 +182,9 @@ class SchemaTester:
         response = response_handler.response
         schema = self.loader.get_schema()
 
-        response_method = response.request["REQUEST_METHOD"].lower()  # type: ignore
+        response_method = response_handler.request.method.lower()
         parameterized_path, _ = self.loader.resolve_path(
-            response.request["PATH_INFO"],  # type: ignore
+            response_handler.request.path,
             method=response_method,
         )
         paths_object = self.get_paths_object()
@@ -254,7 +250,6 @@ class SchemaTester:
                 UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
                     key="content",
                     error_addon=(
-                        f"\n\n{test_config.reference}"
                         f"\n\nNo `content` defined for this response: {response_method}, path: {parameterized_path}"
                     ),
                 )
@@ -262,7 +257,7 @@ class SchemaTester:
         return {}
 
     def get_request_body_schema_section(
-        self, request: dict[str, Any], test_config: OpenAPITestConfig
+        self, request: GenericRequest, test_config: OpenAPITestConfig
     ) -> dict[str, Any]:
         """
         Fetches the request section of a schema.
@@ -270,11 +265,12 @@ class SchemaTester:
         :param response: DRF Request Instance
         :return dict
         """
-        request_method = request["REQUEST_METHOD"].lower()
+        request_method = request.method.lower()  # request["REQUEST_METHOD"].lower()
 
         parameterized_path, _ = self.loader.resolve_path(
-            request["PATH_INFO"], method=request_method
+            request.path, method=request_method
         )
+
         paths_object = self.get_paths_object()
 
         route_object = self.get_key_value(
@@ -297,10 +293,11 @@ class SchemaTester:
             ),
         )
 
-        if all(
-            key in request for key in ["CONTENT_LENGTH", "CONTENT_TYPE", "wsgi.input"]
-        ):
-            if request["CONTENT_TYPE"] != "application/json":
+        if request.data:
+            if not any(
+                "application/json" == request.headers.get(content_type)
+                for content_type in ["content_type", "CONTENT_TYPE", "Content-Type"]
+            ):
                 return {}
 
             request_body_object = self.get_key_value(
@@ -311,6 +308,7 @@ class SchemaTester:
                     f"\n\nNo request body documented for method: {request_method}, path: {parameterized_path}"
                 ),
             )
+
             content_object = self.get_key_value(
                 request_body_object,
                 "content",
@@ -319,6 +317,7 @@ class SchemaTester:
                     f"\n\nNo content documented for method: {request_method}, path: {parameterized_path}"
                 ),
             )
+
             json_object = self.get_key_value(
                 content_object,
                 r"^application\/.*json$",
@@ -329,6 +328,7 @@ class SchemaTester:
                 ),
                 use_regex=True,
             )
+
             return self.get_key_value(json_object, "schema")
 
         return {}
@@ -617,7 +617,7 @@ class SchemaTester:
 
     def validate_request(
         self,
-        response: Response | HttpResponse,
+        response_handler: ResponseHandler,
         test_config: OpenAPITestConfig | None = None,
     ) -> None:
         """
@@ -631,31 +631,30 @@ class SchemaTester:
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
-        response_handler = ResponseHandlerFactory.create(response)
         if self.is_openapi_schema():
             # TODO: Implement for other schema types
-            request = response.request  # type: ignore
             if test_config:
                 test_config.http_message = "request"
             else:
                 test_config = OpenAPITestConfig(
                     http_message="request",
-                    reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > request",
+                    reference=f"{response_handler.request.method} {response_handler.request.path} > request",
                 )
+
             request_body_schema = self.get_request_body_schema_section(
-                request, test_config=test_config
+                response_handler.request, test_config=test_config
             )
 
             if request_body_schema:
                 self.test_schema_section(
                     schema_section=request_body_schema,
-                    data=response_handler.request_data,
+                    data=response_handler.request.data,
                     test_config=test_config,
                 )
 
     def validate_response(
         self,
-        response: Response | HttpResponse,
+        response_handler: ResponseHandler,
         test_config: OpenAPITestConfig | None = None,
     ) -> None:
         """
@@ -668,15 +667,13 @@ class SchemaTester:
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
-        response_handler = ResponseHandlerFactory.create(response)
-
         if test_config:
             test_config.http_message = "response"
         else:
-            request = response.request  # type: ignore
+            request = response_handler.request
             test_config = OpenAPITestConfig(
                 http_message="response",
-                reference=f"{request['REQUEST_METHOD']} {request['PATH_INFO']} > response > {response.status_code}",
+                reference=f"{request.method} {request.path} > response > {response_handler.response.status_code}",
             )
         response_schema = self.get_response_schema_section(
             response_handler, test_config=test_config

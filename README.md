@@ -256,6 +256,30 @@ class MySimpleTestCase(SimpleTestCase):
 This will ensure you all newly implemented views will be validated against
 the OpenAPI schema.
 
+
+### Django Ninja Test Client
+
+In case you are using `Django Ninja` and its corresponding [test client](https://github.com/vitalik/django-ninja/blob/master/ninja/testing/client.py#L159), you can use the `OpenAPINinjaClient`, which extends from it, in the same way as the `OpenAPIClient`:
+
+```python
+schema_tester = SchemaTester()
+client = OpenAPINinjaClient(
+        router_or_app=router,
+        schema_tester=schema_tester,
+    )
+response = client.get('/api/v1/tests/123/')
+```
+
+Given that the Django Ninja test client works separately from the django url resolver, you can pass the `path_prefix` argument to the `OpenAPINinjaClient` to specify the prefix of the path that should be used to look into the OpenAPI schema.
+
+```python
+client = OpenAPINinjaClient(
+        router_or_app=router,
+        path_prefix='/api/v1',
+        schema_tester=schema_tester,
+    )
+```
+
 ## Known Issues
 
 * We are using [prance](https://github.com/jfinkhaeuser/prance) as a schema resolver, and it has some issues with the
