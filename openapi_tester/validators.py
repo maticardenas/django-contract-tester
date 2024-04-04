@@ -91,12 +91,23 @@ VALIDATOR_MAP: dict[str, Callable] = {
 
 
 def validate_type(schema_section: dict[str, Any], data: Any) -> str | None:
-    schema_type: str = schema_section.get("type", "object")
-    if not VALIDATOR_MAP[schema_type](data):
-        an_articles = ["integer", "object", "array"]
+    an_articles = ["integer", "object", "array"]
+    schema_types: str = schema_section.get("type", "object")
+    if isinstance(schema_types, list):
+        has_type = False
+        for schema_type in schema_types:
+            if VALIDATOR_MAP[schema_type](data):
+                return None
+        if not has_type:
+            return VALIDATE_TYPE_ERROR.format(
+                article="a" if schema_types not in an_articles else "an",
+                type=schema_types,
+                received=f'"{data}"' if isinstance(data, str) else data,
+            )
+    if not VALIDATOR_MAP[schema_types](data):
         return VALIDATE_TYPE_ERROR.format(
-            article="a" if schema_type not in an_articles else "an",
-            type=schema_type,
+            article="a" if schema_types not in an_articles else "an",
+            type=schema_types,
             received=f'"{data}"' if isinstance(data, str) else data,
         )
     return None

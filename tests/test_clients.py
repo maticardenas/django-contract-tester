@@ -33,78 +33,60 @@ def test_init_schema_tester_passed():
     assert client.schema_tester is schema_tester
 
 
-@pytest.mark.parametrize(
-    ("generic_kwargs", "expected_status_code"),
-    [
-        (
-            {"method": "GET", "path": "/api/v1/cars/correct"},
-            status.HTTP_200_OK,
-        ),
-        (
-            {
-                "method": "POST",
-                "path": "/api/v1/vehicles",
-                "data": json.dumps({"vehicle_type": "suv"}),
-                "content_type": "application/json",
-            },
-            status.HTTP_201_CREATED,
-        ),
-    ],
-)
-def test_request(openapi_client, generic_kwargs, expected_status_code):
-    """Ensure ``SchemaTester`` doesn't raise exception when response valid."""
-    response = openapi_client.generic(**generic_kwargs)
+def test_get_request(cars_api_schema: "Path"):
+    schema_tester = SchemaTester(schema_file_path=str(cars_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+    response = openapi_client.get(path="/api/v1/cars/correct")
 
-    assert response.status_code == expected_status_code
+    assert response.status_code == status.HTTP_200_OK
 
 
-@pytest.mark.parametrize(
-    ("generic_kwargs", "expected_status_code"),
-    [
-        (
-            {
-                "method": "POST",
-                "path": "/api/pets",
-                "data": json.dumps({"name": "doggie"}),
-                "content_type": "application/json",
-            },
-            status.HTTP_201_CREATED,
-        ),
-        (
-            {
-                "method": "POST",
-                "path": "/api/pets",
-                "data": json.dumps({"tag": "doggie"}),
-                "content_type": "application/json",
-            },
-            status.HTTP_400_BAD_REQUEST,
-        ),
-    ],
-)
-def test_request_body(generic_kwargs, expected_status_code, pets_api_schema: "Path"):
-    """Ensure ``SchemaTester`` doesn't raise exception when request valid.
-    Additionally, request validation should be performed only in successful responses."""
+def test_post_request(openapi_client):
+    response = openapi_client.post(
+        path="/api/v1/vehicles", data={"vehicle_type": "suv"}
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_request_validation_is_not_triggered_for_bad_requests(pets_api_schema: "Path"):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
-    response = openapi_client.generic(**generic_kwargs)
+    response = openapi_client.post(path="/api/pets", data={"name": False})
 
-    assert response.status_code == expected_status_code
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_request_body_extra_non_documented_field(pets_api_schema: "Path"):
-    """Ensure ``SchemaTester`` raises exception when request is successfull but an
+    """Ensure ``SchemaTester`` raises exception when request is successful but an
     extra field non-documented was sent."""
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
-    kwargs = {
-        "method": "POST",
-        "path": "/api/pets",
-        "data": json.dumps({"name": "doggie", "age": 1}),
-        "content_type": "application/json",
-    }
 
     with pytest.raises(DocumentationError):
-        openapi_client.generic(**kwargs)  # type: ignore
+        openapi_client.post(path="/api/pets", data={"name": "doggie", "age": 1})
+
+
+def test_request_body_non_null_fields(pets_api_schema: "Path"):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    with pytest.raises(DocumentationError):
+        openapi_client.post(path="/api/pets", data={"name": "doggie", "tag": None})
+
+
+def test_request_multiple_types_supported(pets_api_schema: "Path"):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    openapi_client.post(path="/api/pets", data={"name": "doggie", "tag": "pet"})
+
+
+def test_request_multiple_types_null_type_allowed(pets_api_schema: "Path"):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    openapi_client.post(path="/api/pets", data={"name": None, "tag": "pet"})
 
 
 def test_request_on_empty_list(openapi_client):
