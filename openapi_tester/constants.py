@@ -45,7 +45,6 @@ VALIDATE_EXCESS_KEY_ERROR = (
     "The following property was found in the {http_message} data, "
     'but is missing from the schema definition: "{excess_key}"'
 )
-VALIDATE_EXCESS_KEY_ERROR = 'The following property was found in the {http_message}, but is missing from the schema definition: "{excess_key}"'
 VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR = 'The following property was found in the response, but is documented as being "writeOnly": "{write_only_key}"'
 VALIDATE_ONE_OF_ERROR = "Expected data to match one and only one of the oneOf schema types; found {matches} matches"
 VALIDATE_ANY_OF_ERROR = "Expected data to match one or more of the documented anyOf schema types, but found no matches"
