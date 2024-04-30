@@ -146,7 +146,7 @@ class TestValidatorErrors:
         ]
         for schema, data in d:
             message = validate_format(schema, data)
-            schema_type = schema['type'] if 'type' in schema else "object"
+            schema_type = schema["type"] if "type" in schema else "object"
             assert (
                 message
                 == f'''Expected: a "{schema['format']}" formatted "{schema_type}" value\n\nReceived: "{data}"'''
