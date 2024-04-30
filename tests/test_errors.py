@@ -116,15 +116,28 @@ class TestValidatorErrors:
             message == "Expected: a member of the enum ['Cat']\n\nReceived: \"Turtle\""
         )
 
+    def test_format_validation_passes_for_string_type_with_numeric_format(self):
+        d = [
+            ({"format": "double", "type": "string"}, "3.12"),
+            ({"format": "integer", "type": "string"}, "312"),
+            ({"format": "float", "type": "string"}, "3.12"),
+            ({"format": "number", "type": "string"}, "3.12"),
+        ]
+        for schema, data in d:
+            message = validate_format(schema, data)
+            assert message is None
+
     def test_validate_format_error(self):
         d = [
             ({"format": "byte"}, "not byte"),
             ({"format": "base64"}, "not byte"),
             ({"format": "date"}, "not date"),
             ({"format": "date-time"}, "not date-time"),
-            ({"format": "double"}, "not double"),
+            ({"format": "integer", "type": "string"}, "3.12"),
+            ({"format": "double", "type": "string"}, "not double"),
             ({"format": "email"}, "not email"),
-            ({"format": "float"}, "not float"),
+            ({"format": "float", "type": "string"}, "not float"),
+            ({"format": "number", "type": "string"}, "not number"),
             ({"format": "ipv4"}, "not ipv4"),
             ({"format": "ipv6"}, "not ipv6"),
             ({"format": "time"}, "not time"),
@@ -133,9 +146,10 @@ class TestValidatorErrors:
         ]
         for schema, data in d:
             message = validate_format(schema, data)
+            schema_type = schema['type'] if 'type' in schema else "object"
             assert (
                 message
-                == f'''Expected: a "{schema['format']}" formatted value\n\nReceived: "{data}"'''
+                == f'''Expected: a "{schema['format']}" formatted "{schema_type}" value\n\nReceived: "{data}"'''
             )
 
     def test_validate_type_error(self):

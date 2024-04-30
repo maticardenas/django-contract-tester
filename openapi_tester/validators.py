@@ -114,13 +114,31 @@ def validate_type(schema_section: dict[str, Any], data: Any) -> str | None:
 
 
 def validate_format(schema_section: dict[str, Any], data: Any) -> str | None:
+    number_formats = ["number", "float", "double"]
+    value = data
     schema_format: str = schema_section.get("format", "")
-    if schema_format in VALIDATOR_MAP and not VALIDATOR_MAP[schema_format](data):
-        return VALIDATE_FORMAT_ERROR.format(
-            article="an" if format in ["ipv4", "ipv6", "email"] else "a",
-            format=schema_format,
-            received=f'"{data}"',
-        )
+    schema_type: str = schema_section.get("type", "object")
+    if schema_format in VALIDATOR_MAP:
+        if not isinstance(schema_type, list) and schema_type == "string":
+            try:
+                if schema_format == "integer":
+                    value = int(data)
+                if schema_format in number_formats:
+                    value = float(data)
+            except ValueError:
+                return VALIDATE_FORMAT_ERROR.format(
+                    article="an" if format in ["ipv4", "ipv6", "email"] else "a",
+                    format=schema_format,
+                    type=schema_type,
+                    received=f'"{value}"',
+                )
+        if not VALIDATOR_MAP[schema_format](value):
+            return VALIDATE_FORMAT_ERROR.format(
+                article="an" if format in ["ipv4", "ipv6", "email"] else "a",
+                format=schema_format,
+                type=schema_type,
+                received=f'"{value}"',
+            )
     return None
 
 

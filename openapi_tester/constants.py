@@ -12,7 +12,7 @@ OPENAPI_PYTHON_MAPPING = {
 
 # Validation errors
 VALIDATE_FORMAT_ERROR = (
-    'Expected: {article} "{format}" formatted value\n\nReceived: {received}'
+    'Expected: {article} "{format}" formatted "{type}" value\n\nReceived: {received}'
 )
 VALIDATE_PATTERN_ERROR = (
     'The string "{data}" does not match the specified pattern: {pattern}'
