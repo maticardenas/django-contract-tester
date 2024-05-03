@@ -10,6 +10,10 @@ OPENAPI_PYTHON_MAPPING = {
     "number": f"{int.__name__} or {float.__name__}",
 }
 
+NUMERIC_FORMATS = ["number", "float", "double"]
+
+INTERNET_PROTOCOLS = ["ipv4", "ipv6", "email"]
+
 # Validation errors
 VALIDATE_FORMAT_ERROR = (
     'Expected: {article} "{format}" formatted "{type}" value\n\nReceived: {received}'
