@@ -567,7 +567,7 @@ class SchemaTester:
                     "\n\nReference:"
                     f"\n\n{test_config.reference} > {key}"
                     f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
-                    f"\n\nSchema section:\n  {json.dumps(properties, indent=4)}"
+                    f"\n\nSchema section:\n  {json.dumps(properties, indent=4, default=str)}"
                     "\n\nHint: Remove the key from your API"
                     f" {test_config.http_message}, or include it in your OpenAPI docs"
                 )
