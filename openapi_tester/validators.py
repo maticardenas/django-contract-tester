@@ -18,7 +18,9 @@ from django.core.validators import (
 from django.utils.dateparse import parse_date, parse_datetime, parse_time
 
 from openapi_tester.constants import (
+    INTERNET_PROTOCOLS,
     INVALID_PATTERN_ERROR,
+    NUMERIC_FORMATS,
     VALIDATE_ENUM_ERROR,
     VALIDATE_FORMAT_ERROR,
     VALIDATE_MAX_ARRAY_LENGTH_ERROR,
@@ -114,13 +116,30 @@ def validate_type(schema_section: dict[str, Any], data: Any) -> str | None:
 
 
 def validate_format(schema_section: dict[str, Any], data: Any) -> str | None:
+    value = data
     schema_format: str = schema_section.get("format", "")
-    if schema_format in VALIDATOR_MAP and not VALIDATOR_MAP[schema_format](data):
-        return VALIDATE_FORMAT_ERROR.format(
-            article="an" if format in ["ipv4", "ipv6", "email"] else "a",
-            format=schema_format,
-            received=f'"{data}"',
-        )
+    schema_type: str = schema_section.get("type", "object")
+    if schema_format in VALIDATOR_MAP:
+        if not isinstance(schema_type, list) and schema_type == "string":
+            try:
+                if schema_format == "integer":
+                    value = int(data)
+                if schema_format in NUMERIC_FORMATS:
+                    value = float(data)
+            except ValueError:
+                return VALIDATE_FORMAT_ERROR.format(
+                    article="an" if format in INTERNET_PROTOCOLS else "a",
+                    format=schema_format,
+                    type=schema_type,
+                    received=f'"{value}"',
+                )
+        if not VALIDATOR_MAP[schema_format](value):
+            return VALIDATE_FORMAT_ERROR.format(
+                article="an" if format in INTERNET_PROTOCOLS else "a",
+                format=schema_format,
+                type=schema_type,
+                received=f'"{value}"',
+            )
     return None
 
 
