@@ -56,3 +56,28 @@ def test_key_in_write_only_properties_error():
             {"one": 1},
             OpenAPITestConfig(reference="POST /endpoint > response"),
         )
+
+
+def test_date_serialization():
+    tester = SchemaTester()
+    tester.test_openapi_object(
+        {"properties": {"updated_at": {"type": "string", "format": "date-time"}}},
+        {"updated_at": "2021-12-12T12:12:12Z"},
+        OpenAPITestConfig(reference="POST /endpoint > response"),
+    )
+
+
+def test_wrong_date_error():
+    tester = SchemaTester()
+    expected_error_message = (
+        '\n\nExpected: a "date-time" formatted "string" value\n\nReceived: '
+        '"not-a-date"\n\nReference: \n\nPOST /endpoint > response > updated_at\n\n Response value:\n  '
+        "not-a-date\n Schema description:\n  {'type': 'string', 'format': 'date-time'}"
+    )
+
+    with pytest.raises(DocumentationError, match=expected_error_message):
+        tester.test_openapi_object(
+            {"properties": {"updated_at": {"type": "string", "format": "date-time"}}},
+            {"updated_at": "not-a-date"},
+            OpenAPITestConfig(reference="POST /endpoint > response"),
+        )
