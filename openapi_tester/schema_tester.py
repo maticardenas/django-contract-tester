@@ -35,7 +35,11 @@ from openapi_tester.loaders import (
     UrlStaticSchemaLoader,
 )
 from openapi_tester.response_handler_factory import ResponseHandlerFactory
-from openapi_tester.utils import lazy_combinations, normalize_schema_section
+from openapi_tester.utils import (
+    lazy_combinations,
+    normalize_schema_section,
+    serialize_schema_section_data,
+)
 from openapi_tester.validators import (
     validate_enum,
     validate_format,
@@ -554,8 +558,8 @@ class SchemaTester:
                     f"{VALIDATE_MISSING_KEY_ERROR.format(missing_key=key, http_message=test_config.http_message)}"
                     "\n\nReference:"
                     f"\n\n{test_config.reference} > {key}"
-                    f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
-                    f"\nSchema section:\n  {json.dumps(properties, indent=4)}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {serialize_schema_section_data(data=data)}"
+                    f"\nSchema section:\n  {serialize_schema_section_data(data=properties)}"
                     "\n\nHint: Remove the key from your OpenAPI docs, or"
                     f" include it in your API {test_config.http_message}"
                 )
@@ -566,8 +570,8 @@ class SchemaTester:
                     f"{VALIDATE_EXCESS_KEY_ERROR.format(excess_key=key, http_message=test_config.http_message)}"
                     "\n\nReference:"
                     f"\n\n{test_config.reference} > {key}"
-                    f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
-                    f"\n\nSchema section:\n  {json.dumps(properties, indent=4, default=str)}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {serialize_schema_section_data(data=data)}"
+                    f"\n\nSchema section:\n  {serialize_schema_section_data(data=properties)}"
                     "\n\nHint: Remove the key from your API"
                     f" {test_config.http_message}, or include it in your OpenAPI docs"
                 )
@@ -575,8 +579,8 @@ class SchemaTester:
                 raise DocumentationError(
                     f"{VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key=key)}\n\nReference:"
                     f"\n\n{test_config.reference} > {key}"
-                    f"\n\n{test_config.http_message.capitalize()} body:\n  {json.dumps(data, indent=4)}"
-                    f"\nSchema section:\n  {json.dumps(properties, indent=4)}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {serialize_schema_section_data(data=data)}"
+                    f"\nSchema section:\n  {serialize_schema_section_data(data=properties)}"
                     f"\n\nHint: Remove the key from your API {test_config.http_message}, or"
                     ' remove the "WriteOnly" restriction'
                 )

@@ -4,6 +4,7 @@ Utils Module - this file contains utility functions used in multiple places.
 
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 from itertools import chain, combinations
 from typing import TYPE_CHECKING
@@ -53,6 +54,10 @@ def normalize_schema_section(schema_section: dict[str, Any]) -> dict[str, Any]:
                 for entry in value
             ]
     return output
+
+
+def serialize_schema_section_data(data: dict[str, Any]) -> str:
+    return json.dumps(data, indent=4, default=str)
 
 
 def lazy_combinations(options_list: Sequence[dict[str, Any]]) -> Iterator[dict]:

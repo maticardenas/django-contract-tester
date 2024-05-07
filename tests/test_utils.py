@@ -1,4 +1,4 @@
-from openapi_tester.utils import merge_objects
+from openapi_tester.utils import merge_objects, serialize_schema_section_data
 from tests.utils import sort_object
 
 object_1 = {
@@ -42,3 +42,29 @@ def test_merge_objects():
         "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
     }
     assert sort_object(merge_objects(test_schemas)) == sort_object(expected)
+
+
+def test_serialize_schema_section_data():
+    data = {
+        "type": "object",
+        "required": ["key1", "key2"],
+        "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
+    }
+    serialized_data = serialize_schema_section_data(data=data)
+    assert serialized_data == (
+        "{\n"
+        '    "type": "object",\n'
+        '    "required": [\n'
+        '        "key1",\n'
+        '        "key2"\n'
+        "    ],\n"
+        '    "properties": {\n'
+        '        "key1": {\n'
+        '            "type": "string"\n'
+        "        },\n"
+        '        "key2": {\n'
+        '            "type": "string"\n'
+        "        }\n"
+        "    }\n"
+        "}"
+    )
