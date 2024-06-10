@@ -67,3 +67,18 @@ def lazy_combinations(options_list: Sequence[dict[str, Any]]) -> Iterator[dict]:
     for i in range(2, len(options_list) + 1):
         for combination in combinations(options_list, i):
             yield merge_objects(combination)
+
+
+def serialize_json(func):
+    def wrapper(*args, **kwargs):
+        # import pdb; pdb.set_trace()
+        data = kwargs.get("data")
+        content_type = kwargs.get("content_type")
+        if data and content_type == "application/json":
+            try:
+                kwargs["data"] = json.dumps(data)
+            except (TypeError, OverflowError):
+                kwargs["data"] = data
+        return func(*args, **kwargs)
+
+    return wrapper
