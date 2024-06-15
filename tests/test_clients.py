@@ -6,8 +6,12 @@ import pytest
 from django.test.testcases import SimpleTestCase
 from rest_framework import status
 
-from openapi_tester.clients import OpenAPIClient
-from openapi_tester.exceptions import DocumentationError, UndocumentedSchemaSectionError
+from openapi_tester.clients import OpenAPIClient, OpenAPINinjaClient
+from openapi_tester.exceptions import (
+    APIFrameworkNotInstalledError,
+    DocumentationError,
+    UndocumentedSchemaSectionError,
+)
 from openapi_tester.schema_tester import SchemaTester
 
 if TYPE_CHECKING:
@@ -29,6 +33,15 @@ def test_init_schema_tester_passed():
     schema_tester = SchemaTester()
 
     client = OpenAPIClient(schema_tester=schema_tester)
+
+    assert client.schema_tester is schema_tester
+
+
+def test_init_schema_tester_passed_ninja():
+    """Ensure passed ``SchemaTester`` instance is used."""
+    schema_tester = SchemaTester()
+
+    client = OpenAPINinjaClient(router_or_app=None, schema_tester=schema_tester)
 
     assert client.schema_tester is schema_tester
 
@@ -162,3 +175,10 @@ def test_django_testcase_client_class(openapi_client_class):
     test_case._pre_setup()
 
     assert isinstance(test_case.client, OpenAPIClient)
+
+
+def test_ninja_not_installed(ninja_not_installed):
+    OpenAPIClient()
+
+    with pytest.raises(APIFrameworkNotInstalledError):
+        OpenAPINinjaClient(router_or_app=None)

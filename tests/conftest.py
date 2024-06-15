@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from rest_framework.response import Response
 
+import openapi_tester
 from openapi_tester.response_handler import GenericRequest
 from tests.schema_converter import SchemaToPythonConverter
 from tests.utils import TEST_ROOT
@@ -98,3 +99,16 @@ def response_factory() -> Callable:
         return response
 
     return response
+
+
+@pytest.fixture
+def users_ninja_api_schema() -> Path:
+    return TEST_ROOT / "schemas" / "users_django_api_schema.yaml"
+
+
+@pytest.fixture
+def ninja_not_installed():
+    former_client = openapi_tester.clients.TestClient
+    openapi_tester.clients.TestClient = object
+    yield
+    openapi_tester.clients.TestClient = former_client

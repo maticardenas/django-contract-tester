@@ -34,3 +34,11 @@ class UndocumentedSchemaSectionError(OpenAPISchemaError):
     """
 
     pass
+
+
+class APIFrameworkNotInstalledError(Exception):
+    """
+    Raised when a required API framework is not installed.
+    """
+
+    pass
