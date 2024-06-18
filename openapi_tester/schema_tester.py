@@ -623,11 +623,8 @@ class SchemaTester:
         """
         Verifies that an OpenAPI schema definition matches an API request body.
 
-        :param request: The HTTP request
-        :param case_tester: Optional Callable that checks a string's casing
-        :param ignore_case: Optional list of keys to ignore in case testing
-        :param validators: Optional list of validator functions
-        :param **kwargs: Request keyword arguments
+        :param response_handler: The HTTP response handler (can be a DRF or Ninja response)
+        :param test_config: Optional object with test configuration
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
@@ -660,10 +657,8 @@ class SchemaTester:
         """
         Verifies that an OpenAPI schema definition matches an API response.
 
-        :param response: The HTTP response
-        :param case_tester: Optional Callable that checks a string's casing
-        :param ignore_case: Optional list of keys to ignore in case testing
-        :param validators: Optional list of validator functions
+        :param response_handler: The HTTP response handler (can be a DRF or Ninja response)
+        :param test_config: Optional object with test configuration
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """

@@ -3,13 +3,20 @@
 from __future__ import annotations
 
 import http
+import logging
 from typing import TYPE_CHECKING
 
-# pylint: disable=import-error
-from ninja import NinjaAPI, Router
-from ninja.testing import TestClient
+try:
+    from ninja import NinjaAPI, Router
+    from ninja.testing import TestClient
+except ImportError:
+    NinjaAPI = Router = TestClient = object
+    logging.info("Django-Ninja is not installed.")
+
+
 from rest_framework.test import APIClient
 
+from .exceptions import APIFrameworkNotInstalledError
 from .response_handler_factory import ResponseHandlerFactory
 from .schema_tester import SchemaTester
 from .utils import serialize_json
@@ -129,8 +136,11 @@ class OpenAPINinjaClient(TestClient):
         schema_tester: SchemaTester | None = None,
         **kwargs,
     ) -> None:
-        """Initialize ``OpenAPIClient`` instance."""
-        super().__init__(*args, router_or_app=router_or_app, **kwargs)
+        """Initialize ``OpenAPINinjaClient`` instance."""
+        if not isinstance(object, TestClient):
+            super().__init__(*args, router_or_app=router_or_app, **kwargs)
+        else:
+            raise APIFrameworkNotInstalledError("Django-Ninja is not installed.")
         self.schema_tester = schema_tester or self._schema_tester_factory()
         self._ninja_path_prefix = path_prefix
 
