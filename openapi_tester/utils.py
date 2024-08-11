@@ -4,10 +4,11 @@ Utils Module - this file contains utility functions used in multiple places.
 
 from __future__ import annotations
 
-import json
 from copy import deepcopy
 from itertools import chain, combinations
 from typing import TYPE_CHECKING
+
+import orjson
 
 if TYPE_CHECKING:
     from typing import Any, Iterator, Sequence
@@ -57,7 +58,7 @@ def normalize_schema_section(schema_section: dict[str, Any]) -> dict[str, Any]:
 
 
 def serialize_schema_section_data(data: dict[str, Any]) -> str:
-    return json.dumps(data, indent=4, default=str)
+    return orjson.dumps(data, option=orjson.OPT_INDENT_2, default=str).decode("utf-8")
 
 
 def lazy_combinations(options_list: Sequence[dict[str, Any]]) -> Iterator[dict]:
@@ -76,7 +77,7 @@ def serialize_json(func):
         content_type = kwargs.get("content_type")
         if data and content_type == "application/json":
             try:
-                kwargs["data"] = json.dumps(data)
+                kwargs["data"] = orjson.dumps(data)
             except (TypeError, OverflowError):
                 kwargs["data"] = data
         return func(*args, **kwargs)

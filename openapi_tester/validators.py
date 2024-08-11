@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import base64
-import json
 import re
 from typing import TYPE_CHECKING
 from uuid import UUID
 
+import orjson
 from django.core.exceptions import ValidationError
 from django.core.validators import (
     EmailValidator,
@@ -200,7 +200,9 @@ def validate_unique_items(
     unique_items = schema_section.get("uniqueItems")
     if unique_items:
         comparison_data = (
-            json.dumps(item, sort_keys=True) if isinstance(item, dict) else item
+            orjson.dumps(item, option=orjson.OPT_SORT_KEYS).decode("utf-8")
+            if isinstance(item, dict)
+            else item
             for item in data
         )
         if len(set(comparison_data)) != len(data):

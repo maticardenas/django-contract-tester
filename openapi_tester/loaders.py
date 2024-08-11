@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import difflib
-import json
 import pathlib
 import re
-from json import dumps, loads
 from typing import TYPE_CHECKING, cast
 from urllib.parse import urlparse
 
+import orjson
 import requests
 import yaml
 from django.urls import Resolver404, resolve
@@ -225,7 +224,8 @@ class DrfYasgSchemaLoader(BaseSchemaLoader):
         Loads generated schema from drf-yasg and returns it as a dict.
         """
         odict_schema = self.schema_generator.get_schema(None, True)
-        return cast("dict", loads(dumps(odict_schema.as_odict())))
+        str_schema = orjson.dumps(odict_schema.as_odict()).decode("utf-8")
+        return cast("dict", orjson.loads(str_schema))
 
     def resolve_path(
         self, endpoint_path: str, method: str
@@ -253,7 +253,10 @@ class DrfSpectacularSchemaLoader(BaseSchemaLoader):
         """
         Loads generated schema from drf_spectacular and returns it as a dict.
         """
-        return cast("dict", loads(dumps(self.schema_generator.get_schema(public=True))))
+        str_schema = orjson.dumps(self.schema_generator.get_schema(public=True)).decode(
+            "utf-8"
+        )
+        return cast("dict", orjson.loads(str_schema))
 
     def resolve_path(
         self, endpoint_path: str, method: str
@@ -290,7 +293,7 @@ class StaticSchemaLoader(BaseSchemaLoader):
             content = file.read()
             return cast(
                 "dict",
-                json.loads(content)
+                orjson.loads(content)
                 if ".json" in self.path
                 else yaml.load(content, Loader=yaml.FullLoader),
             )
@@ -316,7 +319,7 @@ class UrlStaticSchemaLoader(BaseSchemaLoader):
         return cast(
             "dict",
             (
-                json.loads(response.content)
+                orjson.loads(response.content)
                 if ".json" in self.url
                 else yaml.load(response.content, Loader=yaml.FullLoader)
             ),

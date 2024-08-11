@@ -1,7 +1,7 @@
 import functools
-import json
 from typing import TYPE_CHECKING
 
+import orjson
 import pytest
 from django.test.testcases import SimpleTestCase
 from rest_framework import status
@@ -129,7 +129,7 @@ def test_request_on_empty_list(openapi_client):
             {
                 "method": "POST",
                 "path": "/api/v1/vehicles",
-                "data": json.dumps({"vehicle_type": "1" * 50}),
+                "data": orjson.dumps({"vehicle_type": "1" * 50}).decode("utf-8"),
                 "content_type": "application/json",
             },
             {

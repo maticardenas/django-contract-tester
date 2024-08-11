@@ -49,7 +49,6 @@ class OpenAPIClient(APIClient):
         self.schema_tester.validate_response(response_handler=response_handler)
         return response
 
-    # pylint: disable=W0622
     @serialize_json
     def post(
         self,
@@ -63,7 +62,6 @@ class OpenAPIClient(APIClient):
             **kwargs,
         )
 
-    # pylint: disable=W0622
     @serialize_json
     def put(
         self,
@@ -77,7 +75,6 @@ class OpenAPIClient(APIClient):
             **kwargs,
         )
 
-    # pylint: disable=W0622
     @serialize_json
     def patch(self, *args, content_type="application/json", **kwargs):
         return super().patch(
@@ -86,7 +83,6 @@ class OpenAPIClient(APIClient):
             **kwargs,
         )
 
-    # pylint: disable=W0622
     @serialize_json
     def delete(
         self,
@@ -100,7 +96,6 @@ class OpenAPIClient(APIClient):
             **kwargs,
         )
 
-    # pylint: disable=W0622
     @serialize_json
     def options(
         self,

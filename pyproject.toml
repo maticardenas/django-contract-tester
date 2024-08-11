@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-contract-tester"
-version = "1.4.1"
+version = "1.4.2"
 description = "Test utility for validating OpenAPI response documentation"
 authors =["Matías Cárdenas <cardenasmatias.1990@gmail.com>", "Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 license = "BSD-4-Clause"
@@ -62,6 +62,7 @@ pyYAML = "*"
 drf-spectacular = { version = "*", optional = true }
 drf-yasg = { version = "*", optional = true }
 django-ninja = {version = "^1.1.0", optional = true}
+orjson = "^3.10.7"
 
 [tool.poetry.extras]
 drf-yasg = ["drf-yasg"]
