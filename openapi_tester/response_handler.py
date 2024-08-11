@@ -2,10 +2,11 @@
 This module contains the concrete response handlers for both DRF and Django Ninja responses.
 """
 
-import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Optional, Union
+
+import orjson
 
 if TYPE_CHECKING:
     from django.http.response import HttpResponse
@@ -95,6 +96,6 @@ class DjangoNinjaResponseHandler(ResponseHandler):
 
     def _build_request_data(self, request_data: Any) -> dict:
         try:
-            return json.loads(request_data)
-        except (json.JSONDecodeError, TypeError, ValueError):
+            return orjson.loads(request_data)
+        except (orjson.JSONDecodeError, TypeError, ValueError):
             return {}

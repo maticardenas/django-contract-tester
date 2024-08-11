@@ -1,6 +1,6 @@
-import json
 from typing import TYPE_CHECKING
 
+import orjson
 import pytest
 
 from openapi_tester import SchemaTester
@@ -40,7 +40,7 @@ def test_create_user(client: OpenAPINinjaClient):
     }
     response = client.post(
         path="/",
-        data=json.dumps(payload),
+        data=orjson.dumps(payload).decode("utf-8"),
         content_type="application/json",
     )
     assert response.status_code == 201
@@ -55,7 +55,7 @@ def test_update_user(client: OpenAPINinjaClient):
     }
     response = client.put(
         path="/1",
-        data=json.dumps(payload),
+        data=orjson.dumps(payload).decode("utf-8"),
         content_type="application/json",
     )
     assert response.status_code == 200
@@ -75,6 +75,6 @@ def test_patch_user_undocumented_path(client: OpenAPINinjaClient):
     with pytest.raises(UndocumentedSchemaSectionError):
         client.patch(
             path="/1",
-            data=json.dumps(payload),
+            data=orjson.dumps(payload).decode("utf-8"),
             content_type="application/json",
         )

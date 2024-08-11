@@ -46,6 +46,7 @@ repos:
         entry: pylint
         language: python
         types: [ python ]
+        args: [ "--extension-pkg-allow-list=orjson"]
         exclude: tests|test_project|manage.py
         additional_dependencies:
           - django
@@ -60,3 +61,4 @@ repos:
           - drf-spectacular
           - pylint
           - faker
+          - orjson

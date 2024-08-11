@@ -52,19 +52,12 @@ def test_serialize_schema_section_data():
     }
     serialized_data = serialize_schema_section_data(data=data)
     assert serialized_data == (
-        "{\n"
-        '    "type": "object",\n'
-        '    "required": [\n'
-        '        "key1",\n'
-        '        "key2"\n'
-        "    ],\n"
-        '    "properties": {\n'
-        '        "key1": {\n'
-        '            "type": "string"\n'
-        "        },\n"
-        '        "key2": {\n'
-        '            "type": "string"\n'
-        "        }\n"
-        "    }\n"
-        "}"
+        "{\n  "
+        '"type": "object",'
+        '\n  "required": [\n    "key1",\n    "key2"\n  ],\n  '
+        '"properties": {\n'
+        '    "key1": {\n      "type": "string"\n    },\n'
+        '    "key2": {\n      "type": "string"\n    }\n'
+        "  }"
+        "\n}"
     )
