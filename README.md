@@ -8,13 +8,7 @@
 
 This is a test utility to validate `DRF (Django REST Framework)` and `Django Ninja` test requests & responses against `OpenAPI` versions 2.x and 3.x schemas.
 
-It has built-in support for:
-
-- OpenAPI 2/3 yaml or json schema files.
-- OpenAPI 2 schemas created with [drf-yasg](https://github.com/axnsan12/drf-yasg).*
-- OpenAPI 3 schemas created with [drf-spectacular](https://github.com/tfranzel/drf-spectacular).*
-
-*For `drf-yasg` and `drf-spectacular` support is for now only for responses.
+It has built-in support for `OpenAPI`version `2.0`, `3.0.x` and `3.1.x`, both `yaml` or `json` schema files.
 
 ## Installation
 
