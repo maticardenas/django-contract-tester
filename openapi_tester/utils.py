@@ -71,10 +71,8 @@ def lazy_combinations(options_list: Sequence[dict[str, Any]]) -> Iterator[dict]:
 
 
 def serialize_json(func):
-    def wrapper(*args, **kwargs):
-        # import pdb; pdb.set_trace()
+    def wrapper(*args, content_type="application/json", **kwargs):
         data = kwargs.get("data")
-        content_type = kwargs.get("content_type")
         if data and content_type == "application/json":
             try:
                 kwargs["data"] = orjson.dumps(data)

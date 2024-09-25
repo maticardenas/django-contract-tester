@@ -64,6 +64,15 @@ def test_post_request(openapi_client):
     assert response.status_code == status.HTTP_201_CREATED
 
 
+def test_post_request_no_content_type(openapi_client):
+    response = openapi_client.post(
+        path="/api/v1/vehicles",
+        data={"vehicle_type": "suv"},
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+
 def test_request_validation_is_not_triggered_for_bad_requests(pets_api_schema: "Path"):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)
