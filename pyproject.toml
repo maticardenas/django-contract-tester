@@ -96,6 +96,7 @@ disable = """
     fixme,
     line-too-long,
     too-many-arguments,
+    too-many-positional-arguments,
 """
 enable = "useless-suppression"
 
