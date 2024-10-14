@@ -1,5 +1,5 @@
 from django.conf.urls.i18n import i18n_patterns
-from django.urls import include, path, re_path
+from django.urls import include, path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions, routers
@@ -45,7 +45,6 @@ api_urlpatterns = [
     path("api/<str:version>/router_generated/", include(router.urls)),
     path("api/pets", Pet.as_view(), name="get-pets"),
     path("ninja_api/", ninja_api.urls),
-    re_path(r"api/pet/(?P<petId>\d+)", Pet.as_view(), name="get-pet"),
 ]
 
 internationalised_urlpatterns = i18n_patterns(
