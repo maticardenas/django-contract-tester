@@ -95,6 +95,28 @@ def test_request_body_extra_non_documented_field(pets_api_schema: "Path"):
         )
 
 
+def test_request_with_write_only_field(pets_api_schema: "Path"):
+    """Ensure validation doesn't raise exception when request a write-only field is
+    included in the request, and not in the response."""
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    openapi_client.post(
+        path="/api/pets",
+        data={"name": "doggie", "tag": "Bulldog"},
+        content_type="application/json",
+    )
+
+
+def test_response_with_write_only_field(pets_api_schema: "Path"):
+    """Ensure validation raises exception when response includes a write-only field."""
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    with pytest.raises(DocumentationError):
+        openapi_client.get(path="/api/pets")
+
+
 def test_request_body_non_null_fields(pets_api_schema: "Path"):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     openapi_client = OpenAPIClient(schema_tester=schema_tester)

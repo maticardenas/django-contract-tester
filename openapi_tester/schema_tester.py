@@ -575,7 +575,7 @@ class SchemaTester:
                     "\n\nHint: Remove the key from your API"
                     f" {test_config.http_message}, or include it in your OpenAPI docs"
                 )
-            if key in write_only_properties:
+            if key in write_only_properties and test_config.http_message == "response":
                 raise DocumentationError(
                     f"{VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR.format(write_only_key=key)}\n\nReference:"
                     f"\n\n{test_config.reference} > {key}"

@@ -125,6 +125,10 @@ docs_any_of_example = {
         },
     ],
 }
+# Excluded schemas files for test_example_schemas as they include expected validation errors.
+EXCLUDED_SCHEMA_FILES = [
+    "openapi_v3_reference_schema.yaml",
+]
 
 
 def test_loader_inference(settings):
@@ -172,7 +176,9 @@ def test_drf_coerced_model_primary_key(client, url):
     [
         filename
         for filename in glob.iglob(str(TEST_ROOT) + "/schemas/**/**", recursive=True)
-        if os.path.isfile(filename) and "metadata" not in filename
+        if os.path.isfile(filename)
+        and "metadata" not in filename
+        and filename.split("/")[-1] not in EXCLUDED_SCHEMA_FILES
     ],
 )
 def test_example_schemas(filename):
@@ -403,7 +409,10 @@ def test_get_request_body_schema_section(
     assert schema_section == {
         "type": "object",
         "required": ["name"],
-        "properties": {"name": {"type": ["string", "null"]}, "tag": {"type": "string"}},
+        "properties": {
+            "name": {"type": ["string", "null"]},
+            "tag": {"type": "string", "writeOnly": True},
+        },
     }
 
 
@@ -745,7 +754,7 @@ def test_get_paths_object_no_path_prefix(pets_api_schema: Path):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
     paths_object = schema_tester.get_paths_object()
 
-    assert list(paths_object.keys()) == ["/api/pets", "/api/pets/{id}"]
+    assert list(paths_object.keys()) == ["/api/pets", "/api/pets/{petId}"]
 
 
 def test_get_paths_object_path_prefix(pets_api_schema_prefix_in_server: Path):
