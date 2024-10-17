@@ -21,6 +21,7 @@ from openapi_tester.constants import (
     VALIDATE_MISSING_KEY_ERROR,
     VALIDATE_NONE_ERROR,
     VALIDATE_ONE_OF_ERROR,
+    VALIDATE_READ_ONLY_RESPONSE_KEY_ERROR,
     VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR,
 )
 from openapi_tester.exceptions import (
@@ -537,11 +538,10 @@ class SchemaTester:
         write_only_properties = [
             key for key in properties.keys() if properties[key].get("writeOnly")
         ]
-        required_keys = [
-            key
-            for key in schema_section.get("required", [])
-            if key not in write_only_properties
+        read_only_properties = [
+            key for key in properties.keys() if properties[key].get("readOnly")
         ]
+        required_keys = schema_section.get("required", [])
         request_response_keys = data.keys()
         additional_properties: bool | dict | None = schema_section.get(
             "additionalProperties"
@@ -583,6 +583,15 @@ class SchemaTester:
                     f"\nSchema section:\n  {serialize_schema_section_data(data=properties)}"
                     f"\n\nHint: Remove the key from your API {test_config.http_message}, or"
                     ' remove the "WriteOnly" restriction'
+                )
+            if key in read_only_properties and test_config.http_message == "request":
+                raise DocumentationError(
+                    f"{VALIDATE_READ_ONLY_RESPONSE_KEY_ERROR.format(read_only_key=key)}\n\nReference:"
+                    f"\n\n{test_config.reference} > {key}"
+                    f"\n\n{test_config.http_message.capitalize()} body:\n  {serialize_schema_section_data(data=data)}"
+                    f"\nSchema section:\n  {serialize_schema_section_data(data=properties)}"
+                    f"\n\nHint: Remove the key from your API {test_config.http_message}, or"
+                    ' remove the "ReadOnly" restriction'
                 )
         for key, value in data.items():
             if key in properties:
