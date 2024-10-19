@@ -81,3 +81,24 @@ def serialize_json(func):
         return func(*args, **kwargs)
 
     return wrapper
+
+
+def get_required_keys(
+    schema_section: dict,
+    http_message: str,
+    write_only_props: list[str],
+    read_only_props: list[str],
+) -> list[str]:
+    if http_message == "request":
+        return [
+            key
+            for key in schema_section.get("required", [])
+            if key not in read_only_props
+        ]
+    if http_message == "response":
+        return [
+            key
+            for key in schema_section.get("required", [])
+            if key not in write_only_props
+        ]
+    return []

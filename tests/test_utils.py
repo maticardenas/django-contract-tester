@@ -1,4 +1,8 @@
-from openapi_tester.utils import merge_objects, serialize_schema_section_data
+from openapi_tester.utils import (
+    get_required_keys,
+    merge_objects,
+    serialize_schema_section_data,
+)
 from tests.utils import sort_object
 
 object_1 = {
@@ -61,3 +65,75 @@ def test_serialize_schema_section_data():
         "  }"
         "\n}"
     )
+
+
+def test_get_required_keys():
+    # given
+    schema_section = {
+        "type": "object",
+        "required": ["key1", "key2"],
+        "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
+    }
+    read_only_props = []
+    write_only_props = []
+    http_message = "response"
+
+    # when
+    required_keys = get_required_keys(
+        schema_section=schema_section,
+        http_message=http_message,
+        read_only_props=read_only_props,
+        write_only_props=write_only_props,
+    )
+
+    # then
+    assert required_keys == ["key1", "key2"]
+
+
+def test_get_required_keys_request_with_read_only_field():
+    # given
+    schema_section = {
+        "type": "object",
+        "required": ["key1", "key2"],
+        "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
+        "readOnly": ["key2"],
+    }
+    read_only_props = ["key2"]
+    write_only_props = []
+
+    http_message = "request"
+
+    # when
+    required_keys = get_required_keys(
+        schema_section=schema_section,
+        http_message=http_message,
+        read_only_props=read_only_props,
+        write_only_props=write_only_props,
+    )
+
+    # then
+    assert required_keys == ["key1"]
+
+
+def test_get_required_keys_response_with_write_only_field():
+    # given
+    schema_section = {
+        "type": "object",
+        "required": ["key1", "key2"],
+        "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
+        "writeOnly": ["key2"],
+    }
+    write_only_props = ["key2"]
+    read_only_props = []
+    http_message = "response"
+
+    # when
+    required_keys = get_required_keys(
+        schema_section=schema_section,
+        http_message=http_message,
+        write_only_props=write_only_props,
+        read_only_props=read_only_props,
+    )
+
+    # then
+    assert required_keys == ["key1"]

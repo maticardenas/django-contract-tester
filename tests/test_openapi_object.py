@@ -28,13 +28,13 @@ def test_missing_schema_key_error():
         "\n\nReference:"
         "\n\nPOST /endpoint > response > two"
         '\n\nResponse body:\n  {\n  "one": 1,\n  "two": 2\n}'
-        '\n\nSchema section:\n  {\n  "one": {\n    "type": "int"\n  }\n}'
+        '\n\nSchema section:\n  {\n  "one": {\n    "type": "integer"\n  }\n}'
         "\n\nHint: Remove the key from your API response, or include it in your OpenAPI docs"
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
         tester.test_openapi_object(
-            {"required": ["one"], "properties": {"one": {"type": "int"}}},
+            {"required": ["one"], "properties": {"one": {"type": "integer"}}},
             {"one": 1, "two": 2},
             OpenAPITestConfig(reference="POST /endpoint > response"),
         )
@@ -46,16 +46,47 @@ def test_key_in_write_only_properties_error():
         "\n\nReference:"
         "\n\nPOST /endpoint > response > one"
         '\n\nResponse body:\n  {\n  "one": 1\n}'
-        '\nSchema section:\n  {\n  "one": {\n    "type": "int",\n    "writeOnly": true\n  }\n}'
+        '\nSchema section:\n  {\n  "one": {\n    "type": "integer",\n    "writeOnly": true\n  }\n}'
         '\n\nHint: Remove the key from your API response, or remove the "WriteOnly" restriction'
     )
     tester = SchemaTester()
     with pytest.raises(DocumentationError, match=expected_error_message):
         tester.test_openapi_object(
-            {"properties": {"one": {"type": "int", "writeOnly": True}}},
+            {"properties": {"one": {"type": "integer", "writeOnly": True}}},
             {"one": 1},
             OpenAPITestConfig(reference="POST /endpoint > response"),
         )
+
+
+def test_key_in_read_only_properties_error():
+    expected_error_message = (
+        'The following property was found in the request, but is documented as being "readOnly": "one"'
+        "\n\nReference:"
+        "\n\nPOST /endpoint > request > one"
+        '\n\nRequest body:\n  {\n  "one": 1\n}'
+        '\nSchema section:\n  {\n  "one": {\n    "type": "integer",\n    "readOnly": true\n  }\n}'
+        '\n\nHint: Remove the key from your API request, or remove the "ReadOnly" restriction'
+    )
+    tester = SchemaTester()
+    with pytest.raises(DocumentationError, match=expected_error_message):
+        tester.test_openapi_object(
+            {"properties": {"one": {"type": "integer", "readOnly": True}}},
+            {"one": 1},
+            OpenAPITestConfig(
+                reference="POST /endpoint > request", http_message="request"
+            ),
+        )
+
+
+def test_key_in_read_only_properties_response_does_not_raise_error():
+    tester = SchemaTester()
+    tester.test_openapi_object(
+        {"properties": {"one": {"type": "integer", "readOnly": True}}},
+        {"one": 1},
+        OpenAPITestConfig(
+            reference="POST /endpoint > response", http_message="response"
+        ),
+    )
 
 
 def test_date_serialization():
