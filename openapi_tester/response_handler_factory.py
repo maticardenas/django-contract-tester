@@ -3,9 +3,8 @@
 Module that contains the factory to create response handlers.
 """
 
-from typing import TYPE_CHECKING, Union
-
-from rest_framework.response import Response
+import contextlib
+from typing import TYPE_CHECKING
 
 from openapi_tester.response_handler import (
     DjangoNinjaResponseHandler,
@@ -26,8 +25,20 @@ class ResponseHandlerFactory:
 
     @staticmethod
     def create(
-        *request_args, response: Union[Response, "HttpResponse"], **kwargs
+        *request_args,
+        response: "HttpResponse",
+        **kwargs,
     ) -> "ResponseHandler":
-        if isinstance(response, Response):
-            return DRFResponseHandler(response=response)
-        return DjangoNinjaResponseHandler(*request_args, response=response, **kwargs)
+        with contextlib.suppress(ImportError):
+            from rest_framework.response import Response as DRFResponse
+
+            if isinstance(response, DRFResponse):
+                return DRFResponseHandler(response=response)
+        with contextlib.suppress(ImportError):
+            from ninja.testing.client import NinjaResponse
+
+            if isinstance(response, NinjaResponse):
+                return DjangoNinjaResponseHandler(
+                    *request_args, response=response, **kwargs
+                )
+        raise TypeError(f"Can't pick response handler for {response}!")
