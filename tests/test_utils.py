@@ -5,22 +5,6 @@ from openapi_tester.utils import (
 )
 from tests.utils import sort_object
 
-object_1 = {
-    "type": "object",
-    "required": ["key1"],
-    "properties": {"key1": {"type": "string"}},
-}
-object_2 = {
-    "type": "object",
-    "required": ["key2"],
-    "properties": {"key2": {"type": "string"}},
-}
-merged_object = {
-    "type": "object",
-    "required": ["key1", "key2"],
-    "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
-}
-
 
 def test_documentation_error_sort_data_type():
     assert sort_object([1, 3, 2]) == [1, 2, 3]  # list
@@ -36,6 +20,16 @@ def test_documentation_error_sort_data_type():
 
 
 def test_merge_objects():
+    object_1 = {
+        "type": "object",
+        "required": ["key1"],
+        "properties": {"key1": {"type": "string"}},
+    }
+    object_2 = {
+        "type": "object",
+        "required": ["key2"],
+        "properties": {"key2": {"type": "string"}},
+    }
     test_schemas = [
         object_1,
         object_2,
