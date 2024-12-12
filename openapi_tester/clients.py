@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import http
-import logging
 from typing import TYPE_CHECKING
 
 try:
@@ -11,7 +10,6 @@ try:
     from ninja.testing import TestClient
 except ImportError:
     NinjaAPI = Router = TestClient = object
-    logging.info("Django-Ninja is not installed.")
 
 
 from rest_framework.test import APIClient
