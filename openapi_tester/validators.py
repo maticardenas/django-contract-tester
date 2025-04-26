@@ -62,6 +62,14 @@ base64_format_validator = create_validator(
     lambda x: base64.b64encode(base64.b64decode(x, validate=True)) == x
 )
 
+int32_format_validator = create_validator(
+    lambda x: isinstance(x, int) and x.bit_length() <= 32, True
+)
+
+int64_format_validator = create_validator(
+    lambda x: isinstance(x, int) and x.bit_length() <= 64, True
+)
+
 VALIDATOR_MAP: dict[str, Callable] = {
     # by type
     "string": create_validator(lambda x: isinstance(x, str), True),
@@ -83,6 +91,8 @@ VALIDATOR_MAP: dict[str, Callable] = {
     "double": number_format_validator,
     "email": create_validator(EmailValidator()),
     "float": number_format_validator,
+    "int32": int32_format_validator,
+    "int64": int64_format_validator,
     "ipv4": create_validator(validate_ipv4_address),
     "ipv6": create_validator(validate_ipv6_address),
     "time": create_validator(parse_time, True),

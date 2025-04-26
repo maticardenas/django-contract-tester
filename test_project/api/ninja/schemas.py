@@ -6,6 +6,8 @@ class UserIn(Schema):
     email: str
     age: int
     is_active: bool
+    membership_level: int = 0
+    total_points_earned: int = 0
 
     class Config:
         example = {
@@ -13,6 +15,8 @@ class UserIn(Schema):
             "email": "john.doe@example.com",
             "age": 30,
             "is_active": True,
+            "membership_level": 3,
+            "total_points_earned": 1000,
         }
 
 
@@ -26,4 +30,6 @@ class UserOut(UserIn):
             "email": "john.doe@example.com",
             "age": 30,
             "is_active": True,
+            "membership_level": 3,
+            "total_points_earned": 1000,
         }

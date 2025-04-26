@@ -22,13 +22,24 @@ def create_user(request, user: UserIn):
 
 @router.get("/{user_id}", response={200: UserOut})
 def get_user(request, user_id: int):
-    return {
-        "id": 1,
-        "name": "John Doe",
-        "email": "john.doe@example.com",
-        "age": 30,
-        "is_active": True,
-    }
+    if user_id == 1:
+        return {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "age": 30,
+            "is_active": True,
+        }
+    else:
+        return {
+            "id": 2,
+            "name": "Jane Doe",
+            "email": "jane.doe@example.com",
+            "age": 25,
+            "is_active": True,
+            "total_points_earned": 2**64,
+            "membership_level": 3,
+        }
 
 
 @router.put("/{user_id}", response={200: UserOut})

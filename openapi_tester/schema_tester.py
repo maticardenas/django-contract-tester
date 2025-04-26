@@ -656,7 +656,6 @@ class SchemaTester:
             request_body_schema = self.get_request_body_schema_section(
                 response_handler.request, test_config=test_config
             )
-
             if request_body_schema:
                 self.test_schema_section(
                     schema_section=request_body_schema,

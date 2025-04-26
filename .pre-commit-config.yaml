@@ -16,7 +16,7 @@ repos:
     hooks:
       # Run the linter.
       - id: ruff
-        args: [ --fix ]
+        args: [--fix]
       # Run the formatter.
       - id: ruff-format
 
@@ -24,10 +24,10 @@ repos:
     rev: v3.8.0
     hooks:
       - id: pyupgrade
-        args: [ "--py3-plus", "--py36-plus", "--py37-plus" ]
+        args: ["--py3-plus", "--py36-plus", "--py37-plus"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.1
+    rev: v1.15.0
     hooks:
       - id: mypy
         additional_dependencies:
@@ -45,8 +45,8 @@ repos:
         name: pylint
         entry: pylint
         language: python
-        types: [ python ]
-        args: [ "--extension-pkg-allow-list=orjson"]
+        types: [python]
+        args: ["--extension-pkg-allow-list=orjson"]
         exclude: tests|test_project|manage.py
         additional_dependencies:
           - django
