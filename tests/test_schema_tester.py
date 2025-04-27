@@ -388,14 +388,9 @@ def test_validate_request_schema_with_prefix_in_server_path_prefix(
     schema_tester.validate_request(ResponseHandlerFactory.create(response=response))
 
 
-def test_is_openapi_schema(pets_api_schema: Path):
+def test_get_openapi_schema(pets_api_schema: Path):
     schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
-    assert schema_tester.is_openapi_schema() is True
-
-
-def test_is_openapi_schema_false():
-    schema_tester = SchemaTester()
-    assert schema_tester.is_openapi_schema() is False
+    assert schema_tester.get_openapi_schema() == "3.1.0"
 
 
 def test_get_request_body_schema_section(

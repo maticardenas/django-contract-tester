@@ -389,8 +389,8 @@ class SchemaTester:
             f"{VALIDATE_ANY_OF_ERROR}\n\nReference: {reference}.anyOf"
         )
 
-    def is_openapi_schema(self) -> bool:
-        return self.loader.get_schema().get("openapi") is not None
+    def get_openapi_schema(self) -> str | None:
+        return self.loader.get_schema().get("openapi")
 
     @staticmethod
     def test_is_nullable(schema_item: dict) -> bool:
@@ -405,7 +405,7 @@ class SchemaTester:
         """
         openapi_schema_3_nullable = "nullable"
         swagger_2_nullable = "x-nullable"
-        openapi_schema_3_1_type_nullable = "null"
+
         if "oneOf" in schema_item:
             one_of: list[dict[str, Any]] = schema_item.get("oneOf", [])
             return any(
@@ -413,6 +413,7 @@ class SchemaTester:
                 for schema in one_of
                 for nullable_key in [openapi_schema_3_nullable, swagger_2_nullable]
             )
+
         if "anyOf" in schema_item:
             any_of: list[dict[str, Any]] = schema_item.get("anyOf", [])
             return any(
@@ -420,9 +421,6 @@ class SchemaTester:
                 for schema in any_of
                 for nullable_key in [openapi_schema_3_nullable, swagger_2_nullable]
             )
-        if "type" in schema_item and isinstance(schema_item["type"], list):
-            types: list[str] = schema_item["type"]
-            return openapi_schema_3_1_type_nullable in types
 
         return any(
             nullable_key in schema_item and schema_item[nullable_key]
@@ -450,7 +448,7 @@ class SchemaTester:
         This method orchestrates the testing of a schema section
         """
         test_config = test_config or OpenAPITestConfig()
-        if data is None:
+        if data is None and "3.1" not in (self.get_openapi_schema() or ""):
             if self.test_is_nullable(schema_section) or not schema_section:
                 # If data is None and nullable, we return early
                 return
@@ -643,7 +641,7 @@ class SchemaTester:
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
-        if self.is_openapi_schema():
+        if self.get_openapi_schema() is not None:
             # TODO: Implement for other schema types
             if test_config:
                 test_config.http_message = "request"

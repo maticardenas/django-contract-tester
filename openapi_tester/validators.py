@@ -83,6 +83,7 @@ VALIDATOR_MAP: dict[str, Callable] = {
     ),
     "object": create_validator(lambda x: isinstance(x, dict), True),
     "array": create_validator(lambda x: isinstance(x, list), True),
+    "null": create_validator(lambda x: x is None, True),
     # by format
     "byte": base64_format_validator,
     "base64": base64_format_validator,

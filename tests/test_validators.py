@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 from typing import TYPE_CHECKING
+from unittest.mock import patch
 
 import pytest
 from faker import Faker
@@ -47,6 +48,7 @@ TEST_DATA_MAP: dict[str, tuple[Any, Any]] = {
     "number": (faker.pyfloat(), faker.pybool()),
     "object": (faker.pydict(), faker.pystr()),
     "array": (faker.pylist(), faker.pystr()),
+    "null": (None, faker.pystr()),
     # by format
     "byte": (
         base64.b64encode(faker.pystr().encode("utf-8")).decode("utf-8"),
@@ -412,6 +414,40 @@ def test_is_nullable_oneof():
     with pytest.raises(DocumentationError):
         tester.test_schema_section(
             {"oneOf": [{"type": "object"}, {"type": "string"}]}, None
+        )
+
+
+@patch(
+    "openapi_tester.schema_tester.SchemaTester.get_openapi_schema", return_value="3.1.0"
+)
+def test_null_validation(mock_get_openapi_schema):
+    tester.test_schema_section({"type": ["null", "integer"]}, None)
+
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section({"type": "integer"}, "test")
+
+
+@patch(
+    "openapi_tester.schema_tester.SchemaTester.get_openapi_schema", return_value="3.1.0"
+)
+def test_is_nullable_null_openapi_3_1_validation_one_of(mock_get_openapi_schema):
+    tester.test_schema_section({"oneOf": [{"type": "integer"}, {"type": "null"}]}, None)
+
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(
+            {"oneOf": [{"type": "integer"}, {"type": "null"}]}, "test"
+        )
+
+
+@patch(
+    "openapi_tester.schema_tester.SchemaTester.get_openapi_schema", return_value="3.1.0"
+)
+def test_is_nullable_null_openapi_3_1_validation_any_of(mock_get_openapi_schema):
+    tester.test_schema_section({"anyOf": [{"type": "integer"}, {"type": "null"}]}, None)
+
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(
+            {"anyOf": [{"type": "integer"}, {"type": "null"}]}, "test"
         )
 
 
