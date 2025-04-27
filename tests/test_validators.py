@@ -61,6 +61,8 @@ TEST_DATA_MAP: dict[str, tuple[Any, Any]] = {
     "double": (faker.pyfloat(), faker.pyint()),
     "email": (faker.email(), faker.pystr()),
     "float": (faker.pyfloat(), faker.pyint()),
+    "int32": (faker.pyint(min_value=-(2**31), max_value=2**31 - 1), faker.pystr()),
+    "int64": (faker.pyint(min_value=-(2**63), max_value=2**63 - 1), faker.pystr()),
     "ipv4": (faker.ipv4(), faker.pystr()),
     "ipv6": (faker.ipv6(), faker.pystr()),
     "time": (faker.time(), faker.pystr()),
@@ -439,3 +441,17 @@ def test_validate_unique_items_dict():
         == "The array [{'id': 123, 'type': 'Potato'}, {'id': 234, 'type': 'Potato'}, "
         "{'type': 'Potato', 'id': 123}] must contain unique items only"
     )
+
+
+def test_int32_validation():
+    tester.test_schema_section({"type": "integer", "format": "int32"}, 123)
+
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section({"type": "integer", "format": "int32"}, 2**32)
+
+
+def test_int64_validation():
+    tester.test_schema_section({"type": "integer", "format": "int64"}, 123)
+
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section({"type": "integer", "format": "int64"}, 2**64)
