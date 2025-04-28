@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.3 2025-04-28
+
+* Adding `int32` and `int64` format validation support for `integer` values.
+* Adding `null` type (OpenAPI `3.1.x`) validation support.
+
 ## v1.5.2 2024-12-12
 
 * Improving response handlers creation, by checking supported frameworks and ensuring failure in case response type is not handled.
