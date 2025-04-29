@@ -450,6 +450,38 @@ def test_is_nullable_null_openapi_3_1_validation_any_of(mock_get_openapi_schema)
             {"anyOf": [{"type": "integer"}, {"type": "null"}]}, "test"
         )
 
+@patch(
+    "openapi_tester.schema_tester.SchemaTester.get_openapi_schema", return_value="3.1.0"
+)
+def test_is_nullable_null_openapi_3_1_validation_date_time_format(mock_get_openapi_schema):
+    schema = {"type": ["string", "null"], "format": "date-time"}
+    tester.test_schema_section(schema, None)
+    tester.test_schema_section(schema, "2025-04-29T00:00:00+01:00")
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(schema, "asd")
+
+
+@patch(
+    "openapi_tester.schema_tester.SchemaTester.get_openapi_schema", return_value="3.1.0"
+)
+def test_is_nullable_null_openapi_3_1_validation_email_format(mock_get_openapi_schema):
+    schema = {"type": ["string", "null"], "format": "email"}
+    tester.test_schema_section(schema, None)
+    tester.test_schema_section(schema, "test@gmail.com")
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(schema, "notanemail")
+
+
+@patch(
+    "openapi_tester.schema_tester.SchemaTester.get_openapi_schema", return_value="3.1.0"
+)
+def test_is_nullable_null_openapi_3_1_validation_min_length(mock_get_openapi_schema):
+    schema = {"type": ["string", "null"], "minLength": 1}
+    tester.test_schema_section(schema, None)
+    tester.test_schema_section(schema, "a string")
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(schema, "")
+
 
 def test_validate_unique_items_dict():
     # Only unique objects.
