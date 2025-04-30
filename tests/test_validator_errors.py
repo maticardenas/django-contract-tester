@@ -22,6 +22,8 @@ from openapi_tester.validators import (
     validate_unique_items,
 )
 
+tester = SchemaTester()
+
 
 def test_case_error_message():
     error = CaseError(key="test-key", case="camelCase", expected="testKey")
@@ -230,3 +232,50 @@ def test_one_of_error():
         tester.test_schema_section(
             {"oneOf": []}, {}, OpenAPITestConfig(reference="init")
         )
+
+
+@pytest.mark.parametrize(
+    "input_value",
+    [
+        "abcd",
+        7,
+        "1234",
+        "abc",
+    ],
+)
+def test_string_integer_pattern_multiple_of_invalid(input_value):
+    """Test invalid cases for string and integer type with pattern and multiple of restrictions."""
+    schema = {"type": ["string", "integer"], "pattern": "^[A-Z]{1,3}$", "multipleOf": 5}
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(schema, input_value)
+
+
+@pytest.mark.parametrize(
+    "input_value",
+    [
+        "abcd",
+        -1,
+        11,
+        True,
+    ],
+)
+def test_string_number_multiple_restrictions_invalid(input_value):
+    """Test invalid cases for string and number type with multiple restrictions."""
+    schema = {"type": ["string", "number"], "maxLength": 3, "minimum": 0, "maximum": 10}
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(schema, input_value)
+
+
+@pytest.mark.parametrize(
+    "input_value",
+    [
+        "test1",
+        1,
+        0,
+    ],
+)
+def test_string_integer_length_minimum_restrictions_invalid(input_value):
+    """Test invalid cases for string and integer type with length and minimum restrictions."""
+    schema = {"type": ["string", "integer"], "maxLength": 4, "minimum": 2}
+    with pytest.raises(DocumentationError):
+        tester.test_schema_section(schema, input_value)

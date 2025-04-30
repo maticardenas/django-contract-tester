@@ -461,7 +461,7 @@ def test_is_nullable_null_openapi_3_1_validation_date_time_format(
     tester.test_schema_section(schema, None)
     tester.test_schema_section(schema, "2025-04-29T00:00:00+01:00")
     with pytest.raises(DocumentationError):
-        tester.test_schema_section(schema, "asd")
+        tester.test_schema_section(schema, "test")
 
 
 @patch(
@@ -484,6 +484,46 @@ def test_is_nullable_null_openapi_3_1_validation_min_length(mock_get_openapi_sch
     tester.test_schema_section(schema, "a string")
     with pytest.raises(DocumentationError):
         tester.test_schema_section(schema, "")
+
+
+@pytest.mark.parametrize(
+    "input_value",
+    [
+        "test",
+        "t",
+        2,
+        5,
+    ],
+)
+def test_string_integer_length_minimum_restrictions_valid(input_value):
+    """Test string and integer type with length and minimum restrictions."""
+    schema = {"type": ["string", "integer"], "maxLength": 4, "minimum": 2}
+    try:
+        tester.test_schema_section(schema, input_value)
+    except DocumentationError as e:
+        pytest.fail(
+            f"Validation failed for valid input: {input_value}. Error: {str(e)}"
+        )
+
+
+def test_string_number_multiple_restrictions_valid():
+    """Test string and number type with multiple restrictions."""
+    schema = {"type": ["string", "number"], "maxLength": 3, "minimum": 0, "maximum": 10}
+
+    tester.test_schema_section(schema, "abc")
+    tester.test_schema_section(schema, 0)
+    tester.test_schema_section(schema, 10)
+    tester.test_schema_section(schema, 5.5)
+
+
+def test_string_integer_pattern_multiple_of_valid():
+    """Test string and integer type with pattern and multiple of restrictions."""
+    schema = {"type": ["string", "integer"], "pattern": "^[A-Z]{1,3}$", "multipleOf": 5}
+
+    tester.test_schema_section(schema, "ABC")
+    tester.test_schema_section(schema, "A")
+    tester.test_schema_section(schema, 5)
+    tester.test_schema_section(schema, 15)
 
 
 def test_validate_unique_items_dict():
