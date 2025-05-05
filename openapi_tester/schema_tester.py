@@ -511,6 +511,9 @@ class SchemaTester:
                     f"\n\n {test_config.http_message.capitalize()} value:\n  {data}"
                     f"\n Schema description:\n  {schema_section}"
                 )
+            # Add early return for null data after type validation succeeds
+            if data is None and validator.__name__ == "validate_type":
+                return
 
         if schema_section_type == "object":
             self.test_openapi_object(
