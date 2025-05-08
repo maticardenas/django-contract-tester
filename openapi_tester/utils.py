@@ -102,3 +102,24 @@ def get_required_keys(
             if key not in write_only_props
         ]
     return []
+
+
+def query_params_to_object(query_params: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Convert the query parameters of a request to an object schema,
+    in order to be able to be validated.
+    """
+    properties = {}
+    required = []
+
+    for param in query_params:
+        param_name = param["name"]
+        properties[param_name] = param.get("schema", {})
+        if param.get("required", False):
+            required.append(param_name)
+
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": required,
+    }
