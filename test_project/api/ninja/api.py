@@ -1,8 +1,13 @@
-from typing import List
+from typing import List, Optional
 
-from ninja import NinjaAPI, Router
+from ninja import NinjaAPI, Query, Router
 
-from test_project.api.ninja.schemas import UserIn, UserOut
+from test_project.api.ninja.schemas import (
+    UserIn,
+    UserOut,
+    UserProfileFilter,
+    UserProfileOut,
+)
 
 ninja_api = NinjaAPI()
 
@@ -20,8 +25,24 @@ def create_user(request, user: UserIn):
     }
 
 
+@router.get("/profiles", response={200: List[UserProfileOut]})
+def get_user_profile(request, query: Query[UserProfileFilter]):
+    return [
+        {
+            "id": 1,
+            "name": "John Doe",
+            "email": "john.doe@example.com",
+            "membership_level": 3,
+            "points": 1000,
+            "join_date": "2021-01-01",
+            "is_active": True,
+            "last_login": "2021-01-01",
+        }
+    ]
+
+
 @router.get("/{user_id}", response={200: UserOut})
-def get_user(request, user_id: int):
+def get_user(request, user_id: int, name: Optional[str] = ""):
     if user_id == 1:
         return {
             "id": 1,

@@ -18,7 +18,9 @@ from openapi_tester.constants import (
     UNDOCUMENTED_SCHEMA_SECTION_ERROR,
     VALIDATE_ANY_OF_ERROR,
     VALIDATE_EXCESS_KEY_ERROR,
+    VALIDATE_EXCESS_QUERY_PARAM_ERROR,
     VALIDATE_MISSING_KEY_ERROR,
+    VALIDATE_MISSING_QUERY_PARAM_ERROR,
     VALIDATE_NONE_ERROR,
     VALIDATE_ONE_OF_ERROR,
     VALIDATE_READ_ONLY_RESPONSE_KEY_ERROR,
@@ -39,6 +41,7 @@ from openapi_tester.utils import (
     get_required_keys,
     lazy_combinations,
     normalize_schema_section,
+    query_params_to_object,
     serialize_schema_section_data,
 )
 from openapi_tester.validators import (
@@ -258,18 +261,12 @@ class SchemaTester:
             )
         return {}
 
-    def get_request_body_schema_section(
+    def retrieve_documented_request(
         self, request: GenericRequest, test_config: OpenAPITestConfig
-    ) -> dict[str, Any]:
-        """
-        Fetches the request section of a schema.
-
-        :param response: DRF Request Instance
-        :return dict
-        """
+    ) -> tuple[str, str, dict[Any, Any]]:
         request_method = request.method.lower()  # request["REQUEST_METHOD"].lower()
 
-        parameterized_path, _ = self.loader.resolve_path(
+        parametrized_path, _ = self.loader.resolve_path(
             request.path, method=request_method
         )
 
@@ -277,9 +274,9 @@ class SchemaTester:
 
         route_object = self.get_key_value(
             paths_object,
-            parameterized_path,
+            parametrized_path,
             (
-                f"\n\n{test_config.reference}\n\nUndocumented route {parameterized_path}.\n\nDocumented routes: "
+                f"\n\n{test_config.reference}\n\nUndocumented route {parametrized_path}.\n\nDocumented routes: "
                 + "\n\t• ".join(paths_object.keys())
             ),
         )
@@ -295,6 +292,51 @@ class SchemaTester:
             ),
         )
 
+        return parametrized_path, request_method, method_object
+
+    def get_request_query_params_schema_section(
+        self, request: GenericRequest, test_config: OpenAPITestConfig
+    ) -> dict[str, Any]:
+        """
+        Fetches the request query params section of a schema and converts it to an object schema format.
+        """
+        parametrized_path, request_method, method_object = (
+            self.retrieve_documented_request(request, test_config)
+        )
+
+        parameters_object: list[dict[str, Any]] = method_object.get("parameters", [])
+        query_params = [
+            param for param in parameters_object if param.get("in") == "query"
+        ]
+
+        if not query_params:
+            if request.query_params:
+                raise UndocumentedSchemaSectionError(
+                    UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(
+                        key="parameters",
+                        error_addon=f"\n\n{test_config.reference}"
+                        f"\n\nNo query parameters documented for method: {request_method}, path: {parametrized_path}",
+                    )
+                )
+            return {}
+
+        # we convert the query params to an object schema in order to be able to validate it within the same flow of test_schema_section
+        return query_params_to_object(query_params)
+
+    def get_request_body_schema_section(
+        self, request: GenericRequest, test_config: OpenAPITestConfig
+    ) -> dict[str, Any]:
+        """
+        Fetches the request section of a schema.
+
+        :param response: DRF Request Instance
+        :return dict
+        """
+
+        parametrized_path, request_method, method_object = (
+            self.retrieve_documented_request(request, test_config)
+        )
+
         if request.data:
             if not any(
                 "application/json" == request.headers.get(content_type)
@@ -307,7 +349,7 @@ class SchemaTester:
                 "requestBody",
                 (
                     f"\n\n{test_config.reference}"
-                    f"\n\nNo request body documented for method: {request_method}, path: {parameterized_path}"
+                    f"\n\nNo request body documented for method: {request_method}, path: {parametrized_path}"
                 ),
             )
 
@@ -316,7 +358,7 @@ class SchemaTester:
                 "content",
                 (
                     f"\n\n{test_config.reference}"
-                    f"\n\nNo content documented for method: {request_method}, path: {parameterized_path}"
+                    f"\n\nNo content documented for method: {request_method}, path: {parametrized_path}"
                 ),
             )
 
@@ -326,7 +368,7 @@ class SchemaTester:
                 (
                     f"\n\n{test_config.reference}"
                     "\n\nNo `application/json` requests documented for method: "
-                    f"{request_method}, path: {parameterized_path}"
+                    f"{request_method}, path: {parametrized_path}"
                 ),
                 use_regex=True,
             )
@@ -443,6 +485,7 @@ class SchemaTester:
         schema_section: dict,
         data: Any,
         test_config: OpenAPITestConfig | None = None,
+        is_query_params: bool = False,
     ) -> None:
         """
         This method orchestrates the testing of a schema section
@@ -515,7 +558,11 @@ class SchemaTester:
             if data is None and validator.__name__ == "validate_type":
                 return
 
-        if schema_section_type == "object":
+        if is_query_params:
+            self.test_openapi_query_params_object(
+                schema_section=schema_section, data=data, test_config=test_config
+            )
+        elif schema_section_type == "object":
             self.test_openapi_object(
                 schema_section=schema_section, data=data, test_config=test_config
             )
@@ -549,6 +596,7 @@ class SchemaTester:
             write_only_props=write_only_properties,
             read_only_props=read_only_properties,
         )
+
         request_response_keys = data.keys()
         additional_properties: bool | dict | None = schema_section.get(
             "additionalProperties"
@@ -618,6 +666,50 @@ class SchemaTester:
                     test_config=drill_down_test_config,
                 )
 
+    def test_openapi_query_params_object(
+        self,
+        schema_section: dict,
+        data: dict,
+        test_config: OpenAPITestConfig,
+    ) -> None:
+        properties = schema_section.get("properties", {})
+        required_params = schema_section.get("required", [])
+        request_params_keys = data.keys()
+
+        for key in properties.keys():
+            self.test_key_casing(key, test_config.case_tester, test_config.ignore_case)
+            if key in required_params and key not in request_params_keys:
+                raise DocumentationError(
+                    f"{VALIDATE_MISSING_QUERY_PARAM_ERROR.format(missing_key=key, http_message=test_config.http_message)}"
+                    "\n\nReference:"
+                    f"\n\n{test_config.reference} > {key}"
+                    f"\n\n{test_config.http_message.capitalize()} Query param:\n  {serialize_schema_section_data(data=data)}"
+                    f"\nSchema section:\n  {serialize_schema_section_data(data=properties)}"
+                    "\n\nHint: Remove the key from your OpenAPI docs, or"
+                    f" include it in your API {test_config.http_message}"
+                )
+        for key in request_params_keys:
+            self.test_key_casing(key, test_config.case_tester, test_config.ignore_case)
+            if key not in properties:
+                raise DocumentationError(
+                    f"{VALIDATE_EXCESS_QUERY_PARAM_ERROR.format(excess_key=key, http_message=test_config.http_message)}"
+                    "\n\nReference:"
+                    f"\n\n{test_config.reference} > {key}"
+                    f"\n\n{test_config.http_message.capitalize()} query parameters:\n  {serialize_schema_section_data(data=data)}"
+                    f"\n\nQuery parameters' Schema section:\n  {serialize_schema_section_data(data=properties)}"
+                    "\n\nHint: Remove the query parameter from your API"
+                    f" {test_config.http_message}, or include it in your OpenAPI docs"
+                )
+        for key, value in data.items():
+            if key in properties:
+                drill_down_test_config = copy(test_config)
+                drill_down_test_config.reference = f"{test_config.reference} > {key}"
+                self.test_schema_section(
+                    schema_section=properties[key],
+                    data=value,
+                    test_config=drill_down_test_config,
+                )
+
     def test_openapi_array(
         self, schema_section: dict[str, Any], data: dict, test_config: OpenAPITestConfig
     ) -> None:
@@ -637,7 +729,9 @@ class SchemaTester:
         test_config: OpenAPITestConfig | None = None,
     ) -> None:
         """
-        Verifies that an OpenAPI schema definition matches an API request body.
+        Verifies that an OpenAPI schema definition matches an API request:
+
+        * Validates
 
         :param response_handler: The HTTP response handler (can be a DRF or Ninja response)
         :param test_config: Optional object with test configuration
@@ -645,7 +739,6 @@ class SchemaTester:
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
         if self.get_openapi_schema() is not None:
-            # TODO: Implement for other schema types
             if test_config:
                 test_config.http_message = "request"
             else:
@@ -654,9 +747,23 @@ class SchemaTester:
                     reference=f"{response_handler.request.method} {response_handler.request.path} > request",
                 )
 
+            query_params_schema = self.get_request_query_params_schema_section(
+                response_handler.request, test_config=test_config
+            )
+
+            if query_params_schema:
+                test_config.reference = f"{test_config.reference} > query parameter"
+                self.test_schema_section(
+                    schema_section=query_params_schema,
+                    data=response_handler.request.query_params,
+                    test_config=test_config,
+                    is_query_params=True,
+                )
+
             request_body_schema = self.get_request_body_schema_section(
                 response_handler.request, test_config=test_config
             )
+
             if request_body_schema:
                 self.test_schema_section(
                     schema_section=request_body_schema,
