@@ -1,6 +1,7 @@
 from openapi_tester.utils import (
     get_required_keys,
     merge_objects,
+    query_params_to_object,
     serialize_schema_section_data,
 )
 from tests.utils import sort_object
@@ -131,3 +132,23 @@ def test_get_required_keys_response_with_write_only_field():
 
     # then
     assert required_keys == ["key1"]
+
+
+def test_query_params_to_object():
+    query_params = [
+        {"name": "name", "in": "query", "required": True, "schema": {"type": "string"}},
+        {
+            "name": "age",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "integer"},
+        },
+    ]
+
+    converted_query_params = query_params_to_object(query_params)
+
+    assert converted_query_params == {
+        "type": "object",
+        "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+        "required": ["name"],
+    }

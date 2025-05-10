@@ -44,6 +44,17 @@ def pets_post_request():
 
 
 @pytest.fixture
+def pets_get_request():
+    return GenericRequest(
+        method="get",
+        path="/api/pets",
+        data={},
+        headers={"Content-Type": "application/json"},
+        query_params={"tags": ["dog", "cat"]},
+    )
+
+
+@pytest.fixture
 def invalid_pets_post_request():
     request_body = MagicMock()
     request_body.read.return_value = b'{"surname": "doggie", "species": "dog"}'
@@ -78,6 +89,7 @@ def response_factory() -> Callable:
                     method=request.method,
                     data=request.data,
                     headers=request.headers,
+                    query_params=request.query_params,
                 )
             }
         else:
@@ -87,6 +99,7 @@ def response_factory() -> Callable:
                     method=method,
                     data={},
                     headers={},
+                    query_params={},
                 )
             }
 

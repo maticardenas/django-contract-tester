@@ -38,6 +38,12 @@ paths:
                     is_active: true
     get:
       summary: Get all users
+      parameters:
+        - name: age
+          in: query
+          required: false
+          schema:
+            type: integer
       responses:
         "200":
           description: All users retrieved successfully
@@ -70,6 +76,11 @@ paths:
           required: true
           schema:
             type: integer
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         "200":
           description: User retrieved successfully
@@ -137,6 +148,91 @@ paths:
       responses:
         "204":
           description: User deleted successfully
+  /ninja_api/users/profiles:
+    get:
+      summary: Get user profiles with filtering options
+      parameters:
+        - name: membership_level
+          in: query
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 5
+            description: User's membership tier level (1-5)
+        - name: min_points
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            description: Minimum points threshold
+        - name: is_active
+          in: query
+          required: false
+          schema:
+            type: boolean
+            description: Filter by active status
+        - name: join_date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+            description: Filter by join date (YYYY-MM-DD)
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 10
+            description: Search term for name or email
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [points, join_date, membership_level]
+            default: points
+            description: Field to sort results by
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+            description: Sort order direction
+      responses:
+        "200":
+          description: User profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProfile"
+              examples:
+                example1:
+                  summary: Example response for user profiles
+                  value:
+                    - id: 1
+                      name: John Doe
+                      email: john.doe@example.com
+                      membership_level: 3
+                      points: 1500
+                      join_date: "2023-01-15"
+                      is_active: true
+                      last_login: "2024-03-20T14:30:00Z"
+                    - id: 2
+                      name: Jane Doe
+                      email: jane.doe@example.com
+                      membership_level: 4
+                      points: 2500
+                      join_date: "2023-03-20"
+                      is_active: true
+                      last_login: "2024-03-19T09:15:00Z"
 components:
   schemas:
     UserIn:
@@ -173,3 +269,36 @@ components:
               type: integer
           required:
             - id
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        membership_level:
+          type: integer
+          minimum: 1
+          maximum: 5
+        points:
+          type: integer
+          minimum: 0
+        join_date:
+          type: string
+          format: date
+        is_active:
+          type: boolean
+        last_login:
+          type: string
+          format: date
+      required:
+        - id
+        - name
+        - email
+        - membership_level
+        - points
+        - join_date
+        - is_active
