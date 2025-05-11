@@ -450,7 +450,6 @@ def test_get_query_params_schema_section(
             "tags": {"type": "array", "items": {"type": "string"}},
             "limit": {"type": "integer", "format": "int32"},
         },
-        "required": [],
     }
 
 
