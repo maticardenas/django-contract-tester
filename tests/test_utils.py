@@ -136,6 +136,30 @@ def test_get_required_keys_response_with_write_only_field():
 
 def test_query_params_to_object():
     query_params = [
+        {
+            "name": "name",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "string"},
+        },
+        {
+            "name": "age",
+            "in": "query",
+            "required": False,
+            "schema": {"type": "integer"},
+        },
+    ]
+
+    converted_query_params = query_params_to_object(query_params)
+
+    assert converted_query_params == {
+        "type": "object",
+        "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
+    }
+
+
+def test_query_params_to_object_with_required_query_params():
+    query_params = [
         {"name": "name", "in": "query", "required": True, "schema": {"type": "string"}},
         {
             "name": "age",
@@ -152,3 +176,11 @@ def test_query_params_to_object():
         "properties": {"name": {"type": "string"}, "age": {"type": "integer"}},
         "required": ["name"],
     }
+
+
+def test_query_params_to_object_no_query_params():
+    query_params = []
+
+    converted_query_params = query_params_to_object(query_params)
+
+    assert converted_query_params == {}

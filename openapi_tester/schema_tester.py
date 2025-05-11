@@ -729,9 +729,8 @@ class SchemaTester:
         test_config: OpenAPITestConfig | None = None,
     ) -> None:
         """
-        Verifies that an OpenAPI schema definition matches an API request:
-
-        * Validates
+        Verifies that an OpenAPI schema definition matches an API request,
+        validating both query parameters and request body.
 
         :param response_handler: The HTTP response handler (can be a DRF or Ninja response)
         :param test_config: Optional object with test configuration

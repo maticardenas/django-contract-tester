@@ -118,8 +118,15 @@ def query_params_to_object(query_params: list[dict[str, Any]]) -> dict[str, Any]
         if param.get("required", False):
             required.append(param_name)
 
-    return {
-        "type": "object",
-        "properties": properties,
-        "required": required,
-    }
+    if properties:
+        query_params_object = {
+            "type": "object",
+            "properties": properties,
+        }
+
+        if len(required) > 0:
+            query_params_object["required"] = required
+
+        return query_params_object
+
+    return {}
