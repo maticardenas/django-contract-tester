@@ -435,6 +435,35 @@ def test_get_request_body_schema_section_no_content_request(
     assert schema_section == {}
 
 
+def test_get_query_params_schema_section(
+    pets_get_request: GenericRequest, pets_api_schema: Path
+):
+    test_config = OpenAPITestConfig(case_tester=is_pascal_case)
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    schema_section = schema_tester.get_request_query_params_schema_section(
+        request=pets_get_request, test_config=test_config
+    )
+
+    assert schema_section == {
+        "type": "object",
+        "properties": {
+            "tags": {"type": "array", "items": {"type": "string"}},
+            "limit": {"type": "integer", "format": "int32"},
+        },
+    }
+
+
+def test_get_request_query_params_schema_section_no_query_params(
+    pets_post_request: GenericRequest, pets_api_schema: Path
+):
+    test_config = OpenAPITestConfig(case_tester=is_pascal_case)
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    schema_section = schema_tester.get_request_query_params_schema_section(
+        request=pets_post_request, test_config=test_config
+    )
+    assert schema_section == {}
+
+
 def test_validate_response_global_case_tester(client):
     response = client.get(de_parameterized_path)
     with pytest.raises(CaseError, match="is not properly PascalCased"):

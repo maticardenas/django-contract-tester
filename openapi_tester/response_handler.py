@@ -6,6 +6,7 @@ import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Optional, Union
+from urllib.parse import parse_qsl
 
 if TYPE_CHECKING:
     from django.http.response import HttpResponse
@@ -20,6 +21,7 @@ class GenericRequest:
     method: str
     data: dict = field(default_factory=dict)
     headers: dict = field(default_factory=dict)
+    query_params: dict = field(default_factory=dict)
 
 
 class ResponseHandler(ABC):
@@ -43,6 +45,31 @@ class ResponseHandler(ABC):
     @abstractmethod
     def data(self) -> Optional[dict]: ...
 
+    @staticmethod
+    def _normalize_query_params(query_params: dict) -> dict:
+        """
+        Normalize the query params to be validated against the schema.
+        This is necessary because the query params are always strings in the request.
+        """
+        normalized_query_params = {}
+        for query_param in query_params.keys():
+            try:
+                normalized_query_params[query_param] = float(query_params[query_param])
+                if normalized_query_params[query_param].is_integer():
+                    normalized_query_params[query_param] = int(
+                        normalized_query_params[query_param]
+                    )
+            except ValueError:
+                if query_param.lower() == "true":
+                    normalized_query_params[query_param] = True
+                elif query_param.lower() == "false":
+                    normalized_query_params[query_param] = False
+                elif query_param.lower() == "null":
+                    normalized_query_params[query_param] = None  # type: ignore[assignment]
+                else:
+                    normalized_query_params[query_param] = query_params[query_param]
+        return normalized_query_params
+
 
 class DRFResponseHandler(ResponseHandler):
     """
@@ -51,6 +78,13 @@ class DRFResponseHandler(ResponseHandler):
 
     def __init__(self, response: "Response") -> None:
         super().__init__(response)
+        self._request_path = self.response.renderer_context["request"].path  # type: ignore[attr-defined]
+        self._request_method = self.response.renderer_context["request"].method  # type: ignore[attr-defined]
+        self._request_data = self.response.renderer_context["request"].data  # type: ignore[attr-defined]
+        self._request_headers = self.response.renderer_context["request"].headers  # type: ignore[attr-defined]
+        self._request_query_params = self._normalize_query_params(
+            self.response.renderer_context["request"].query_params  # type: ignore[attr-defined]
+        )
 
     @property
     def data(self) -> Optional[dict]:
@@ -59,10 +93,11 @@ class DRFResponseHandler(ResponseHandler):
     @property
     def request(self) -> GenericRequest:
         return GenericRequest(
-            path=self.response.renderer_context["request"].path,  # type: ignore[attr-defined]
-            method=self.response.renderer_context["request"].method,  # type: ignore[attr-defined]
-            data=self.response.renderer_context["request"].data,  # type: ignore[attr-defined]
-            headers=self.response.renderer_context["request"].headers,  # type: ignore[attr-defined]
+            path=self._request_path,
+            method=self._request_method,
+            data=self._request_data,
+            headers=self._request_headers,
+            query_params=self._request_query_params,
         )
 
 
@@ -76,7 +111,8 @@ class DjangoNinjaResponseHandler(ResponseHandler):
     ) -> None:
         super().__init__(response)
         self._request_method = request_args[0]
-        self._request_path = f"{path_prefix}{request_args[1]}"
+        self._request_path = self._build_request_path(request_args[1], path_prefix)
+        self._request_query_params = self._build_request_query_params(request_args[1])
         self._request_data = self._build_request_data(request_args[2])
         self._request_headers = kwargs
 
@@ -91,7 +127,19 @@ class DjangoNinjaResponseHandler(ResponseHandler):
             method=self._request_method,
             data=self._request_data,
             headers=self._request_headers,
+            query_params=self._request_query_params,
         )
+
+    def _build_request_path(self, request_path: str, path_prefix: str) -> str:
+        request_path = request_path.split("?")[0]
+        return f"{path_prefix}{request_path}"
+
+    def _build_request_query_params(self, request_path: str) -> dict:
+        try:
+            query_params = dict(parse_qsl(request_path.split("?")[1]))
+            return self._normalize_query_params(query_params)
+        except IndexError:
+            return {}
 
     def _build_request_data(self, request_data: Any) -> dict:
         try:
