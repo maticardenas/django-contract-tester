@@ -250,7 +250,8 @@ class MySimpleTestCase(SimpleTestCase):
 This will ensure you all newly implemented views will be validated against
 the OpenAPI schema.
 
-> It is worth noting that the request validation is only performed for **successful** response scenarios. This is to avoid having the package interfering with your functional negative test case suite.
+> It is worth noting that for the case of clients the request validation is only performed for **successful** response scenarios. This is to avoid having the package interfering with your functional negative test case suite.
+> You can still use `schema_tester.validate_request` method separately for the negative cases in which you would like to validate the request as well.
 
 
 ### Django Ninja Test Client
