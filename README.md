@@ -91,60 +91,6 @@ class MyAPITests(BaseAPITestCase):
         self.assertResponse(response)
 ```
 
-## Response and Request Validation
-
-The `SchemaTester` instance (as initialized in the "Usage" section) provides two main methods for validating your API interactions against the OpenAPI schema: `validate_response` and `validate_request`. These methods are typically used within your test functions after an API call has been made.
-
-### Response Validation
-
-`schema_tester.validate_response(response)`: This method inspects the HTTP response received from your application. It checks if the structure and data types of the response body conform to the OpenAPI schema definition for that specific endpoint, HTTP method, and status code.
-
-For example:
-```python
-# Assuming schema_tester is an initialized instance of SchemaTester
-
-def test_get_item_response(client):
-    response = client.get('/api/v1/items/1')
-    assert response.status_code == 200
-    # Validates the content of 'response' against the schema's 200 OK definition for GET /api/v1/items/1
-    schema_tester.validate_response(response=response)
-```
-
-### Request Validation
-
-`schema_tester.validate_request(response)`: This method validates the original request that led to the given `response`. The validation scope includes:
-*   **Request Body**: For HTTP methods like `POST`, `PUT`, `PATCH`, it checks if the submitted payload matches the schema.
-*   **Query Parameters**: For all relevant HTTP methods (including `GET`), it verifies if the query parameters used in the request are consistent with those defined in the OpenAPI specification.
-
-**Validation on Success**
-
-Request validation is performed *only if* the associated `response` indicates a successful operation (e.g., status codes in the `2xx` range).
-
-**Rationale**: The OpenAPI schema primarily defines the contract for *valid and successful* API interactions. If a request is malformed to the extent that the server rejects it (e.g., with a `400 Bad Request` or `422 Unprocessable Entity`), the server's error response itself is the primary indicator of the problem. `validate_request` focuses on ensuring that requests which *are* successfully processed by the application indeed adhere to the documented contract. It's not intended to diagnose why an already failed request was invalid, as the schema might not even cover such error-inducing request structures.
-This ensures as well that the package validation won't interfere with your functional negative test cases suite.
-
-Examples:
-```python
-# Assuming schema_tester is an initialized instance of SchemaTester
-
-def test_create_item_request(client):
-    payload = {'name': 'A new gizmo', 'price': 25.99}
-    response = client.post('/api/v1/items', data=payload, content_type='application/json')
-    assert response.status_code == 201  # Or 200, 202, 204 etc.
-    # Because the response is successful (201), this will validate:
-    # 1. The 'payload' sent in the POST request.
-    # 2. Any query parameters, if the POST endpoint defined them (uncommon for POST).
-    schema_tester.validate_request(response=response)
-
-def test_list_items_with_filters_request(client):
-    response = client.get('/api/v1/items?status=active&limit=10')
-    assert response.status_code == 200
-    # Because the response is successful (200), this will validate:
-    # 1. That 'status' and 'limit' are valid query parameters for this endpoint.
-    # 2. That their values ('active', 10) are of the correct type/format.
-    schema_tester.validate_request(response=response)
-```
-
 ## Options
 
 You can pass options either globally, when instantiating a `SchemaTester`, or locally, when
@@ -303,6 +249,8 @@ class MySimpleTestCase(SimpleTestCase):
 
 This will ensure you all newly implemented views will be validated against
 the OpenAPI schema.
+
+> It is worth noting that the request validation is only performed for **successful** response scenarios. This is to avoid having the package interfering with your functional negative test case suite.
 
 
 ### Django Ninja Test Client
