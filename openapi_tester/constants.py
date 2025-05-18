@@ -45,8 +45,17 @@ VALIDATE_MISSING_KEY_ERROR = (
     "The following property was found in the schema definition, "
     'but is missing from the {http_message} data: "{missing_key}"'
 )
+VALIDATE_MISSING_QUERY_PARAM_ERROR = (
+    "The following query parameter was found in the schema definition, "
+    'but is missing from the {http_message} data: "{missing_key}"'
+)
+
 VALIDATE_EXCESS_KEY_ERROR = (
     "The following property was found in the {http_message} data, "
+    'but is missing from the schema definition: "{excess_key}"'
+)
+VALIDATE_EXCESS_QUERY_PARAM_ERROR = (
+    "The following query parameter was found in the {http_message}, "
     'but is missing from the schema definition: "{excess_key}"'
 )
 VALIDATE_WRITE_ONLY_RESPONSE_KEY_ERROR = 'The following property was found in the response, but is documented as being "writeOnly": "{write_only_key}"'

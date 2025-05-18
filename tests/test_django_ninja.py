@@ -1,5 +1,6 @@
 import json
 from typing import TYPE_CHECKING
+from urllib.parse import urlencode
 
 import orjson
 import pytest
@@ -30,6 +31,54 @@ def test_get_users(client: OpenAPINinjaClient):
 def test_get_user(client: OpenAPINinjaClient):
     response = client.get("/1")
     assert response.status_code == 200
+
+
+def test_get_user_by_name(client: OpenAPINinjaClient):
+    query_params = {"name": "John Doe"}
+    response = client.get(f"/1?{urlencode(query_params)}")
+    assert response.status_code == 200
+
+
+def test_get_user_with_undocumented_query_param(client: OpenAPINinjaClient):
+    query_params = {"name": "John Doe", "date_of_birth": "12/12/1990"}
+
+    with pytest.raises(DocumentationError) as error:
+        client.get(f"/1?{urlencode(query_params)}")
+
+    assert (
+        'The following query parameter was found in the request, but is missing from the schema definition: "date_of_birth"'
+        in str(error.value)
+    )
+
+
+def test_get_user_profile(client: OpenAPINinjaClient):
+    query_params = {"membership_level": 3}
+    response = client.get(f"/profiles?{urlencode(query_params)}")
+    assert response.status_code == 200
+
+
+def test_get_user_profile_undocumented_query_param(client: OpenAPINinjaClient):
+    query_params = {"membership_level": 3, "date_of_birth": "12/12/1990"}
+    with pytest.raises(DocumentationError) as error:
+        client.get(f"/profiles?{urlencode(query_params)}")
+
+    assert (
+        'The following query parameter was found in the request, but is missing from the schema definition: "date_of_birth"'
+        in str(error.value)
+    )
+
+
+def test_get_user_profile_with_documented_query_param_incompatible_format(
+    client: OpenAPINinjaClient,
+):
+    query_params = {
+        "membership_level": 3,
+        "is_active": "yes",
+    }  # defined as boolean in schema
+    with pytest.raises(DocumentationError) as error:
+        client.get(f"/profiles?{urlencode(query_params)}")
+
+    assert 'Expected: a "boolean" type value' in str(error.value)
 
 
 def test_get_user_with_larger_than_int64_integer(client: OpenAPINinjaClient):
