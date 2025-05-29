@@ -37,6 +37,7 @@ repos:
           - types-PyYAML
           - drf-yasg
           - drf-spectacular
+          - types-toml
           - setuptools
 
   - repo: local
@@ -62,3 +63,4 @@ repos:
           - pylint
           - faker
           - orjson
+          - toml
