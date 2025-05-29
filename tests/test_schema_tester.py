@@ -17,6 +17,7 @@ from openapi_tester import (
     StaticSchemaLoader,
     is_pascal_case,
 )
+from openapi_tester.config import ValidationSettings
 from openapi_tester.constants import (
     INIT_ERROR,
     OPENAPI_PYTHON_MAPPING,
@@ -335,6 +336,27 @@ def test_validate_request_invalid(
         schema_tester.validate_request(response_handler=response_handler)
 
 
+def test_validate_request_invalid_request_disabled(
+    response_factory,
+    pets_api_schema: Path,
+    pets_post_request: GenericRequest,
+    custom_test_config: OpenAPITestConfig,
+):
+    schema_tester = SchemaTester(schema_file_path=str(pets_api_schema))
+    pets_post_request.data.pop("name")
+    response = response_factory(
+        schema=None,
+        url_fragment="/api/pets",
+        method="POST",
+        status_code=201,
+        request=pets_post_request,
+    )
+    response_handler = ResponseHandlerFactory.create(response=response)
+    schema_tester.validate_request(
+        response_handler=response_handler, test_config=custom_test_config
+    )
+
+
 def test_validate_request_no_application_json(
     response_factory, pets_api_schema: Path, pets_post_request: GenericRequest
 ):
@@ -501,6 +523,15 @@ def test_validate_response_passed_in_case_tester(client):
             response_handler=ResponseHandlerFactory.create(response=response),
             test_config=OpenAPITestConfig(case_tester=is_pascal_case),
         )
+
+
+def test_validate_response_no_response_validation(client):
+    response = client.get(de_parameterized_path)
+    validation = tester.validate_response(
+        response_handler=ResponseHandlerFactory.create(response=response),
+        test_config=OpenAPITestConfig(validation=ValidationSettings(response=False)),
+    )
+    assert validation is None
 
 
 def test_validate_response_passed_in_ignored_case(client):

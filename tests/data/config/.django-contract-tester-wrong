@@ -1,0 +1,4 @@
+[django-contract-tester:validation]
+# Invalid values to test error handling
+disabled_types = not_a_list_but_string
+disabled_formats = 12345

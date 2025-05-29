@@ -1,0 +1,7 @@
+[tool.django-contract-tester.validation]
+# Master switches:
+request = true  # Overall request validation disabled
+response = false # Overall response validation
+types = false
+formats = false
+query_parameters = false # Overall query parameter validation

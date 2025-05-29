@@ -1,4 +1,5 @@
 from typing import Union
+from unittest.mock import patch
 
 import pytest
 
@@ -192,6 +193,12 @@ def test_validate_type_error(schema: dict, data: Union[str, int, bool], article:
         message
         == f"Expected: {article} \"{schema['type']}\" type value\n\nReceived: {data}"
     )
+
+
+@patch("openapi_tester.validators.settings.validation.disabled_types", ["integer"])  # pyright: ignore[reportUndefinedVariable]
+def test_validate_type_error_with_disabled_types():
+    message = validate_type({"type": "integer"}, "literal string")
+    assert message is None
 
 
 def test_null_error():

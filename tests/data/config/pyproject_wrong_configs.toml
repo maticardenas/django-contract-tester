@@ -1,0 +1,19 @@
+
+[tool.django-contract-tester]
+ignore_case = "name"
+
+[tool.django-contract-tester.validation]
+# Master switches:
+request = false  # Overall request validation disabled
+response = true # Overall response validation
+types = true    # All schema type validations (string, integer, etc.)
+formats = true  # All schema format validations (date-time, uuid, etc.)
+query_parameters = true # Overall query parameter validation
+
+# Granular disabling:
+# These lists are consulted if their respective master switch (types, formats) is true.
+disabled_types = "integer" # wrong format, should be a list
+disabled_formats = "email" # wrong format, should be a list
+
+# List of other OpenAPI validation keywords (constraints) to disable
+disabled_constraints = "enum" # wrong  format, should be a list
