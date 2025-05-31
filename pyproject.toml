@@ -22,14 +22,13 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Framework :: Django",
-    'Framework :: Django :: 3.0',
-    'Framework :: Django :: 3.1',
-    'Framework :: Django :: 3.2',
-    'Framework :: Django :: 4.0',
-    'Framework :: Django :: 4.1',
+    'Framework :: Django :: 4.2',
     'Framework :: Django :: 4.2',
     'Framework :: Django :: 5.0',
+    'Framework :: Django :: 5.1',
+    'Framework :: Django :: 5.2',
     "Framework :: Pytest",
     "Topic :: Software Development",
     "Topic :: Software Development :: Libraries",
@@ -61,7 +60,7 @@ prance = "*"
 pyYAML = "*"
 drf-spectacular = { version = "*", optional = true }
 drf-yasg = { version = "*", optional = true }
-django-ninja = {version = "^1.1.0", optional = true}
+django-ninja = {version = "^1.4.2", optional = true}
 orjson = "^3.10.7"
 
 [tool.poetry.extras]

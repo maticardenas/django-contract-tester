@@ -1,7 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/django-contract-tester.svg)](https://pypi.org/project/django-contract-tester/)
 [![Coverage](https://codecov.io/gh/maticardenas/django-contract-tester/graph/badge.svg)](https://app.codecov.io/gh/maticardenas/django-contract-tester)
 [![Python versions](https://img.shields.io/badge/Python-3.8%2B-blue)](https://pypi.org/project/django-contract-tester/)
-[![Django versions](https://img.shields.io/badge/Django-3.2%2B-blue)](https://pypi.org/project/django-contract-tester/)
+[![Django versions](https://img.shields.io/badge/Django-4.2%2B-blue)](https://pypi.org/project/django-contract-tester/)
 
 
 # Django Contract Tester
