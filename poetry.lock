@@ -369,13 +369,13 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "django-ninja"
-version = "1.1.0"
+version = "1.4.2"
 description = "Django Ninja - Fast Django REST framework"
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "django_ninja-1.1.0-py3-none-any.whl", hash = "sha256:6330c3497061d9fd1f43c1200f85c13aab7687110e2899f8304e5aa476c10b44"},
-    {file = "django_ninja-1.1.0.tar.gz", hash = "sha256:87bff046416a2653ed2fbef1408e101292bf8170684821bac82accfd73bef059"},
+    {file = "django_ninja-1.4.2-py3-none-any.whl", hash = "sha256:9f8e29d52247729a0bd1090bae20010d39f24e61938dd848d19bb25bf88ad4ad"},
+    {file = "django_ninja-1.4.2.tar.gz", hash = "sha256:5295760282a705cabd398386e7dffbc99551e3b765f30e1a40e62676100b2604"},
 ]
 
 [package.dependencies]
@@ -385,7 +385,7 @@ pydantic = ">=2.0,<3.0.0"
 [package.extras]
 dev = ["pre-commit"]
 doc = ["markdown-include", "mkdocs", "mkdocs-material", "mkdocstrings"]
-test = ["django-stubs", "mypy (==1.7.1)", "psycopg2-binary", "pytest", "pytest-asyncio", "pytest-cov", "pytest-django", "ruff (==0.1.7)"]
+test = ["django-stubs", "mypy (==1.7.1)", "psycopg2-binary", "pytest", "pytest-asyncio", "pytest-cov", "pytest-django", "ruff (==0.5.7)"]
 
 [[package]]
 name = "djangorestframework"
@@ -1591,4 +1591,4 @@ drf-yasg = ["drf-yasg"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "8ae3bc62904e349cff8554173aeb45ff8012fb8550ec8cf97898a601671ae08f"
+content-hash = "a82946408cb41b03ff376b3ea8778caec36f22074f3e5a07b3a937d5762e3229"
