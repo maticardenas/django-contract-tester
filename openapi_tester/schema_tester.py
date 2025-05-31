@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import re
-from copy import copy
+from copy import copy, deepcopy
 from itertools import chain
 from typing import TYPE_CHECKING, Any, Callable, cast
 
@@ -13,6 +13,7 @@ from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.validators import URLValidator
 
 from openapi_tester.config import OpenAPITestConfig
+from openapi_tester.config import settings as global_settings
 from openapi_tester.constants import (
     INIT_ERROR,
     UNDOCUMENTED_SCHEMA_SECTION_ERROR,
@@ -733,41 +734,54 @@ class SchemaTester:
         validating both query parameters and request body.
 
         :param response_handler: The HTTP response handler (can be a DRF or Ninja response)
-        :param test_config: Optional object with test configuration
+        :param test_config: Optional object with test configuration. If None, global settings are used.
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
+        current_config = (
+            deepcopy(test_config)
+            if test_config is not None
+            else deepcopy(global_settings)
+        )
+
+        if not current_config.validation.request:
+            return
+
         if self.get_openapi_schema() is not None:
-            if test_config:
-                test_config.http_message = "request"
-            else:
-                test_config = OpenAPITestConfig(
-                    http_message="request",
-                    reference=f"{response_handler.request.method} {response_handler.request.path} > request",
+            current_config.http_message = "request"
+            if (
+                not test_config
+                or not test_config.reference
+                or test_config.reference == "root"
+            ):
+                current_config.reference = f"{response_handler.request.method} {response_handler.request.path} > request"
+
+            if current_config.validation.query_parameters:
+                query_params_schema = self.get_request_query_params_schema_section(
+                    response_handler.request, test_config=current_config
                 )
 
-            query_params_schema = self.get_request_query_params_schema_section(
-                response_handler.request, test_config=test_config
-            )
-
-            if query_params_schema:
-                test_config.reference = f"{test_config.reference} > query parameter"
-                self.test_schema_section(
-                    schema_section=query_params_schema,
-                    data=response_handler.request.query_params,
-                    test_config=test_config,
-                    is_query_params=True,
-                )
+                if query_params_schema:
+                    query_params_config = deepcopy(current_config)
+                    query_params_config.reference = (
+                        f"{current_config.reference} > query parameter"
+                    )
+                    self.test_schema_section(
+                        schema_section=query_params_schema,
+                        data=response_handler.request.query_params,
+                        test_config=query_params_config,
+                        is_query_params=True,
+                    )
 
             request_body_schema = self.get_request_body_schema_section(
-                response_handler.request, test_config=test_config
+                response_handler.request, test_config=current_config
             )
 
             if request_body_schema:
                 self.test_schema_section(
                     schema_section=request_body_schema,
                     data=response_handler.request.data,
-                    test_config=test_config,
+                    test_config=current_config,
                 )
 
     def validate_response(
@@ -779,23 +793,35 @@ class SchemaTester:
         Verifies that an OpenAPI schema definition matches an API response.
 
         :param response_handler: The HTTP response handler (can be a DRF or Ninja response)
-        :param test_config: Optional object with test configuration
+        :param test_config: Optional object with test configuration. If None, global settings are used.
         :raises: ``openapi_tester.exceptions.DocumentationError`` for inconsistencies in the API response and schema.
                  ``openapi_tester.exceptions.CaseError`` for case errors.
         """
-        if test_config:
-            test_config.http_message = "response"
-        else:
+        current_config = (
+            deepcopy(test_config)
+            if test_config is not None
+            else deepcopy(global_settings)
+        )
+
+        if not current_config.validation.response:
+            return
+
+        current_config.http_message = "response"
+
+        # Ensure reference is appropriate if not explicitly passed in test_config
+        if (
+            not test_config
+            or not test_config.reference
+            or test_config.reference == "root"
+        ):
             request = response_handler.request
-            test_config = OpenAPITestConfig(
-                http_message="response",
-                reference=f"{request.method} {request.path} > response > {response_handler.response.status_code}",
-            )
+            current_config.reference = f"{request.method} {request.path} > response > {response_handler.response.status_code}"
+
         response_schema = self.get_response_schema_section(
-            response_handler, test_config=test_config
+            response_handler, test_config=current_config
         )
         self.test_schema_section(
             schema_section=response_schema,
             data=response_handler.data,
-            test_config=test_config,
+            test_config=current_config,
         )
