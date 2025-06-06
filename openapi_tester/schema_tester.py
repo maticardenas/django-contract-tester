@@ -43,6 +43,7 @@ from openapi_tester.utils import (
     normalize_schema_section,
     query_params_to_object,
     serialize_schema_section_data,
+    should_validate_query_param,
 )
 from openapi_tester.validators import (
     validate_enum,
@@ -702,6 +703,10 @@ class SchemaTester:
                 )
         for key, value in data.items():
             if key in properties:
+                if not should_validate_query_param(
+                    param_schema_section=properties[key], request_value=value
+                ):
+                    continue
                 drill_down_test_config = copy(test_config)
                 drill_down_test_config.reference = f"{test_config.reference} > {key}"
                 self.test_schema_section(

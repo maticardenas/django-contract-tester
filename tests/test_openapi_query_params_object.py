@@ -179,3 +179,56 @@ def test_openapi_query_params_object_email_format():
                 reference="GET /endpoint > query_params", http_message="request"
             ),
         )
+
+
+def test_openapi_query_params_object_string_type_schema_section_integer_query_param():
+    tester = SchemaTester()
+
+    schema_section = {
+        "type": "object",
+        "properties": {
+            "key": {"type": "string"},
+        },
+    }
+
+    query_params = {"key": 1234}
+
+    tester.test_openapi_query_params_object(
+        schema_section=schema_section,
+        data=query_params,
+        test_config=OpenAPITestConfig(
+            reference="GET /endpoint > query_params", http_message="request"
+        ),
+    )
+
+
+def test_openapi_params_object_string_type_schema_section_with_format_string_query_param():
+    tester = SchemaTester()
+
+    schema_section = {
+        "type": "object",
+        "properties": {
+            "key": {"type": "string", "format": "email"},
+        },
+    }
+
+    query_params = {"key": "test@test.com"}
+
+    tester.test_openapi_query_params_object(
+        schema_section=schema_section,
+        data=query_params,
+        test_config=OpenAPITestConfig(
+            reference="GET /endpoint > query_params", http_message="request"
+        ),
+    )
+
+    query_params = {"key": "1234"}
+
+    with pytest.raises(DocumentationError):
+        tester.test_openapi_query_params_object(
+            schema_section=schema_section,
+            data=query_params,
+            test_config=OpenAPITestConfig(
+                reference="GET /endpoint > query_params", http_message="request"
+            ),
+        )
