@@ -3,6 +3,7 @@ from openapi_tester.utils import (
     merge_objects,
     query_params_to_object,
     serialize_schema_section_data,
+    should_validate_query_param,
 )
 from tests.utils import sort_object
 
@@ -184,3 +185,17 @@ def test_query_params_to_object_no_query_params():
     converted_query_params = query_params_to_object(query_params)
 
     assert converted_query_params == {}
+
+
+def test_should_validate_query_param():
+    assert should_validate_query_param({"type": "string"}, "123") is False
+    assert should_validate_query_param({"type": "string"}, 123) is False
+    assert (
+        should_validate_query_param(
+            {"type": "string", "format": "email"}, "test@test.com"
+        )
+        is True
+    )
+    assert (
+        should_validate_query_param({"type": "string", "format": "email"}, 123) is False
+    )

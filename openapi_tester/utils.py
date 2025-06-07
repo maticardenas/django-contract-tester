@@ -130,3 +130,18 @@ def query_params_to_object(query_params: list[dict[str, Any]]) -> dict[str, Any]
         return query_params_object
 
     return {}
+
+
+def should_validate_query_param(param_schema_section: dict, request_value: Any) -> bool:
+    """
+    Checks if query paramter should be validated.
+    If the query paramter is a raw string (without any format or constraints) it should not be validated.
+    If the query parameter is a string and has a format or constraints, it should be validated if the request value (after normalization) is a string.
+    """
+
+    if param_schema_section.get("type") == "string":
+        if len(param_schema_section) == 1:
+            return False
+        return isinstance(request_value, str)
+
+    return True
