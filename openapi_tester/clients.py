@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import http
 from typing import TYPE_CHECKING
 
 try:
@@ -42,8 +41,8 @@ class OpenAPIClient(APIClient):
         response_handler = ResponseHandlerFactory.create(
             *args, response=response, **kwargs
         )
-        if self._is_successful_response(response):
-            self.schema_tester.validate_request(response_handler=response_handler)
+
+        self.schema_tester.validate_request(response_handler=response_handler)
         self.schema_tester.validate_response(response_handler=response_handler)
         return response
 
@@ -108,10 +107,6 @@ class OpenAPIClient(APIClient):
         )
 
     @staticmethod
-    def _is_successful_response(response: Response) -> bool:
-        return response.status_code < http.HTTPStatus.BAD_REQUEST
-
-    @staticmethod
     def _schema_tester_factory() -> SchemaTester:
         """Factory of default ``SchemaTester`` instances."""
         return SchemaTester()
@@ -143,14 +138,9 @@ class OpenAPINinjaClient(TestClient):
         response_handler = ResponseHandlerFactory.create(
             *args, response=response, path_prefix=self._ninja_path_prefix, **kwargs
         )
-        if self._is_successful_response(response):
-            self.schema_tester.validate_request(response_handler=response_handler)
-        self.schema_tester.validate_response(response_handler)
+        self.schema_tester.validate_request(response_handler=response_handler)
+        self.schema_tester.validate_response(response_handler=response_handler)
         return response
-
-    @staticmethod
-    def _is_successful_response(response: Response) -> bool:
-        return response.status_code < http.HTTPStatus.BAD_REQUEST
 
     @staticmethod
     def _schema_tester_factory() -> SchemaTester:

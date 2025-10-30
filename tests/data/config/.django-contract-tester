@@ -1,0 +1,17 @@
+[django-contract-tester]
+ignore_case = name, color, height, width, length
+
+[django-contract-tester:validation]
+# Master switches:
+request = false
+response = true
+types = true
+formats = true
+query_parameters = true
+
+# Granular disabling:
+disabled_types = integer, array
+disabled_formats = date-time, email
+
+# List of other OpenAPI validation keywords (constraints) to disable
+disabled_constraints = enum, pattern, minLength, maxLength, minimum, maximum, multipleOf, uniqueItems, minItems, maxItems, minProperties, maxProperties

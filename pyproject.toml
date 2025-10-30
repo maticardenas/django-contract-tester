@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-contract-tester"
-version = "1.6.1"
+version = "1.7.0"
 description = "Test utility for validating OpenAPI response documentation"
 authors =["Matías Cárdenas <cardenasmatias.1990@gmail.com>", "Sondre Lillebø Gundersen <sondrelg@live.no>", "Na'aman Hirschfeld <nhirschfeld@gmail.com>"]
 license = "BSD-4-Clause"
@@ -62,6 +62,8 @@ drf-spectacular = { version = "*", optional = true }
 drf-yasg = { version = "*", optional = true }
 django-ninja = {version = "^1.4.2", optional = true}
 orjson = "^3.10.7"
+toml = "^0.10.2"
+types-toml = "^0.10.8.20240310"
 
 [tool.poetry.extras]
 drf-yasg = ["drf-yasg"]
@@ -123,6 +125,7 @@ lint.ignore = [
     "B008", # do not perform function calls in argument defaults
     "C901", # too complex
 ]
+exclude = ["tests/data/config"]
 
 [tool.coverage.run]
 source = [
@@ -131,6 +134,7 @@ source = [
 omit = [
     "manage.py",
     "test_project/*",
+    "tests/data/config/*",
 ]
 branch = true
 
@@ -142,6 +146,7 @@ exclude_lines = [
     "pragma: no cover",
     "if TYPE_CHECKING:",
 ]
+
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "test_project.settings"

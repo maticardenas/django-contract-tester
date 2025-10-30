@@ -16,7 +16,7 @@ repos:
     hooks:
       # Run the linter.
       - id: ruff
-        args: [--fix]
+        args: ["--fix", "--exclude", "migrations,node_modules,venv,build,dist,tests/data/config"]
       # Run the formatter.
       - id: ruff-format
 
@@ -37,6 +37,7 @@ repos:
           - types-PyYAML
           - drf-yasg
           - drf-spectacular
+          - types-toml
           - setuptools
 
   - repo: local
@@ -62,3 +63,4 @@ repos:
           - pylint
           - faker
           - orjson
+          - toml

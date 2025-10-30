@@ -1,0 +1,7 @@
+[django-contract-tester:validation]
+# Master switches:
+request = true
+response = false
+types = false
+formats = false
+query_parameters = false

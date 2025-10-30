@@ -8,6 +8,7 @@ import pytest
 from faker import Faker
 
 from openapi_tester import SchemaTester
+from openapi_tester.config import OpenAPITestConfig
 from openapi_tester.constants import (
     OPENAPI_PYTHON_MAPPING,
     VALIDATE_EXCESS_KEY_ERROR,
@@ -23,7 +24,12 @@ from openapi_tester.constants import (
     VALIDATE_TYPE_ERROR,
 )
 from openapi_tester.exceptions import DocumentationError, OpenAPISchemaError
-from openapi_tester.validators import VALIDATOR_MAP, validate_unique_items
+from openapi_tester.validators import (
+    VALIDATOR_MAP,
+    validate_format,
+    validate_type,
+    validate_unique_items,
+)
 from tests import (
     example_response_types,
     example_schema_array,
@@ -566,3 +572,25 @@ def test_int64_validation():
 
     with pytest.raises(DocumentationError):
         tester.test_schema_section({"type": "integer", "format": "int64"}, 2**64)
+
+
+def test_disabled_types_validation(custom_test_config: OpenAPITestConfig):
+    tester.test_schema_section({"type": "integer"}, "literal string")
+    tester.test_schema_section(example_schema_array, "another literal string")
+
+
+def test_disabled_types_validation_no_types_format_validations(
+    custom_test_config_no_response_validation: OpenAPITestConfig,
+):
+    tester.test_schema_section({"type": "integer"}, "literal string")
+    tester.test_schema_section(example_schema_array, "another literal string")
+
+
+def test_validate_type_with_disabled_types(custom_test_config: OpenAPITestConfig):
+    assert validate_type({"type": "integer"}, "literal string") is None
+    assert validate_type({"type": ["integer", "boolean"]}, "literal string") is None
+
+
+def test_validate_format_with_disabled_formats(custom_test_config: OpenAPITestConfig):
+    result = validate_format({"format": "date-time"}, "2025-04-29T00:00:00+01:00")
+    assert result is None

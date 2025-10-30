@@ -1,6 +1,7 @@
 from openapi_tester.utils import (
     get_required_keys,
     merge_objects,
+    normalize_query_param_value,
     query_params_to_object,
     serialize_schema_section_data,
     should_validate_query_param,
@@ -199,3 +200,9 @@ def test_should_validate_query_param():
     assert (
         should_validate_query_param({"type": "string", "format": "email"}, 123) is False
     )
+
+
+def test_normalize_query_param_value():
+    assert normalize_query_param_value({"type": "array"}, "1,2,3") == ["1", "2", "3"]
+    assert normalize_query_param_value({"type": "array"}, "1|2|3") == ["1", "2", "3"]
+    assert normalize_query_param_value({"type": "array"}, "1;2;3") == ["1", "2", "3"]

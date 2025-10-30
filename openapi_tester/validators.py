@@ -17,6 +17,7 @@ from django.core.validators import (
 )
 from django.utils.dateparse import parse_date, parse_datetime, parse_time
 
+from openapi_tester.config import settings
 from openapi_tester.constants import (
     INTERNET_PROTOCOLS,
     INVALID_PATTERN_ERROR,
@@ -104,19 +105,32 @@ VALIDATOR_MAP: dict[str, Callable] = {
 
 
 def validate_type(schema_section: dict[str, Any], data: Any) -> str | None:
+    if settings.validation.types is False:
+        return None
+
     an_articles = ["integer", "object", "array"]
     schema_types: str = schema_section.get("type", "object")
+
     if isinstance(schema_types, list):
-        has_type = False
+        if any(s_type in settings.validation.disabled_types for s_type in schema_types):
+            return None
+
+        has_type_match = False
         for schema_type in schema_types:
             if VALIDATOR_MAP[schema_type](data):
-                return None
-        if not has_type:
+                has_type_match = True
+                break
+        if not has_type_match:
             return VALIDATE_TYPE_ERROR.format(
-                article="a" if schema_types not in an_articles else "an",
-                type=schema_types,
+                article="a",
+                type=" or ".join(schema_types),
                 received=f'"{data}"' if isinstance(data, str) else data,
             )
+        return None
+
+    if schema_types in settings.validation.disabled_types:
+        return None
+
     if not VALIDATOR_MAP[schema_types](data):
         return VALIDATE_TYPE_ERROR.format(
             article="a" if schema_types not in an_articles else "an",
@@ -127,9 +141,16 @@ def validate_type(schema_section: dict[str, Any], data: Any) -> str | None:
 
 
 def validate_format(schema_section: dict[str, Any], data: Any) -> str | None:
+    if settings.validation.formats is False:
+        return None
+
     value = data
     schema_format: str = schema_section.get("format", "")
     schema_type: str = schema_section.get("type", "object")
+
+    if schema_format in settings.validation.disabled_formats:
+        return None
+
     if schema_format in VALIDATOR_MAP:
         if not isinstance(schema_type, list) and schema_type == "string":
             try:
@@ -156,6 +177,10 @@ def validate_format(schema_section: dict[str, Any], data: Any) -> str | None:
 
 def validate_enum(schema_section: dict[str, Any], data: Any) -> str | None:
     enum = schema_section.get("enum")
+
+    if "enum" in settings.validation.disabled_constraints:
+        return None
+
     if enum and data not in enum:
         return VALIDATE_ENUM_ERROR.format(
             enum=schema_section["enum"], received=f'"{data}"'
@@ -164,6 +189,8 @@ def validate_enum(schema_section: dict[str, Any], data: Any) -> str | None:
 
 
 def validate_pattern(schema_section: dict[str, Any], data: str) -> str | None:
+    if "pattern" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, str):
         return None
     pattern = schema_section.get("pattern")
@@ -181,6 +208,8 @@ def validate_pattern(schema_section: dict[str, Any], data: str) -> str | None:
 def validate_multiple_of(
     schema_section: dict[str, Any], data: int | float
 ) -> str | None:
+    if "multipleOf" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, (int, float)):
         return None
     multiple = schema_section.get("multipleOf")
@@ -190,6 +219,11 @@ def validate_multiple_of(
 
 
 def validate_maximum(schema_section: dict[str, Any], data: int | float) -> str | None:
+    if (
+        "maximum" in settings.validation.disabled_constraints
+        or "exclusiveMaximum" in settings.validation.disabled_constraints
+    ):
+        return None
     if not isinstance(data, (int, float)):
         return None
 
@@ -209,6 +243,11 @@ def validate_maximum(schema_section: dict[str, Any], data: int | float) -> str |
 
 
 def validate_minimum(schema_section: dict[str, Any], data: int | float) -> str | None:
+    if (
+        "minimum" in settings.validation.disabled_constraints
+        or "exclusiveMinimum" in settings.validation.disabled_constraints
+    ):
+        return None
     if not isinstance(data, (int, float)):
         return None
 
@@ -230,6 +269,8 @@ def validate_minimum(schema_section: dict[str, Any], data: int | float) -> str |
 def validate_unique_items(
     schema_section: dict[str, Any], data: list[Any]
 ) -> str | None:
+    if "uniqueItems" in settings.validation.disabled_constraints:
+        return None
     unique_items = schema_section.get("uniqueItems")
     if unique_items:
         comparison_data = (
@@ -244,6 +285,8 @@ def validate_unique_items(
 
 
 def validate_min_length(schema_section: dict[str, Any], data: str) -> str | None:
+    if "minLength" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, str):
         return None
     min_length: int | None = schema_section.get("minLength")
@@ -253,6 +296,8 @@ def validate_min_length(schema_section: dict[str, Any], data: str) -> str | None
 
 
 def validate_max_length(schema_section: dict[str, Any], data: str) -> str | None:
+    if "maxLength" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, str):
         return None
     max_length: int | None = schema_section.get("maxLength")
@@ -262,6 +307,8 @@ def validate_max_length(schema_section: dict[str, Any], data: str) -> str | None
 
 
 def validate_min_items(schema_section: dict[str, Any], data: list) -> str | None:
+    if "minItems" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, list):
         return None
     min_length: int | None = schema_section.get("minItems")
@@ -271,6 +318,8 @@ def validate_min_items(schema_section: dict[str, Any], data: list) -> str | None
 
 
 def validate_max_items(schema_section: dict[str, Any], data: list) -> str | None:
+    if "maxItems" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, list):
         return None
     max_length: int | None = schema_section.get("maxItems")
@@ -280,6 +329,8 @@ def validate_max_items(schema_section: dict[str, Any], data: list) -> str | None
 
 
 def validate_min_properties(schema_section: dict[str, Any], data: dict) -> str | None:
+    if "minProperties" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, dict):
         return None
     min_properties: int | None = schema_section.get("minProperties")
@@ -291,6 +342,8 @@ def validate_min_properties(schema_section: dict[str, Any], data: dict) -> str |
 
 
 def validate_max_properties(schema_section: dict[str, Any], data: dict) -> str | None:
+    if "maxProperties" in settings.validation.disabled_constraints:
+        return None
     if not isinstance(data, dict):
         return None
     max_properties: int | None = schema_section.get("maxProperties")

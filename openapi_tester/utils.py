@@ -145,3 +145,34 @@ def should_validate_query_param(param_schema_section: dict, request_value: Any) 
         return isinstance(request_value, str)
 
     return True
+
+
+def normalize_query_param_value(param_schema: dict, value: Any) -> Any:
+    """
+    Normalize query parameter values based on their schema type.
+
+    Specifically handles the case where an array-type parameter comes as a
+    delimited string (e.g., "a,b,c" or "a|b|c").
+
+    Args:
+        param_schema: The OpenAPI schema for the parameter
+        value: The actual value from the request
+
+    Returns:
+        Normalized value (converted to array if needed)
+    """
+    schema_type = param_schema.get("type")
+
+    # If schema expects array but we got a string, try to parse it
+    if schema_type == "array" and isinstance(value, str):
+        # Try common delimiters
+        for delimiter in [",", "|", ";"]:
+            if delimiter in value:
+                # Split and strip whitespace
+                return [item.strip() for item in value.split(delimiter) if item.strip()]
+
+        # No delimiter found - treat as single-item array
+        # This allows "?ids=single_value" to work
+        return [value] if value else []
+
+    return value

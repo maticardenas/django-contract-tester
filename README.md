@@ -277,6 +277,122 @@ client = OpenAPINinjaClient(
     )
 ```
 
+## Configuration
+
+This package supports configuration through dedicated configuration files, allowing you to set validation behavior globally for your project. This allows you to disable/enable specific validations, which can be useful in case you have certain designs that are still in progress, or can't be changed for some specific reason
+
+### Methods
+
+You can configure the library using either:
+
+1. **`.django-contract-tester`**
+2. **`pyproject.toml`**
+
+If both files exist, `.django-contract-tester` takes precedence over configuration in `pyproject.toml`.
+
+### Structure
+
+#### .django-contract-tester
+
+Create a `.django-contract-tester` file in your project root with the following INI structure:
+
+```ini
+[django-contract-tester]
+ignore_case = ID, API, URL
+
+[django-contract-tester:validation]
+request = true
+response = true
+types = true
+formats = true
+query_parameters = true
+request_for_non_successful_responses = false
+disabled_types = integer, array
+disabled_formats = date-time, email
+disabled_constraints = enum, pattern, minLength
+```
+
+#### pyproject.toml
+
+Add under `[tool.django-contract-tester]` section:
+
+- **`ignore_case`**: List of keys to ignore when testing key case (only applies when `case_tester` is set)
+
+Under `[tool.django-contract-tester.validation]`, you can control various aspects of validation:
+
+**Master Switches** (enable/disable entire validation categories):
+- **`request`** (default: `true`): Enable/disable request body validation
+- **`request_for_non_successful_responses`** (default: `false`): Enable request validation for non-successful responses (`4xx`, `5xx`)
+- **`response`** (default: `true`): Enable/disable response body validation
+- **`types`** (default: `true`): Enable/disable all schema type validations (string, integer, array, etc.)
+- **`formats`** (default: `true`): Enable/disable all schema format validations (date-time, uuid, email, etc.)
+- **`query_parameters`** (default: `true`): Enable/disable query parameter validation
+
+**Granular Controls** (disable specific types/formats/constraints):
+- **`disabled_types`**: List of OpenAPI types to skip validating (e.g., `["integer", "array"]`)
+- **`disabled_formats`**: List of OpenAPI formats to skip validating (e.g., `["date-time", "email"]`)
+- **`disabled_constraints`**: List of OpenAPI constraint keywords to skip validating (e.g., `["enum", "pattern", "minLength"]`)
+
+### Examples
+
+#### .django-contract-tester
+
+```ini
+[django-contract-tester]
+# Keys to ignore during case validation
+ignore_case = ID, API, URL
+
+[django-contract-tester:validation]
+# Master switches
+request = true
+response = true
+types = true
+formats = true
+query_parameters = true
+
+# Disable validation for specific types
+disabled_types = integer
+
+# Disable validation for specific formats
+disabled_formats = date-time, email
+
+# Disable specific constraint validations
+disabled_constraints = enum, pattern, minLength, maxLength, minimum, maximum, multipleOf
+```
+
+#### pyproject.toml
+
+```toml
+[tool.django-contract-tester]
+# Keys to ignore during case validation
+ignore_case = ["ID", "API", "URL"]
+
+[tool.django-contract-tester.validation]
+# Master switches
+request = true
+response = true
+types = true
+formats = true
+query_parameters = true
+
+# Disable validation for specific types
+disabled_types = ["integer"]
+
+# Disable validation for specific formats
+disabled_formats = ["date-time", "email"]
+
+# Disable specific constraint validations
+disabled_constraints = [
+    "enum",
+    "pattern",
+    "minLength",
+    "maxLength",
+    "minimum",
+    "maximum",
+    "multipleOf"
+]
+```
+
 ## Known Issues
 
 * We are using [prance](https://github.com/jfinkhaeuser/prance) as a schema resolver, and it has some issues with the
