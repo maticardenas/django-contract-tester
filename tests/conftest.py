@@ -34,6 +34,11 @@ def cars_api_schema() -> Path:
 
 
 @pytest.fixture
+def openapi_v32_pets_schema() -> Path:
+    return TEST_ROOT / "schemas" / "openapi_v3.2_pets_schema.yaml"
+
+
+@pytest.fixture
 def pets_post_request() -> GenericRequest:
     request_body = MagicMock()
     request_body.read.return_value = b'{"name": "doggie", "tag": "dog"}'

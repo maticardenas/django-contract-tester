@@ -17,6 +17,7 @@ from openapi_spec_validator import (
     OpenAPIV2SpecValidator,
     OpenAPIV30SpecValidator,
     OpenAPIV31SpecValidator,
+    OpenAPIV32SpecValidator,
 )
 from prance.util.resolver import RefResolver
 from rest_framework.schemas.generators import BaseSchemaGenerator, EndpointEnumerator
@@ -26,7 +27,8 @@ from openapi_tester.constants import UNDOCUMENTED_SCHEMA_SECTION_ERROR
 from openapi_tester.exceptions import UndocumentedSchemaSectionError
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
     from urllib.parse import ParseResult
 
     from django.urls import ResolverMatch
@@ -117,6 +119,8 @@ class BaseSchemaLoader:
                     validator = OpenAPIV30SpecValidator(schema=schema)
                 elif (major, minor) == ("3", "1"):
                     validator = OpenAPIV31SpecValidator(schema=schema)
+                elif (major, minor) == ("3", "2"):
+                    validator = OpenAPIV32SpecValidator(schema=schema)
                 else:
                     raise UndocumentedSchemaSectionError(
                         UNDOCUMENTED_SCHEMA_SECTION_ERROR.format(

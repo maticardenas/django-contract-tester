@@ -227,3 +227,69 @@ def test_ninja_not_installed(ninja_not_installed):
 
     with pytest.raises(APIFrameworkNotInstalledError):
         OpenAPINinjaClient(router_or_app=None)
+
+
+def test_openapi_v32_schema_loads(openapi_v32_pets_schema: "Path"):
+    """Test that schemas with OpenAPI 3.2 features are properly loaded and supported."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    assert schema_tester.get_openapi_schema() == "3.2.0"
+
+
+def test_openapi_v32_get_request(openapi_v32_pets_schema: "Path"):
+    """Test GET request with OpenAPI 3.2 schema."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+    response = openapi_client.get(path="/api/pets")
+
+    assert response.status_code == status.HTTP_200_OK
+
+
+def test_openapi_v32_post_request(openapi_v32_pets_schema: "Path"):
+    """Test POST request with OpenAPI 3.2 schema."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+    response = openapi_client.post(
+        path="/api/pets",
+        data={"name": "doggie", "tag": "pet"},
+        content_type="application/json",
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED
+
+
+def test_openapi_v32_enhanced_tags_recognized(openapi_v32_pets_schema: "Path"):
+    """Test that OpenAPI 3.2 enhanced tags are properly recognized."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    schema = schema_tester.loader.get_schema()
+
+    tags = schema.get("tags", [])
+    assert len(tags) > 0
+
+    pets_tag = next((t for t in tags if t["name"] == "pets"), None)
+    assert pets_tag is not None
+    assert pets_tag.get("summary") == "Pet Management"
+    assert pets_tag.get("kind") == "nav"
+
+
+def test_openapi_v32_server_names(openapi_v32_pets_schema: "Path"):
+    """Test that OpenAPI 3.2 server names are properly recognized."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    schema = schema_tester.loader.get_schema()
+
+    servers = schema.get("servers", [])
+    assert len(servers) > 0
+    assert servers[0].get("name") == "Production"
+    assert servers[0].get("description") == "Main production server"
+
+
+def test_openapi_v32_example_data_value(openapi_v32_pets_schema: "Path"):
+    """Test that OpenAPI 3.2 examples with dataValue field are present."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    schema = schema_tester.loader.get_schema()
+
+    pets_get = schema["paths"]["/api/pets"]["get"]
+    examples = pets_get["responses"]["200"]["content"]["application/json"]["examples"]
+
+    assert "simple" in examples
+    assert "dataValue" in examples["simple"]
+    assert isinstance(examples["simple"]["dataValue"], list)
