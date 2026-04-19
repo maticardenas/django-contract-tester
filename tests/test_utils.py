@@ -1,3 +1,5 @@
+import pytest
+
 from openapi_tester.utils import (
     get_required_keys,
     merge_objects,
@@ -206,3 +208,37 @@ def test_normalize_query_param_value():
     assert normalize_query_param_value({"type": "array"}, "1,2,3") == ["1", "2", "3"]
     assert normalize_query_param_value({"type": "array"}, "1|2|3") == ["1", "2", "3"]
     assert normalize_query_param_value({"type": "array"}, "1;2;3") == ["1", "2", "3"]
+
+
+@pytest.mark.parametrize(
+    ("items_type", "raw", "expected"),
+    [
+        ("integer", "1,2,3", [1, 2, 3]),
+        ("number", "1.5|2.5|3", [1.5, 2.5, 3.0]),
+        ("boolean", "true;false;true", [True, False, True]),
+        ("integer", "5", [5]),
+        ("string", "a,b,c", ["a", "b", "c"]),
+    ],
+)
+def test_normalize_query_param_value_coerces_items_by_items_type(
+    items_type, raw, expected
+):
+    param_schema = {"type": "array", "items": {"type": items_type}}
+
+    assert normalize_query_param_value(param_schema, raw) == expected
+
+
+@pytest.mark.parametrize(
+    ("items_type", "raw", "expected"),
+    [
+        ("integer", "1,oops,3", [1, "oops", 3]),
+        ("number", "1.5,nope", [1.5, "nope"]),
+        ("boolean", "true,maybe", [True, "maybe"]),
+    ],
+)
+def test_normalize_query_param_value_falls_back_on_invalid_items(
+    items_type, raw, expected
+):
+    param_schema = {"type": "array", "items": {"type": items_type}}
+
+    assert normalize_query_param_value(param_schema, raw) == expected

@@ -135,8 +135,8 @@ def query_params_to_object(query_params: list[dict[str, Any]]) -> dict[str, Any]
 
 def should_validate_query_param(param_schema_section: dict, request_value: Any) -> bool:
     """
-    Checks if query paramter should be validated.
-    If the query paramter is a raw string (without any format or constraints) it should not be validated.
+    Checks if query parameter should be validated.
+    If the query parameter is a raw string (without any format or constraints) it should not be validated.
     If the query parameter is a string and has a format or constraints, it should be validated if the request value (after normalization) is a string.
     """
 
@@ -148,12 +148,41 @@ def should_validate_query_param(param_schema_section: dict, request_value: Any) 
     return True
 
 
+def _coerce_scalar(schema_type: str | None, raw: str) -> Any:
+    """
+    Best-effort coercion of a raw string to the Python type implied by an
+    OpenAPI scalar schema type. Falls back to the raw string on failure or
+    when the target type is unknown.
+    """
+    if schema_type == "integer":
+        try:
+            return int(raw)
+        except ValueError:
+            return raw
+    if schema_type == "number":
+        try:
+            return float(raw)
+        except ValueError:
+            return raw
+    if schema_type == "boolean":
+        lowered = raw.lower()
+        if lowered == "true":
+            return True
+        if lowered == "false":
+            return False
+        return raw
+    return raw
+
+
 def normalize_query_param_value(param_schema: dict, value: Any) -> Any:
     """
     Normalize query parameter values based on their schema type.
 
     Specifically handles the case where an array-type parameter comes as a
-    delimited string (e.g., "a,b,c" or "a|b|c").
+    delimited string (e.g., "a,b,c" or "a|b|c"). When the schema declares an
+    ``items.type`` (integer / number / boolean), each parsed item is coerced
+    to the corresponding Python type so the downstream validator receives
+    values of the expected type.
 
     Args:
         param_schema: The OpenAPI schema for the parameter
@@ -164,16 +193,18 @@ def normalize_query_param_value(param_schema: dict, value: Any) -> Any:
     """
     schema_type = param_schema.get("type")
 
-    # If schema expects array but we got a string, try to parse it
     if schema_type == "array" and isinstance(value, str):
-        # Try common delimiters
+        items_type = param_schema.get("items", {}).get("type")
+
         for delimiter in [",", "|", ";"]:
             if delimiter in value:
-                # Split and strip whitespace
-                return [item.strip() for item in value.split(delimiter) if item.strip()]
+                items = [
+                    item.strip() for item in value.split(delimiter) if item.strip()
+                ]
+                return [_coerce_scalar(items_type, item) for item in items]
 
-        # No delimiter found - treat as single-item array
-        # This allows "?ids=single_value" to work
-        return [value] if value else []
+        if not value:
+            return []
+        return [_coerce_scalar(items_type, value)]
 
     return value
