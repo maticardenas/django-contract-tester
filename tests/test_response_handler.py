@@ -10,24 +10,6 @@ from openapi_tester.response_handler import (
 )
 
 
-@pytest.fixture
-def normalize():
-    return ResponseHandler._normalize_query_params
-
-
-@pytest.fixture
-def build_ninja_handler():
-    def _build(path: str) -> DjangoNinjaResponseHandler:
-        return DjangoNinjaResponseHandler(
-            "GET",
-            path,
-            None,
-            response=MagicMock(),
-        )
-
-    return _build
-
-
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
@@ -37,8 +19,8 @@ def build_ninja_handler():
         ({"amount": "2.0"}, {"amount": 2}),
     ],
 )
-def test_normalize_query_params_casts_numeric_strings(normalize, raw, expected):
-    assert normalize(raw) == expected
+def test_normalize_query_params_casts_numeric_strings(raw: dict, expected: dict):
+    assert ResponseHandler._normalize_query_params(raw) == expected
 
 
 @pytest.mark.parametrize(
@@ -51,13 +33,18 @@ def test_normalize_query_params_casts_numeric_strings(normalize, raw, expected):
     ],
 )
 def test_normalize_query_params_handles_special_and_plain_strings(
-    normalize, raw, expected
+    raw: dict, expected: dict
 ):
-    assert normalize(raw) == expected
+    assert ResponseHandler._normalize_query_params(raw) == expected
 
 
-def test_django_ninja_handler_parses_and_normalizes_query_string(build_ninja_handler):
-    handler = build_ninja_handler("/api/pets?page=1&active=true&name=doggie")
+def test_django_ninja_handler_parses_and_normalizes_query_string():
+    handler = DjangoNinjaResponseHandler(
+        "GET",
+        "/api/pets?page=1&active=true&name=doggie",
+        None,
+        response=MagicMock(),
+    )
 
     assert handler.request.query_params == {
         "page": 1,
@@ -66,9 +53,12 @@ def test_django_ninja_handler_parses_and_normalizes_query_string(build_ninja_han
     }
 
 
-def test_django_ninja_handler_returns_empty_query_params_when_missing(
-    build_ninja_handler,
-):
-    handler = build_ninja_handler("/api/pets")
+def test_django_ninja_handler_returns_empty_query_params_when_missing():
+    handler = DjangoNinjaResponseHandler(
+        "GET",
+        "/api/pets",
+        None,
+        response=MagicMock(),
+    )
 
     assert handler.request.query_params == {}

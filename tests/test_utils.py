@@ -242,3 +242,27 @@ def test_normalize_query_param_value_falls_back_on_invalid_items(
     param_schema = {"type": "array", "items": {"type": items_type}}
 
     assert normalize_query_param_value(param_schema, raw) == expected
+
+
+@pytest.mark.parametrize(
+    ("items_type", "value", "expected"),
+    [
+        ("integer", 155, [155]),
+        ("number", 3.14, [3.14]),
+        ("boolean", True, [True]),
+        ("boolean", False, [False]),
+        ("integer", None, []),
+    ],
+)
+def test_normalize_query_param_value_wraps_precoerced_scalars_as_single_item_array(
+    items_type, value, expected
+):
+    param_schema = {"type": "array", "items": {"type": items_type}}
+
+    assert normalize_query_param_value(param_schema, value) == expected
+
+
+def test_normalize_query_param_value_leaves_lists_untouched():
+    param_schema = {"type": "array", "items": {"type": "integer"}}
+
+    assert normalize_query_param_value(param_schema, [1, 2, 3]) == [1, 2, 3]

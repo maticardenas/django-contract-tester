@@ -193,18 +193,23 @@ def normalize_query_param_value(param_schema: dict, value: Any) -> Any:
     """
     schema_type = param_schema.get("type")
 
-    if schema_type == "array" and isinstance(value, str):
+    if schema_type == "array" and not isinstance(value, list):
         items_type = param_schema.get("items", {}).get("type")
 
-        for delimiter in [",", "|", ";"]:
-            if delimiter in value:
-                items = [
-                    item.strip() for item in value.split(delimiter) if item.strip()
-                ]
-                return [_coerce_scalar(items_type, item) for item in items]
+        if isinstance(value, str):
+            for delimiter in [",", "|", ";"]:
+                if delimiter in value:
+                    items = [
+                        item.strip() for item in value.split(delimiter) if item.strip()
+                    ]
+                    return [_coerce_scalar(items_type, item) for item in items]
 
-        if not value:
+            if not value:
+                return []
+            return [_coerce_scalar(items_type, value)]
+
+        if value is None:
             return []
-        return [_coerce_scalar(items_type, value)]
+        return [value]
 
     return value
