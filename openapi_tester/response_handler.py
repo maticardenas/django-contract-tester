@@ -51,23 +51,23 @@ class ResponseHandler(ABC):
         Normalize the query params to be validated against the schema.
         This is necessary because the query params are always strings in the request.
         """
-        normalized_query_params = {}
-        for query_param in query_params.keys():
+        normalized_query_params: dict = {}
+        for key, value in query_params.items():
             try:
-                normalized_query_params[query_param] = float(query_params[query_param])
-                if normalized_query_params[query_param].is_integer():
-                    normalized_query_params[query_param] = int(
-                        normalized_query_params[query_param]
-                    )
+                number = float(value)
+                normalized_query_params[key] = (
+                    int(number) if number.is_integer() else number
+                )
             except ValueError:
-                if query_param.lower() == "true":
-                    normalized_query_params[query_param] = True
-                elif query_param.lower() == "false":
-                    normalized_query_params[query_param] = False
-                elif query_param.lower() == "null":
-                    normalized_query_params[query_param] = None  # type: ignore[assignment]
+                lowered = value.lower()
+                if lowered == "true":
+                    normalized_query_params[key] = True
+                elif lowered == "false":
+                    normalized_query_params[key] = False
+                elif lowered == "null":
+                    normalized_query_params[key] = None
                 else:
-                    normalized_query_params[query_param] = query_params[query_param]
+                    normalized_query_params[key] = value
         return normalized_query_params
 
     @abstractmethod

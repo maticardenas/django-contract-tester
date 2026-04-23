@@ -38,6 +38,7 @@ repos:
           - drf-yasg
           - drf-spectacular
           - types-toml
+          - types-requests
           - setuptools
 
   - repo: local
