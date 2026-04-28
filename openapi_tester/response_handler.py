@@ -5,7 +5,7 @@ This module contains the concrete response handlers for both DRF and Django Ninj
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 from urllib.parse import parse_qsl
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ class ResponseHandler(ABC):
 
     @property
     @abstractmethod
-    def data(self) -> Optional[dict]: ...
+    def data(self) -> dict | None: ...
 
     @staticmethod
     def _normalize_query_params(query_params: dict) -> dict:
@@ -90,7 +90,7 @@ class DRFResponseHandler(ResponseHandler):
         )
 
     @property
-    def data(self) -> Optional[dict]:
+    def data(self) -> dict | None:
         return self.response.json() if self.response.data is not None else None  # type: ignore[attr-defined]
 
     @property
@@ -123,7 +123,7 @@ class DjangoNinjaResponseHandler(ResponseHandler):
         self._request_headers = kwargs
 
     @property
-    def data(self) -> Optional[dict]:
+    def data(self) -> dict | None:
         return self.response.json() if self.response.content else None  # type: ignore[attr-defined]
 
     @property

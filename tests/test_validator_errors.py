@@ -1,4 +1,3 @@
-from typing import Union
 from unittest.mock import patch
 
 import pytest
@@ -185,7 +184,7 @@ def test_format_validation_passes_for_string_type_with_numeric_format(
         ({"type": "array"}, "string", "an"),
     ],
 )
-def test_validate_type_error(schema: dict, data: Union[str, int, bool], article: str):
+def test_validate_type_error(schema: dict, data: str | int | bool, article: str):
     # string
     message = validate_type(schema, data)
     data = f'"{data}"' if isinstance(data, str) else data
