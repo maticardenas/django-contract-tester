@@ -257,6 +257,20 @@ def test_openapi_v32_post_request(openapi_v32_pets_schema: "Path"):
     assert response.status_code == status.HTTP_201_CREATED
 
 
+def test_openapi_v32_query_request(openapi_v32_pets_schema: "Path"):
+    """Test POST request with OpenAPI 3.2 schema."""
+    schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))
+    openapi_client = OpenAPIClient(schema_tester=schema_tester)
+
+    response = openapi_client.query(
+        path="/api/pets",
+        data={"names": ["doggie", "max"], "tags": ["pet", "dog"]},
+        content_type="application/json",
+    )
+
+    assert response.status_code == status.HTTP_200_OK
+
+
 def test_openapi_v32_enhanced_tags_recognized(openapi_v32_pets_schema: "Path"):
     """Test that OpenAPI 3.2 enhanced tags are properly recognized."""
     schema_tester = SchemaTester(schema_file_path=str(openapi_v32_pets_schema))

@@ -105,6 +105,12 @@ class OpenAPIClient(APIClient):
             **kwargs,
         )
 
+    @serialize_json
+    def query(self, path, data=None, content_type="application/json", **extra):
+        return self.generic(
+            "QUERY", path, data=data, content_type=content_type, **extra
+        )
+
     @staticmethod
     def _schema_tester_factory() -> SchemaTester:
         """Factory of default ``SchemaTester`` instances."""

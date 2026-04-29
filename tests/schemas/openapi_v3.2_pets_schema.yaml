@@ -108,6 +108,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    query:
+      tags: [pets]
+      summary: Query pets by names and tags
+      description: |
+        Returns the cross-product of pets generated from the supplied names and tags lists.
+        Demonstrates the OpenAPI 3.2 QUERY HTTP method, where the request body carries
+        the search parameters instead of the URL query string.
+      operationId: queryPets
+      requestBody:
+        description: Names and tags to query by
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - names
+                - tags
+              properties:
+                names:
+                  type: array
+                  items:
+                    type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+            examples:
+              basic:
+                summary: Simple query
+                dataValue:
+                  names: ["doggie", "max"]
+                  tags: ["pet", "dog"]
+      responses:
+        '200':
+          description: filtered pet list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PetQueryResult'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api/pets/{petId}:
     get:
       tags: [pets]
@@ -181,6 +229,21 @@ components:
         tag:
           type: string
           writeOnly: true
+
+    PetQueryResult:
+      type: object
+      required:
+        - id
+        - name
+        - tag
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        tag:
+          type: string
 
     Error:
       type: object
