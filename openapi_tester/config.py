@@ -4,8 +4,9 @@ Configuration module for schema section test.
 
 import configparser
 import pathlib
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Callable, Optional
+from typing import Any
 
 import toml
 
@@ -16,7 +17,7 @@ class ValidationSettings:
 
     # pylint: disable=too-many-instance-attributes
     # Eight is reasonable in this case as has the required configuration options
-    excluded_endpoints: Optional[list[str]] = None
+    excluded_endpoints: list[str] | None = None
     request: bool = True
     request_for_non_successful_responses: bool = False
     response: bool = True
@@ -32,8 +33,8 @@ class ValidationSettings:
 class OpenAPITestConfig:
     """Configuration dataclass for schema section test."""
 
-    case_tester: Optional[Callable[[str], None]] = None
-    ignore_case: Optional[list[str]] = None
+    case_tester: Callable[[str], None] | None = None
+    ignore_case: list[str] | None = None
     validators: Any = None
     reference: str = "root"
     http_message: str = "response"
@@ -64,7 +65,7 @@ def _parse_bool_value(value: str) -> bool:
 
 
 def load_config_from_ini_file(
-    config_path: Optional[pathlib.Path] = None,
+    config_path: pathlib.Path | None = None,
 ) -> OpenAPITestConfig:
     """
     Loads configuration from .django-contract-tester INI file.
@@ -91,7 +92,7 @@ def load_config_from_ini_file(
     Returns:
         OpenAPITestConfig instance with loaded settings or DEFAULT_CONFIG if not found.
     """
-    ini_path: Optional[pathlib.Path] = None
+    ini_path: pathlib.Path | None = None
 
     if config_path is not None:
         # Use the provided path directly
@@ -187,7 +188,7 @@ def load_config_from_ini_file(
 
 
 def load_config_from_pyproject_toml(
-    config_path: Optional[pathlib.Path] = None,
+    config_path: pathlib.Path | None = None,
 ) -> OpenAPITestConfig:
     """
     Loads configuration from pyproject.toml.
@@ -200,7 +201,7 @@ def load_config_from_pyproject_toml(
         config_path: Optional path to a pyproject.toml file. If not provided,
                      searches from the current working directory upwards.
     """
-    pyproject_path: Optional[pathlib.Path] = None
+    pyproject_path: pathlib.Path | None = None
 
     if config_path is not None:
         # Use the provided path directly

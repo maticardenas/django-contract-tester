@@ -9,7 +9,8 @@ from inflection import camelize, dasherize, underscore
 from openapi_tester.exceptions import CaseError
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
 
 def _create_tester(casing: str, handler: Callable[[Any], str]) -> Callable[[str], None]:

@@ -1,6 +1,6 @@
 [![PyPI](https://img.shields.io/pypi/v/django-contract-tester.svg)](https://pypi.org/project/django-contract-tester/)
 [![Coverage](https://codecov.io/gh/maticardenas/django-contract-tester/graph/badge.svg)](https://app.codecov.io/gh/maticardenas/django-contract-tester)
-[![Python versions](https://img.shields.io/badge/Python-3.9%2B-blue)](https://pypi.org/project/django-contract-tester/)
+[![Python versions](https://img.shields.io/badge/Python-3.10%2B-blue)](https://pypi.org/project/django-contract-tester/)
 [![Django versions](https://img.shields.io/badge/Django-4.2%2B-blue)](https://pypi.org/project/django-contract-tester/)
 [![OpenAPI versions](https://img.shields.io/badge/OpenAPI-3.0.x%20%7C%203.1.x-green.svg?logo=openapiinitiative&logoColor=green
 )](https://pypi.org/project/django-contract-tester/)

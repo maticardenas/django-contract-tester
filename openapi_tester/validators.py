@@ -40,7 +40,8 @@ from openapi_tester.constants import (
 from openapi_tester.exceptions import OpenAPISchemaError
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
 
 
 def create_validator(

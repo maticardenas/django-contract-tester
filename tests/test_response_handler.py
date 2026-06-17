@@ -6,6 +6,7 @@ import pytest
 
 from openapi_tester.response_handler import (
     DjangoNinjaResponseHandler,
+    DRFResponseHandler,
     ResponseHandler,
 )
 
@@ -62,3 +63,61 @@ def test_django_ninja_handler_returns_empty_query_params_when_missing():
     )
 
     assert handler.request.query_params == {}
+
+
+def _drf_response_handler(*, response_data, parsed_json):
+    response = MagicMock()
+    response.renderer_context = {
+        "request": MagicMock(
+            path="/api/pets",
+            method="GET",
+            data={},
+            headers={},
+            query_params={},
+        )
+    }
+    response.data = response_data
+    response.json.return_value = parsed_json
+    return DRFResponseHandler(response=response)
+
+
+def test_drf_response_handler_data_returns_parsed_json():
+    handler = _drf_response_handler(
+        response_data={"id": 1, "name": "doggie"},
+        parsed_json={"id": 1, "name": "doggie"},
+    )
+
+    assert handler.data == {"id": 1, "name": "doggie"}
+
+
+def test_drf_response_handler_data_returns_none_when_response_data_is_none():
+    handler = _drf_response_handler(response_data=None, parsed_json=None)
+
+    assert handler.data is None
+
+
+def test_django_ninja_handler_data_returns_parsed_json():
+    response = MagicMock()
+    response.content = b'{"id": 1, "name": "doggie"}'
+    response.json.return_value = {"id": 1, "name": "doggie"}
+    handler = DjangoNinjaResponseHandler(
+        "GET",
+        "/api/pets",
+        None,
+        response=response,
+    )
+
+    assert handler.data == {"id": 1, "name": "doggie"}
+
+
+def test_django_ninja_handler_data_returns_none_when_content_is_empty():
+    response = MagicMock()
+    response.content = b""
+    handler = DjangoNinjaResponseHandler(
+        "GET",
+        "/api/pets",
+        None,
+        response=response,
+    )
+
+    assert handler.data is None

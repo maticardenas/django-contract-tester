@@ -1,5 +1,3 @@
-from typing import Optional
-
 from ninja import NinjaAPI, Query, Router
 
 from test_project.api.ninja.schemas import (
@@ -42,7 +40,7 @@ def get_user_profile(request, query: Query[UserProfileFilter]):
 
 
 @router.get("/{user_id}", response={200: UserOut})
-def get_user(request, user_id: int, name: Optional[str] = ""):
+def get_user(request, user_id: int, name: str | None = ""):
     if user_id == 1:
         return {
             "id": 1,

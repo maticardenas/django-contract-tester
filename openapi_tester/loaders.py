@@ -26,7 +26,8 @@ from openapi_tester.constants import UNDOCUMENTED_SCHEMA_SECTION_ERROR
 from openapi_tester.exceptions import UndocumentedSchemaSectionError
 
 if TYPE_CHECKING:
-    from typing import Any, Callable
+    from collections.abc import Callable
+    from typing import Any
     from urllib.parse import ParseResult
 
     from django.urls import ResolverMatch
