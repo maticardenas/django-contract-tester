@@ -79,7 +79,7 @@ def serialize_json(func):
                 kwargs["data"] = orjson.dumps(data)
             except (TypeError, OverflowError):
                 kwargs["data"] = data
-        return func(*args, **kwargs)
+        return func(*args, content_type=content_type, **kwargs)
 
     return wrapper
 

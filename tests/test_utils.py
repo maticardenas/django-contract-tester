@@ -5,6 +5,7 @@ from openapi_tester.utils import (
     merge_objects,
     normalize_query_param_value,
     query_params_to_object,
+    serialize_json,
     serialize_schema_section_data,
     should_validate_query_param,
 )
@@ -45,6 +46,39 @@ def test_merge_objects():
         "properties": {"key1": {"type": "string"}, "key2": {"type": "string"}},
     }
     assert sort_object(merge_objects(test_schemas)) == sort_object(expected)
+
+
+def test_serialize_json_decorator():
+    @serialize_json
+    def dummy_function(*args, **kwargs):
+        return kwargs
+
+    data = {"key": "value"}
+    result = dummy_function(data=data)
+    assert result["data"] == b'{"key":"value"}'
+    assert result["content_type"] == "application/json"
+
+
+def test_serialize_json_decorator_content_type_application_json():
+    @serialize_json
+    def dummy_function(*args, **kwargs):
+        return kwargs
+
+    data = {"key": "value"}
+    result = dummy_function(data=data, content_type="application/json")
+    assert result["data"] == b'{"key":"value"}'
+    assert result["content_type"] == "application/json"
+
+
+def test_serialize_json_decorator_content_type_text_plain():
+    @serialize_json
+    def dummy_function(*args, **kwargs):
+        return kwargs
+
+    data = "value"
+    result = dummy_function(data=data, content_type="text/plain")
+    assert result["data"] == "value"
+    assert result["content_type"] == "text/plain"
 
 
 def test_serialize_schema_section_data():
