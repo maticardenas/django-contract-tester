@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.8.2 2026-06-17
+
+* Fix `serialize_json` decorator so the `content_type` argument is forwarded to the wrapped client method.
+
 ## v1.8.0 2026-01-22
 
 * Add feature for excluding endpoints or entire API paths from validation.
