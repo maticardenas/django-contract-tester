@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from copy import deepcopy
-from typing import TYPE_CHECKING, Callable
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -31,6 +31,11 @@ def pets_api_schema_prefix_in_server() -> Path:
 @pytest.fixture
 def cars_api_schema() -> Path:
     return TEST_ROOT / "schemas" / "spectactular_reference_schema.yaml"
+
+
+@pytest.fixture
+def openapi_v32_pets_schema() -> Path:
+    return TEST_ROOT / "schemas" / "openapi_v3.2_pets_schema.yaml"
 
 
 @pytest.fixture

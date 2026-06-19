@@ -1,0 +1,342 @@
+openapi: "3.2.0"
+info:
+  version: 1.0.0
+  title: OpenAPI 3.2 Features Test
+  description: A schema to test OpenAPI 3.2 features including enhanced tags, QUERY method, and sequential media types
+  contact:
+    name: API Team
+    email: api@example.com
+servers:
+  - url: http://api.example.io
+    name: Production
+    description: Main production server
+  - url: http://staging.example.io
+    name: Staging
+    description: Staging environment
+tags:
+  - name: products
+    summary: Product Management
+    description: All product-related operations
+    kind: nav
+  - name: books
+    summary: Books
+    description: Book catalog and operations
+    parent: products
+    kind: nav
+  - name: electronics
+    summary: Electronics
+    description: Electronic items catalog
+    parent: products
+    kind: nav
+  - name: digital
+    summary: Digital Products
+    description: Instantly delivered digital items
+    kind: badge
+  - name: admin
+    summary: Admin Operations
+    description: Administrative endpoints
+    kind: audience
+paths:
+  /api/products:
+    get:
+      tags: [products]
+      summary: List all products
+      description: Returns a list of all available products
+      operationId: listProducts
+      parameters:
+        - name: category
+          in: query
+          description: Filter by category
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            default: 20
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                basic:
+                  summary: Basic product list
+                  dataValue:
+                    - id: 1
+                      name: "Sample Book"
+                      type: "book"
+                      price: 19.99
+                    - id: 2
+                      name: "Sample Electronics"
+                      type: "electronics"
+                      price: 299.99
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags: [products, admin]
+      summary: Create a new product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        default:
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    query:
+      tags: [products]
+      summary: Query products with complex filters
+      description: Use QUERY method for advanced product searching with request body
+      operationId: queryProducts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                filters:
+                  type: object
+                  properties:
+                    priceMin:
+                      type: number
+                    priceMax:
+                      type: number
+                    categories:
+                      type: array
+                      items:
+                        type: string
+                sort:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    order:
+                      type: string
+                      enum: [asc, desc]
+      responses:
+        '200':
+          description: Filtered products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+  /api/products/{productId}:
+    get:
+      tags: [products]
+      summary: Get product by ID
+      operationId: getProduct
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /api/products/stream:
+    get:
+      tags: [products]
+      summary: Stream product updates
+      description: Server-sent events stream for real-time product updates
+      operationId: streamProducts
+      responses:
+        '200':
+          description: Event stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                format: binary
+              itemSchema:
+                $ref: '#/components/schemas/ProductEvent'
+  /api/products/bulk:
+    post:
+      tags: [products, admin]
+      summary: Bulk upload products
+      description: Upload multiple products using JSON Lines format
+      operationId: bulkUploadProducts
+      requestBody:
+        required: true
+        content:
+          application/jsonl:
+            schema:
+              type: string
+              format: binary
+            itemSchema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Bulk upload successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  created:
+                    type: integer
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        line:
+                          type: integer
+                        error:
+                          type: string
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - price
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+        type:
+          type: string
+        price:
+          type: number
+          format: double
+        metadata:
+          oneOf:
+            - $ref: '#/components/schemas/BookMetadata'
+            - $ref: '#/components/schemas/ElectronicsMetadata'
+          discriminator:
+            propertyName: type
+            mapping:
+              book: '#/components/schemas/BookMetadata'
+              electronics: '#/components/schemas/ElectronicsMetadata'
+            defaultMapping: '#/components/schemas/GenericMetadata'
+    ProductInput:
+      type: object
+      required:
+        - name
+        - type
+        - price
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        price:
+          type: number
+          format: double
+        metadata:
+          type: object
+    BookMetadata:
+      type: object
+      properties:
+        type:
+          type: string
+          const: book
+        author:
+          type: string
+        isbn:
+          type: string
+        pages:
+          type: integer
+    ElectronicsMetadata:
+      type: object
+      properties:
+        type:
+          type: string
+          const: electronics
+        brand:
+          type: string
+        model:
+          type: string
+        warranty:
+          type: string
+    GenericMetadata:
+      type: object
+      properties:
+        type:
+          type: string
+        description:
+          type: string
+    ProductEvent:
+      type: object
+      properties:
+        event:
+          type: string
+          enum: [created, updated, deleted]
+        product:
+          $ref: '#/components/schemas/Product'
+        timestamp:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  securitySchemes:
+    oauth2Device:
+      type: oauth2
+      flows:
+        deviceCode:
+          authorizationUrl: https://auth.example.io/device
+          tokenUrl: https://auth.example.io/token
+          scopes:
+            read:products: Read product information
+            write:products: Create and modify products
+      oauth2MetadataUrl: https://auth.example.io/.well-known/oauth-authorization-server
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      deprecated: true
+      description: API key authentication (deprecated, use OAuth2 instead)
+security:
+  - oauth2Device: [read:products]
+  - apiKey: []

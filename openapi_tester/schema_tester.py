@@ -6,9 +6,10 @@ import fnmatch
 import http
 import json
 import re
+from collections.abc import Callable
 from copy import copy, deepcopy
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Callable, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured, ValidationError
@@ -68,8 +69,6 @@ from openapi_tester.validators import (
 )
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     from rest_framework.response import Response
 
     from openapi_tester.response_handler import GenericRequest, ResponseHandler
@@ -532,7 +531,7 @@ class SchemaTester:
         if not schema_section_type:
             return
         combined_validators = cast(
-            "list[Callable[[dict, Any], Optional[str]]]",
+            "list[Callable[[dict, Any], str | None]]",
             [
                 validate_type,
                 validate_format,
