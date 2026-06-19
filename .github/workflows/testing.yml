@@ -11,23 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+      - uses: j178/prek-action@v2
         with:
-          python-version: "3.12.10"
-      - uses: actions/cache@v3
-        id: cache
-        with:
-          path: |
-            .venv
-             ~/.cache/pre-commit
-          key: ${{ matrix.python-version }}-${{ hashFiles('**/uv.lock') }}-1
-      - run: |
-          python -m venv .venv --upgrade-deps
-          source .venv/bin/activate
-          pip install pre-commit
-      - run: |
-          source .venv/bin/activate
-          pre-commit run --all-files
+          prek-version: "0.4.5"
 
   test:
     runs-on: ubuntu-latest

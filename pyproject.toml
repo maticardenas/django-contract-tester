@@ -65,7 +65,7 @@ django-ninja = ["django-ninja>=1.4.2"]
 dev = [
     "coverage[toml]>=6",
     "Faker",
-    "pre-commit",
+    "prek",
     "pylint",
     "pytest",
     "pytest-django",
