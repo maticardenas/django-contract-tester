@@ -5,7 +5,7 @@ This module contains the concrete response handlers for both DRF and Django Ninj
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Union
+from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qsl
 
 if TYPE_CHECKING:
@@ -30,11 +30,11 @@ class ResponseHandler(ABC):
     from both DRF and Django HTTP (Django Ninja) responses.
     """
 
-    def __init__(self, response: Union["Response", "HttpResponse"]) -> None:
+    def __init__(self, response: "Response | HttpResponse") -> None:
         self._response = response
 
     @property
-    def response(self) -> Union["Response", "HttpResponse"]:
+    def response(self) -> "Response | HttpResponse":
         return self._response
 
     @property

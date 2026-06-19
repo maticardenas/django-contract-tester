@@ -1,7 +1,7 @@
 [![PyPI](https://img.shields.io/pypi/v/django-contract-tester.svg)](https://pypi.org/project/django-contract-tester/)
 [![Coverage](https://codecov.io/gh/maticardenas/django-contract-tester/graph/badge.svg)](https://app.codecov.io/gh/maticardenas/django-contract-tester)
 [![Python versions](https://img.shields.io/badge/Python-3.10%2B-blue)](https://pypi.org/project/django-contract-tester/)
-[![Django versions](https://img.shields.io/badge/Django-4.2%2B-blue)](https://pypi.org/project/django-contract-tester/)
+[![Django versions](https://img.shields.io/badge/Django-5.2%20%7C%206.0-blue)](https://pypi.org/project/django-contract-tester/)
 [![OpenAPI versions](https://img.shields.io/badge/OpenAPI-3.0.x%20%7C%203.1.x-green.svg?logo=openapiinitiative&logoColor=green
 )](https://pypi.org/project/django-contract-tester/)
 
@@ -17,6 +17,8 @@ It has built-in support for `OpenAPI`version `2.0`, `3.0.x` and `3.1.x`, both `y
 ```shell script
 pip install django-contract-tester
 ```
+
+Django 6.0 requires Python 3.12 or newer.
 
 ## Usage
 

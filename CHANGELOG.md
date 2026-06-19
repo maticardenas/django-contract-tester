@@ -1,14 +1,13 @@
 # Changelog
 
-<<<<<<< HEAD
+## v2.0.0 2026-06-19
+
+* Drop Python 3.9 support. Minimum supported Python is now 3.10.
+* Drop Django versions below 5.2. Supported Django versions are 5.2 LTS and 6.0.
+
 ## v1.8.2 2026-06-17
 
 * Fix `serialize_json` decorator so the `content_type` argument is forwarded to the wrapped client method.
-=======
-## v2.0.0 2026-06-17
-
-* Drop Python 3.9 support. Minimum supported Python is now 3.10.
->>>>>>> 7a94cac (chore: removing support for python 3.9)
 
 ## v1.8.0 2026-01-22
 
