@@ -1,5 +1,3 @@
-from typing import Optional
-
 from ninja import FilterSchema, Schema
 
 
@@ -62,12 +60,12 @@ class UserProfileOut(Schema):
 
 class UserProfileFilter(FilterSchema):
     membership_level: int
-    min_points: Optional[int] = None
+    min_points: int | None = None
     is_active: str = "yes"
-    join_date: Optional[str] = None
-    search: Optional[str] = None
-    sort_by: Optional[str] = None
-    sort_order: Optional[str] = None
+    join_date: str | None = None
+    search: str | None = None
+    sort_by: str | None = None
+    sort_order: str | None = None
 
     class Config:
         example = {

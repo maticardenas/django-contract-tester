@@ -90,7 +90,9 @@ def test_validator(label: str):
 
 def test_type_validation():
     # The examples we've set up should always pass
-    for schema, response in zip(example_schema_types, example_response_types):
+    for schema, response in zip(
+        example_schema_types, example_response_types, strict=True
+    ):
         tester.test_schema_section(schema, response)
 
     # An empty array should always pass

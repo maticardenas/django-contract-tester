@@ -1,5 +1,4 @@
 # ruff: noqa: ARG001
-from typing import Union
 
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect
 from django.shortcuts import redirect
@@ -8,7 +7,7 @@ from rest_framework.request import Request
 
 def index(
     request: Request,
-) -> Union[HttpResponseRedirect, HttpResponsePermanentRedirect]:
+) -> HttpResponseRedirect | HttpResponsePermanentRedirect:
     """
     Redirects traffic from / to /swagger.
     """
