@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 
@@ -121,3 +121,39 @@ def test_django_ninja_handler_data_returns_none_when_content_is_empty():
     )
 
     assert handler.data is None
+
+
+def _drf_request_mock(*, method="GET", path="/api/pets", data_property=None):
+    request = MagicMock(path=path, method=method, headers={}, query_params={})
+    type(request).data = data_property or PropertyMock(return_value={})
+    return request
+
+
+def test_drf_response_handler_does_not_read_request_data_on_init():
+    """`request.data` is a lazy property in DRF, reading it parses the request body."""
+    data_property = PropertyMock(return_value={"name": "doggie"})
+    response = MagicMock()
+    response.renderer_context = {
+        "request": _drf_request_mock(data_property=data_property)
+    }
+
+    handler = DRFResponseHandler(response=response)
+
+    data_property.assert_not_called()
+    assert handler.method == "GET"
+    assert handler.path == "/api/pets"
+    assert handler.endpoint() == "GET /api/pets"
+    data_property.assert_not_called()
+
+
+def test_drf_response_handler_reads_request_data_lazily():
+    data_property = PropertyMock(return_value={"name": "doggie"})
+    response = MagicMock()
+    response.renderer_context = {
+        "request": _drf_request_mock(method="POST", data_property=data_property)
+    }
+
+    handler = DRFResponseHandler(response=response)
+
+    assert handler.request.data == {"name": "doggie"}
+    data_property.assert_called_once()

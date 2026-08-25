@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* `DRFResponseHandler` no longer reads `request.data` in its constructor. `request.data` is a lazy property in Django REST Framework, so reading it triggers request body parsing, which could raise parser errors for responses whose body was never parsed during dispatch (for example a `404` raised before the view touched the body). It is now resolved lazily, only when request validation actually needs it.
+* Add `ResponseHandler.method` and `ResponseHandler.path` properties so response validation can resolve the endpoint without building a `GenericRequest`.
+
 ## v2.0.0 2026-06-19
 
 * Drop Python 3.9 support. Minimum supported Python is now 3.10.
