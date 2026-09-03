@@ -194,9 +194,9 @@ class SchemaTester:
         response = response_handler.response
         schema = self.loader.get_schema()
 
-        response_method = response_handler.request.method.lower()
+        response_method = response_handler.method.lower()
         parameterized_path, _ = self.loader.resolve_path(
-            response_handler.request.path,
+            response_handler.path,
             method=response_method,
         )
         paths_object = self.get_paths_object()
@@ -779,11 +779,17 @@ class SchemaTester:
                 or not test_config.reference
                 or test_config.reference == "root"
             ):
-                current_config.reference = f"{response_handler.request.method} {response_handler.request.path} > request"
+                current_config.reference = (
+                    f"{response_handler.method} {response_handler.path} > request"
+                )
+
+            # Resolved once: building a `GenericRequest` may parse the request
+            # body, so it should not be repeated within a single validation run.
+            request = response_handler.request
 
             if current_config.validation.query_parameters:
                 query_params_schema = self.get_request_query_params_schema_section(
-                    response_handler.request, test_config=current_config
+                    request, test_config=current_config
                 )
 
                 if query_params_schema:
@@ -793,19 +799,19 @@ class SchemaTester:
                     )
                     self.test_schema_section(
                         schema_section=query_params_schema,
-                        data=response_handler.request.query_params,
+                        data=request.query_params,
                         test_config=query_params_config,
                         is_query_params=True,
                     )
 
             request_body_schema = self.get_request_body_schema_section(
-                response_handler.request, test_config=current_config
+                request, test_config=current_config
             )
 
             if request_body_schema:
                 self.test_schema_section(
                     schema_section=request_body_schema,
-                    data=response_handler.request.data,
+                    data=request.data,
                     test_config=current_config,
                 )
 
@@ -841,8 +847,10 @@ class SchemaTester:
             or not test_config.reference
             or test_config.reference == "root"
         ):
-            request = response_handler.request
-            current_config.reference = f"{request.method} {request.path} > response > {response_handler.response.status_code}"
+            current_config.reference = (
+                f"{response_handler.method} {response_handler.path} > response > "
+                f"{response_handler.response.status_code}"
+            )
 
         response_schema = self.get_response_schema_section(
             response_handler, test_config=current_config

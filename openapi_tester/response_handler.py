@@ -45,6 +45,14 @@ class ResponseHandler(ABC):
     @abstractmethod
     def data(self) -> dict | None: ...
 
+    @property
+    @abstractmethod
+    def method(self) -> str: ...
+
+    @property
+    @abstractmethod
+    def path(self) -> str: ...
+
     @staticmethod
     def _normalize_query_params(query_params: dict) -> dict:
         """
@@ -83,11 +91,18 @@ class DRFResponseHandler(ResponseHandler):
         super().__init__(response)
         self._request_path = self.response.renderer_context["request"].path  # type: ignore[attr-defined]
         self._request_method = self.response.renderer_context["request"].method  # type: ignore[attr-defined]
-        self._request_data = self.response.renderer_context["request"].data  # type: ignore[attr-defined]
         self._request_headers = self.response.renderer_context["request"].headers  # type: ignore[attr-defined]
         self._request_query_params = self._normalize_query_params(
             self.response.renderer_context["request"].query_params  # type: ignore[attr-defined]
         )
+
+    @property
+    def method(self) -> str:
+        return self._request_method
+
+    @property
+    def path(self) -> str:
+        return self._request_path
 
     @property
     def data(self) -> dict | None:
@@ -98,7 +113,7 @@ class DRFResponseHandler(ResponseHandler):
         return GenericRequest(
             path=self._request_path,
             method=self._request_method,
-            data=self._request_data,
+            data=self.response.renderer_context["request"].data,  # type: ignore[attr-defined]
             headers=self._request_headers,
             query_params=self._request_query_params,
         )
@@ -121,6 +136,14 @@ class DjangoNinjaResponseHandler(ResponseHandler):
         self._request_query_params = self._build_request_query_params(request_args[1])
         self._request_data = self._build_request_data(request_args[2])
         self._request_headers = kwargs
+
+    @property
+    def method(self) -> str:
+        return self._request_method
+
+    @property
+    def path(self) -> str:
+        return self._request_path
 
     @property
     def data(self) -> dict | None:

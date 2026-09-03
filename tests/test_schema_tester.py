@@ -223,6 +223,43 @@ def test_validate_response_failure_scenario_with_predefined_data(client):
             tester.validate_response(ResponseHandlerFactory.create(response=response))
 
 
+class _RequestDataSpy:
+    """
+    Stand-in for a DRF request that records every read of `data`.
+
+    In DRF, `request.data` is a lazy property: reading it parses the request
+    body. Response validation must never do that.
+    """
+
+    def __init__(self, path: str, method: str) -> None:
+        self.path = path
+        self.method = method
+        self.headers: dict = {}
+        self.query_params: dict = {}
+        self.data_read_count = 0
+
+    @property
+    def data(self) -> dict:
+        self.data_read_count += 1
+        return {}
+
+
+def test_validate_response_does_not_read_request_data(response_factory):
+    schema_section = tester.loader.get_schema()["paths"][parameterized_path][method][
+        "responses"
+    ][status]["content"]["application/json"]["schema"]
+    response = response_factory(schema_section, de_parameterized_path, method, status)
+    request_spy = _RequestDataSpy(de_parameterized_path, method)
+    response.renderer_context["request"] = request_spy
+
+    response_handler = ResponseHandlerFactory.create(response=response)
+    assert request_spy.data_read_count == 0
+
+    tester.validate_response(response_handler=response_handler)
+
+    assert request_spy.data_read_count == 0
+
+
 def test_validate_response_failure_scenario_undocumented_path(
     monkeypatch, response_factory
 ):
